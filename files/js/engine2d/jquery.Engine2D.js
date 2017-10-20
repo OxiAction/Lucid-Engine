@@ -5,7 +5,7 @@
 		};
 
 		config = $.extend({}, defaults, config);
-
+		var test;
 		var thingsOnMap = [
 			[50,50],
 			[55,70],
