@@ -75,6 +75,8 @@ $(document).ready(function() {
 
     var engine2D;
 
+    var game = new Game();
+
     // event listener
     $(document).on("XMLParserSuccess", function(event, id, xml) {
         console.log("XML successfully loaded - id: " + id);
@@ -84,7 +86,7 @@ $(document).ready(function() {
         map.init(xml);
 
         // setup game engine
-        engine2D = $("#canvas").Engine2D();
+        engine2D = $("#ui-layer").Engine2D();
         engine2D.init();
     });
 

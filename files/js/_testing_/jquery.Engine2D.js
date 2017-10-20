@@ -54,7 +54,10 @@
 		// context of canvas
 		var ctx = can.getContext('2d');
 		ctx.font = '8px sans';
-
+		ctx.mozImageSmoothingEnabled = false;
+		ctx.webkitImageSmoothingEnabled = false;
+		ctx.msImageSmoothingEnabled = false;
+		ctx.imageSmoothingEnabled = false;
 		var tileset = document.getElementById('tileset');
 
 		this.draw = function() {
