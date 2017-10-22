@@ -1,3 +1,5 @@
+const TYPE_ENGINE_SIDE_SCROLL = "typeEngineSideScroll";
+const TYPE_ENGINE_TOP_DOWN = "typeEngineTopDown";
 
 // global utils
 var EngineUtils;
@@ -15,11 +17,11 @@ function Engine2D(gameSettings, layers) {
 		"difficulty": 1,
 		"speed": 1,
 		"velocity": 1,
-		"type": "side-scroll",
+		"type": TYPE_ENGINE_SIDE_SCROLL,
 		"tilesize": 20
 	};
 
-	this.gameSettings = $.extend({}, gameSettingsDefault, gameSettings);
+	var gameSettings = $.extend({}, gameSettingsDefault, gameSettings);
 
 	// ------------------------------
 

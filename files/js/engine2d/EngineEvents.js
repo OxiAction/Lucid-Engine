@@ -15,7 +15,7 @@ const EVENT_CONTROL_ACTION = "eventControlAction";
 // ----------------------------------
 
 function EngineEvents() {
-	console.log("EngineEvents");
+	EngineUtils.log("EngineEvents");
 	
 	var registeredObjects = {};
 

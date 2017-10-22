@@ -18,6 +18,9 @@ canvas {
 	postion: absolute;
 }
 #layer-menu {
+	z-index: 5
+}
+#layer-ui {
 	z-index: 4
 }
 #layer-ui {
