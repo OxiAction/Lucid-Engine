@@ -4,6 +4,7 @@ const TYPE_CONTROL_LEFT = "typeControlLeft";
 const TYPE_CONTROL_RIGHT = "typeControlRight";
 const TYPE_CONTROL_SHOOT = "typeControlShoot"; // shoot attack
 const TYPE_CONTROL_MELEE = "typeControlMelee"; // melee attack
+const TYPE_CONTROL_CUSTOM = "typeControlCustom"; // for custom events
 
 function Control(config) {
 	EngineUtils.log("Control");
