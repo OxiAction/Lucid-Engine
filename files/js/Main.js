@@ -1,30 +1,6 @@
 var baseURL = window.location.protocol + "//" + window.location.host + "/";
 
 /**
-* prevent console.log errors on older browsers
-*/
-(function() {
-    var method;
-    var noop = function () {};
-    var methods = [
-        "assert", "clear", "count", "debug", "dir", "dirxml", "error",
-        "exception", "group", "groupCollapsed", "groupEnd", "info", "log",
-        "markTimeline", "profile", "profileEnd", "table", "time", "timeEnd",
-        "timeStamp", "trace", "warn"
-    ];
-    var length = methods.length;
-    var console = (window.console = window.console || {});
-
-    while (length--) {
-        method = methods[length];
-
-        if (!console[method]) {
-            console[method] = noop;
-        }
-    }
-}());
-
-/**
 * determines if touch is available
 * NOTE: This is not allways accurate
 */

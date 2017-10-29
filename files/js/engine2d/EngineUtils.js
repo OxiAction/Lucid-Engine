@@ -32,8 +32,53 @@ function EngineUtils() {
     // log
     this.log = function(msg) {
         if (debug) {
-            // console.log("LOG for " + object + " - message: " + msg);
             console.log("[" + msg + "]");
         }
     }
+
+    // prevent console.log errors on older browsers
+    if (typeof console == "undefined") {
+        window.console = {
+            log: function () {
+                // do nothing
+            }
+        };
+        console.warn = console.debug = console.log;
+    }
+
+    // prototyping -> extending stuff
+
+    Number.prototype.round = function(precision) {
+        precision = Math.pow(10, precision || 0);
+        return Math.round(this * precision) / precision;
+    };
+
+    Number.prototype.floor = function() {
+        return Math.floor(this);
+    };
+
+    Number.prototype.ceil = function() {
+        return Math.ceil(this);
+    };
+
+    Number.prototype.toInt = function() {
+        return (this | 0);
+    };
+
+    Number.prototype.toDeg = function() {
+        return (this * 180) / Math.PI;
+    };
+
+    Array.prototype.erase = function(item) {
+        for(var i = this.length; i--;) {
+            if(this[i] === item) {
+                this.splice(i, 1);
+            }
+        }
+        return this;
+    };
+
+    Array.prototype.random = function() {
+        return this[Math.floor(Math.random() * this.length)];
+    };
 }
