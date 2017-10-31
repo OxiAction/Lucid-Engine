@@ -20,7 +20,7 @@ function Control(config) {
 	Component.call(this, config);
 
 	if (config.type == null) {
-		EngineUtils.error(this, "type is null");
+		EngineUtils.error("control type is null");
 		return;
 	}
 }

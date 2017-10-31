@@ -5,6 +5,7 @@ function Component(config) {
 
 	var type = config.type;
 	var active = config.active;
+	var id = config.id;
 
 	this.setType = function(value) {
 		type = value;
@@ -22,6 +23,7 @@ function Component(config) {
 		return active;
 	}
 
-	this.destroy = function() {
+	this.getID = function() {
+		return id;
 	}
 }

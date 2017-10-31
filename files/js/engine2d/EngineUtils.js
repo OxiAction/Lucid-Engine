@@ -3,16 +3,25 @@ function EngineUtils() {
     var cache = {};
     var debug = 0;
 
+    /**
+    * enable / disable debug mode
+    *
+    * value:             bool
+    */
     this.setDebug = function(value) {
         debug = value;
     }
 
-    // testing browser for touch support
+    /**
+    * testing browser for touch support
+    */
     this.supportsTouch = function() {
     	return "ontouchend" in document;
     }
 
-    // testing browser for canvas
+    /**
+    * testing browser for canvas support
+    */
     this.supportsCanvas = function() {
         // check cache first
     	if (cache.supportsCanvas != undefined) {
@@ -24,12 +33,20 @@ function EngineUtils() {
 		return cache.supportsCanvas;
     }
 
-    // error reporting
-    this.error = function(object, msg) {
-        this.log("[ERROR] in " + object + " - message: " + msg);
+    /**
+    * error reporting
+    *
+    * msg:             object
+    */
+    this.error = function(msg) {
+        this.log("[ERROR] message: " + msg);
     }
 
-    // log
+    /**
+    * console.log layer
+    *
+    * msg:             object
+    */
     this.log = function(msg) {
         if (debug) {
             console.log("[" + msg + "]");
@@ -46,7 +63,7 @@ function EngineUtils() {
         console.warn = console.debug = console.log;
     }
 
-    // prototyping -> extending stuff
+    // prototyping: extending js defaults stuff
 
     Number.prototype.round = function(precision) {
         precision = Math.pow(10, precision || 0);
@@ -81,4 +98,33 @@ function EngineUtils() {
     Array.prototype.random = function() {
         return this[Math.floor(Math.random() * this.length)];
     };
+
+    Array.prototype.contains = function(item) {
+        var i = this.length;
+        while (i--) {
+            if (this[i] === item) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // custom jQuery scripts
+
+    /**
+    * used for loading js scripts
+    *
+    * url:              string the file path
+    * success:          function
+    * error:            function
+    */
+    jQuery.loadScript = function (url, success, error) {
+        jQuery.ajax({
+            "url": url,
+            "dataType": "script",
+            "success": success,
+            "error": error,
+            "async": true
+        });
+    }
 }

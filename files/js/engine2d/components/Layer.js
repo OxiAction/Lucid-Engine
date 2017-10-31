@@ -8,7 +8,7 @@ function Layer(config) {
 	EngineUtils.log("Layer");
 
 	var configDefault = {
-		"target": null, // target canvas id
+		"id": null, // id
 		"type": null, // TYPE_LAYER_xxx
 		"active": 1, // if active => render
 		"renderingInterval": null // rendering interval
@@ -19,12 +19,17 @@ function Layer(config) {
 	Component.call(this, config);
 
 	if (config.type == null) {
-		EngineUtils.error(this, "type is null");
+		EngineUtils.error("layer type is null");
 		return;
 	}
 
 	var self = this;
-	var target = config.target;
+	
+	var id = self.getID();
+
+	// target canvas
+	var canvas = document.getElementById(id);
+
 	var renderingInterval = config.renderingInterval;
 
 	if (renderingInterval == null) {
@@ -49,6 +54,14 @@ function Layer(config) {
 		}
 	}
 
+	this.setDisplay = function(display) {
+		if (display) {
+			canvas.style.display = "block";
+		} else {
+			canvas.style.display = "none";
+		}
+	}
+
 	this.update = function() {
 		var type = this.getType();
 
@@ -63,4 +76,7 @@ function Layer(config) {
 	this.destroy = function() {
 		clearInterval(self.update);
 	}
+
+	// default display state
+	this.setDisplay(false);
 }

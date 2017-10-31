@@ -1,6 +1,9 @@
 // gloabl Utils
 var GameUtils;
 
+/**
+* This is the main Game object. It uses the Engine2D API to build the game.
+*/
 function Game() {
     EngineUtils.setDebug(1);
     
@@ -8,62 +11,67 @@ function Game() {
 
     // check support
     if (!EngineUtils.supportsCanvas()) {
-        EngineUtils.error(this, "browser does NOT support canvas")
+        EngineUtils.error("browser does NOT support canvas")
         return;
     }
 
+    // required for event listener removing
+    var namespace = ".Game";
+
     // custom layers
-    var layerMenu = new LayerMenu({"target": "#layer-menu", "type": TYPE_LAYER_MENU});
-    var layerUI = new LayerUI({"target": "#layer-ui", "type": TYPE_LAYER_UI});
+    var layerMenu = new LayerMenu({
+        "id": "layer-menu",
+        "type": TYPE_LAYER_MENU
+    });
 
-    // engine default layers
-    var layerObjects = new Layer({"target": "#layer-objects", "type": TYPE_LAYER_OBJECTS});
-    var layerForeground = new Layer({"target": "#layer-foreground", "type": TYPE_LAYER_GRAPHICAL});
-    var layerBackground = new Layer({"target": "#layer-background", "type": TYPE_LAYER_GRAPHICAL});
-    var layers = {layerMenu, layerUI, layerObjects, layerForeground, layerBackground};
-
-    var player = new Player({});
-    player.addControl(new Control({"type": TYPE_CONTROL_LEFT, "key": 37}));
-    player.addControl(new Control({"type": TYPE_CONTROL_RIGHT, "key": 39}));
-
-    var engine2d = new Engine2D({"type": TYPE_ENGINE_SIDE_SCROLL});
-    engine2d.setLayers(layers);
-
-    // testing...
-    $(document).trigger(EVENT_ENGINE_LOAD_MAP, "testmap");
-
-    engine2d.destroy();
-    engine2d = null;
-
-    /*
-    ////////////////////////////////////////////////
-    TODO:   this is how it should look like
-            just some ideas how this engine should work
+    var layerUI = new LayerUI({
+        "id": "layer-ui",
+        "type": TYPE_LAYER_UI
+    });
     
     // the engine
     var engine2d = new Engine2D();
+
+    // add the custom layers
+    engine2d.addLayer(layerMenu);
+    engine2d.addLayer(layerUI);
     
-    // player object
-    var player1 = new Player();
+    // create player object
+    var player1 = new Player({
+        "id": 1,
+        "name": "John Doe"
+    });
     
-    // removing a player from the engine will result in removing the player from the map and from the group
+    // add player
     engine2d.addPlayer(player1);
-    // engine2d.removePlayer(player1);
 
-    // something like this should be possible:
-    player1.setActive(false); // diasable player (controls, chat etc.)
-    // player1.setActive(true); // enable
+    // enable player interaction abillities
+    player1.setActive(true);
     
-
     // show menu
-    engine2d.showLayer("menu");
+    engine2d.setLayerDisplayByID("layer-menu", true);
 
-    ---> now if the player selects a map in the menu - e.g. "map1":
+    var mapName = "levelMap1";
 
-    // event listener for the map selection event
+    // load the file into DOM
+    engine2d.loadMapFile(mapName);
+
+    // event is triggered if map 
+    $(document).on(EVENT_ENGINE_LOADED_MAP_FILE_SUCCESS + namespace, function(event, mapName) {
+        engine2d.buildMap(mapName);
+        engine2d.enterMap(mapName);
+    });
+
+    // remove event listener
+    // $(document).off(EVENT_ENGINE_LOADED_MAP_FILE_SUCCESS + namespace);
+
+    /*
+    TODO this is how it should work :D Just some ideas...
+
+    // layer-menu event listener for the map selection event
     mapSelected {
         // load selected map
-        engine2d.loadMap("map1");
+        engine2d.loadMapFile("map1");
         
         // event listener for the map loaded event
         mapLoaded {
@@ -95,13 +103,12 @@ function Game() {
                 // remove interaction
                 player1.removeAllControls();
 
-                engine2d.unloadMap();
+                engine2d.unloadCurrentMap();
                 
                 // something like this
-                engine2d.showLayer("menu");
+                engine2d.showLayerByID("layer-menu");
             } // end map finished
         } // end map loaded
     } // end map selected
-
     */
 }
