@@ -18,23 +18,24 @@ function Game() {
     // required for event listener removing
     var namespace = ".Game";
 
-    // custom layers
-    var layerMenu = new LayerMenu({
+    // the engine
+    var engine2d = new Engine2D({
+        "layerContainer": "layer-container"
+    });
+
+    // custom layer for menu - persistent
+    var layerMenu = engine2d.createLayer({
         "id": "layer-menu",
+        "persistent": true,
         "type": TYPE_LAYER_MENU
     });
 
-    var layerUI = new LayerUI({
+    // custom layer for ui - persitent
+    var layerUI = engine2d.createLayer({
         "id": "layer-ui",
+        "persistent": true,
         "type": TYPE_LAYER_UI
     });
-    
-    // the engine
-    var engine2d = new Engine2D();
-
-    // add the custom layers
-    engine2d.addLayer(layerMenu);
-    engine2d.addLayer(layerUI);
     
     // create player object
     var player1 = new Player({

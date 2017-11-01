@@ -13,6 +13,9 @@ function Map(config) {
 
 	Component.call(this, config);
 
+	var self = this;
+
+	var id = self.getID();
 	var name = config.name;
 	var layers = config.layers;
 	var engine2d = config.engine2d;

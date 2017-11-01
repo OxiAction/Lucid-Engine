@@ -45,12 +45,10 @@
 
 <!--[if lt IE 7]><body class="ie6"><![endif]--><!--[if IE 7]><body class="ie7"><![endif]--><!--[if IE 8]><body class="ie8"><![endif]--><!--[if IE 9]><body class="ie9"><![endif]--><!--[if (gt IE 9)|!(IE)]><!--><body><!--<![endif]-->
 	<div id="content">
-		<!-- custom layers -->
-		<canvas id="layer-menu" >Your Browser is not supported by the game.</canvas>
-		<canvas id="layer-ui" ></canvas>
-		<div id="engine2d-layers">
+		<div id="layer-container">
 			<!-- engine2d canvas layers will be set on runtime -->
 		</div>
+		<canvas id="layer-fallback" >Your Browser is not supported by the game.</canvas>
 	</div>
 </body>
 </html>

@@ -10,7 +10,10 @@ function Layer(config) {
 	var configDefault = {
 		"id": null, // id
 		"type": null, // TYPE_LAYER_xxx
-		"active": 1, // if active => render
+		"active": true, // if active => render
+		"display": false, // hide / show
+		"persistent": false, // determines if this layer will be auto deleted by the Engine2D
+		"layerContainer": "layer-container", // target HTML container ID for layers
 		"renderingInterval": null // rendering interval
 	};
 
@@ -18,22 +21,38 @@ function Layer(config) {
 
 	Component.call(this, config);
 
-	if (config.type == null) {
+	var self = this;
+	
+	var id = self.getID();
+	var type = self.getType();
+	var active = self.getActive();
+	var display = config["display"];
+	var persistent = config["persistent"];
+
+	// check for type
+	if (type == null) {
 		EngineUtils.error("layer type is null");
 		return;
 	}
 
-	var self = this;
-	
-	var id = self.getID();
+	// create canvas
+	var canvas = document.createElement("canvas");
+	canvas.id = id;
 
-	// target canvas
-	var canvas = document.getElementById(id);
+	// get container for canvas
+	var layerContainer = document.getElementById(config["layerContainer"]);
+	if (!layerContainer) {
+		EngineUtils.error("layer layerContainer is null")
+		return;
+	}
+	layerContainer.append(canvas);
 
+	// perforamnce is depending on the rendering interval of the layers
+	// certain layers dont need to be rendered that often
 	var renderingInterval = config.renderingInterval;
 
 	if (renderingInterval == null) {
-		switch (this.getType()) {
+		switch (type) {
 			case TYPE_LAYER_MENU:
 				renderingInterval = 40;
 				break;
@@ -54,12 +73,26 @@ function Layer(config) {
 		}
 	}
 
-	this.setDisplay = function(display) {
-		if (display) {
+	this.setDisplay = function(value) {
+		if (value) {
+			display = true;
 			canvas.style.display = "block";
 		} else {
+			display = false;
 			canvas.style.display = "none";
 		}
+	}
+
+	this.getDisplay = function() {
+		return display;
+	}
+
+	this.getCanvas = function() {
+		return canvas;
+	}
+
+	this.getPersistent = function() {
+		return persistent;
 	}
 
 	this.update = function() {
@@ -70,13 +103,13 @@ function Layer(config) {
 		}
 	}
 
-	// setInterval(this.update, renderingInterval);
-	this.update();
-
 	this.destroy = function() {
 		clearInterval(self.update);
 	}
 
 	// default display state
-	this.setDisplay(false);
+	this.setDisplay(display);
+
+	// setInterval(this.update, renderingInterval);
+	this.update();
 }

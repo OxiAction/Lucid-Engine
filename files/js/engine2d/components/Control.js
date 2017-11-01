@@ -11,7 +11,7 @@ function Control(config) {
 
 	var configDefault = {
 		"type": null, // TYPE_CONTROL_xxx
-		"active": 1, // activate control
+		"active": true, // activate control
 		"key": null // key code
 	};
 
@@ -19,7 +19,12 @@ function Control(config) {
 
 	Component.call(this, config);
 
-	if (config.type == null) {
+	var self = this;
+
+	var type = self.getType();
+	var active = self.getActive();
+
+	if (type == null) {
 		EngineUtils.error("control type is null");
 		return;
 	}

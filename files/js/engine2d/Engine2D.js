@@ -20,13 +20,16 @@ function Engine2D(config) {
 
 	var configDefault = {
 		"mapsPath": "files/maps/",
-		"mapsExtension": ".js"
+		"mapsExtension": ".js",
+		"layerContainer": "layer-container" // target HTML container ID for layers
 	};
 
 	var config = $.extend({}, configDefault, config);
 
 	var self = this;
 	var namespace = ".Engine2D";
+
+	var layerContainer = config["layerContainer"];
 
 	var layers = {};
 	var players = {};
@@ -153,6 +156,22 @@ function Engine2D(config) {
 		return true;
 	}
 
+	this.createLayer = function(config) {
+		if (!config) {
+			config = {};
+		}
+
+		if (config["layerContainer"] === undefined) {
+			config["layerContainer"] = layerContainer;
+		}
+
+		var layer = new Layer(config);
+
+		self.addLayer(layer);
+
+		return layer;
+	}
+
 	/**
 	* add layer
 	*
@@ -168,7 +187,7 @@ function Engine2D(config) {
 	*
 	* layerID: 			id
 	* display: 			boolean
-	* invertOthers: 	boolean
+	* invertOthers: 	boolean - default true
 	*/
 	this.setLayerDisplayByID = function(layerID, display, invertOthers) {
 		if (!(layerID in layers) || display === undefined) {

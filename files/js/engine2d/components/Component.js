@@ -3,9 +3,9 @@
 function Component(config) {
 	EngineUtils.log("Component");
 
-	var type = config.type;
-	var active = config.active;
-	var id = config.id;
+	var type = config["type"];
+	var active = config["active"];
+	var id = config["id"];
 
 	this.setType = function(value) {
 		type = value;
