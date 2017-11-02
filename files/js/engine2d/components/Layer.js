@@ -11,10 +11,10 @@ function Layer(config) {
 		"id": null, // id
 		"type": null, // TYPE_LAYER_xxx
 		"active": true, // if active => render
-		"display": false, // hide / show
+		"effects": null, // effects
+		"display": false, // initial hide / show
 		"persistent": false, // determines if this layer will be auto deleted by the Engine2D
-		"layerContainer": "layer-container", // target HTML container ID for layers
-		"renderingInterval": null // rendering interval
+		"layerContainer": "layer-container" // target HTML container ID for layers
 	};
 
 	var config = $.extend({}, configDefault, config);
@@ -26,6 +26,7 @@ function Layer(config) {
 	var id = self.getID();
 	var type = self.getType();
 	var active = self.getActive();
+	var effects = config["effects"];
 	var display = config["display"];
 	var persistent = config["persistent"];
 
@@ -47,32 +48,11 @@ function Layer(config) {
 	}
 	layerContainer.append(canvas);
 
-	// perforamnce is depending on the rendering interval of the layers
-	// certain layers dont need to be rendered that often
-	var renderingInterval = config.renderingInterval;
-
-	if (renderingInterval == null) {
-		switch (type) {
-			case TYPE_LAYER_MENU:
-				renderingInterval = 40;
-				break;
-			case TYPE_LAYER_UI:
-				renderingInterval = 40;
-				break;
-			case TYPE_LAYER_GRAPHICAL:
-				renderingInterval = 20;
-				break;
-			case TYPE_LAYER_COLLISION:
-				renderingInterval = 20;
-				break;
-			case TYPE_LAYER_OBJECTS:
-				renderingInterval = 20;
-				break;
-			default:
-				renderingInterval = 20;
-		}
-	}
-
+	/**
+	* TODO: description
+	*
+	* value: 			boolean
+	*/
 	this.setDisplay = function(value) {
 		if (value) {
 			display = true;
@@ -83,33 +63,60 @@ function Layer(config) {
 		}
 	}
 
+	/**
+	* TODO: description
+	*/
 	this.getDisplay = function() {
 		return display;
 	}
 
+	/**
+	* TODO: description
+	*/
 	this.getCanvas = function() {
 		return canvas;
 	}
 
+	/**
+	* TODO: description
+	*/
 	this.getPersistent = function() {
 		return persistent;
 	}
 
-	this.update = function() {
-		var type = this.getType();
-
-		if (type == TYPE_LAYER_OBJECTS) {
-			// ...
-		}
+	/**
+	* TODO: description
+	*
+	* updateConfig: 		object
+	*/
+	this.update = function(updateConfig) {
+		
 	}
 
+	/**
+	* TODO: description
+	*/
+	this.getCollisionData = function() {
+		if (type != TYPE_LAYER_COLLISION) {
+			EngineUtils.error("cant get collision data from a layer with type: " + type);
+			return false;
+		}
+
+		//...
+	}
+
+	/**
+	* TODO: description
+	*/
 	this.destroy = function() {
-		clearInterval(self.update);
+		EngineUtils.log("destroying layer with id: " + id);
+
+		layerContainer.removeChild(canvas);
+		canvas = null;
 	}
 
 	// default display state
 	this.setDisplay(display);
 
-	// setInterval(this.update, renderingInterval);
-	this.update();
+	// this.update();
 }

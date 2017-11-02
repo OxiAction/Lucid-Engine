@@ -21,24 +21,85 @@ function Engine2D(config) {
 	var configDefault = {
 		"mapsPath": "files/maps/",
 		"mapsExtension": ".js",
-		"layerContainer": "layer-container" // target HTML container ID for layers
+		"layerContainer": "layer-container", // target HTML container ID for layers
+		"renderCollisionLayer": false,
+		"renderingInterval": 30,
+		"customUpdateFunction": null // use custom update function istead the default one
 	};
 
 	var config = $.extend({}, configDefault, config);
 
 	var self = this;
+
 	var namespace = ".Engine2D";
 
+	var mapsPath = config["mapsPath"];
+	var mapsExtension = config["mapsExtension"];
 	var layerContainer = config["layerContainer"];
+	var renderCollisionLayer = config["renderCollisionLayer"];
+	var renderingInterval = config["renderingInterval"];
+	var customUpdateFunction = config["customUpdateFunction"];
 
-	var layers = {};
+	var updateInterval = null; // interval id
+	var collisionLayers = []; // collision layers
+	var collidingLayers = []; // layers which acquire collision data
+	var normalLayers = []; // normal layers 
+	var layers = []; // collection of all layers
+
 	var players = {};
 
 	var loadedMapFiles = []; // already loaded files of maps
-	var buildMaps = {}; // already build maps - key is mapName and value Map object
-	var currentMap = null; // the currently active Map
+	var buildMaps = {}; // already build maps - key is mapName and value Map object TODO switch to array!
+	var currentBuildMapName = null; // the currently build Map
 
 	// ------------------------------
+
+	/**
+	* TODO: description
+	*/
+	this.start = function() {
+		EngineUtils.log("starting engine2d");
+
+		if (updateInterval) {
+			EngineUtils.log("engine2d already started");
+			return false;
+		}
+
+		var updateFunction = this.update;
+
+		if (customUpdateFunction) {
+			updateFunction = customUpdateFunction;
+		}
+
+		updateInterval = setInterval(updateFunction, renderingInterval);
+
+		return true;
+	}
+
+	/**
+	* TODO: description
+	*/
+	this.stop = function() {
+		EngineUtils.log("stopping engine2d");
+
+		if (!updateInterval) {
+			EngineUtils.log("engine2d not started yet - nothing to stop");
+			return false;
+		}
+
+		clearInterval(updateInterval);
+
+		return true;
+	}
+
+	/**
+	* TODO: description
+	*/
+	this.update = function() {
+		EngineUtils.log("engine2d update step...");
+
+		self.updateLayers();
+	}
 
 	/**
 	* get the "list" of already build maps
@@ -55,10 +116,58 @@ function Engine2D(config) {
 	}
 
 	/**
-	* TODO
+	* TODO: description
 	*/
-	this.doDraw = function() {
-		// TODO not sure how this will work :X
+	this.updateLayers = function() {
+		var i;
+		var layer;
+
+		var collisionData = [];
+		var updateConfig = {
+			"viewportWidth": this.getViewportWidth(),
+			"viewportHeight": this.getViewportHeight()
+		};
+
+		// skip through collisionLayer
+		// update them and collect collisionData
+		for (i = 0; i < collisionLayers.length; ++i) {
+			layer = collisionLayers[i];
+			layer.update(updateConfig);
+
+			var currCollisionData = layer.getCollisionData();
+			if (currCollisionData) {
+				collisionData.push(currCollisionData);
+			}
+		}
+
+		// set collisionData for the next layers we want to
+		updateConfig["collisionData"] = collisionData;
+
+		for (i = 0; i < collidingLayers.length; ++i) {
+			layer = collidingLayers[i];
+			layer.update(updateConfig);
+		}
+
+		for (i = 0; i < normalLayers.length; ++i) {
+			layer = normalLayers[i];
+			layer.update(updateConfig);
+		}
+	}
+
+	/**
+	* TODO: description
+	*/
+	this.getViewportWidth = function() {
+		// TODO...
+		return 300;
+	}
+
+	/**
+	* TODO: description
+	*/
+	this.getViewportHeight = function() {
+		// TODO...
+		return 150;
 	}
 
 	/**
@@ -68,7 +177,7 @@ function Engine2D(config) {
 	*/
 	this.loadMapFile = function(mapName) {
 		// full path to file
-		var mapFullPath = config["mapsPath"] + mapName + config["mapsExtension"];
+		var mapFullPath = mapsPath + mapName + mapsExtension;
 
 		// check if already loaded
 		if (loadedMapFiles.contains(mapName)) {
@@ -92,11 +201,12 @@ function Engine2D(config) {
 	* build an already loaded map
 	*
 	* mapName: 			string
+	* return: 			Map
 	*/
 	this.buildMap = function(mapName) {
 		if (!loadedMapFiles.contains(mapName)) {
 			EngineUtils.error("cannot enter map - not loaded yet: " + mapName);
-			return false;
+			return null;
 		}
 
 		EngineUtils.log("building map: " + mapName);
@@ -104,7 +214,7 @@ function Engine2D(config) {
 		var mapConfig = mapData["config"];
 		if (mapConfig === undefined) {
 			EngineUtils.error("map data doesnt have a config: " + mapName);
-			return false;
+			return null;
 		}
 
 		// reference to engine2d
@@ -116,7 +226,9 @@ function Engine2D(config) {
 		// ...and add it to our build "list"
 		buildMaps[mapName] = map;
 
-		return true;
+		currentBuildMapName = mapName;
+
+		return map;
 	}
 
 	/**
@@ -132,54 +244,81 @@ function Engine2D(config) {
 
 		var map = buildMaps[mapName];
 		map.destroy();
+		buildMaps[mapName] = null;
 		map = null;
 
-		buildMaps.erase(map);
+		currentBuildMapName = null;
 
 		return true;
 	}
 
 	/**
-	* enter a (already loaded and build) map
+	* TODO: description
 	*
-	* mapName: 			string
+	* layerConfig: 			object
+	* return: 				Layer
 	*/
-	this.enterMap = function(mapName) {
-		if (!(mapName in buildMaps)) {
-			EngineUtils.error("cannot enter map - not build (or maybe loaded) yet: " + mapName);
-			return false;
+	this.createAddLayer = function(layerConfig) {
+		if (!layerConfig) {
+			layerConfig = {};
 		}
 
-		EngineUtils.log("entering map: " + mapName);
-
-		//...
-		return true;
-	}
-
-	this.createLayer = function(config) {
-		if (!config) {
-			config = {};
+		if (layerConfig["layerContainer"] === undefined) {
+			layerConfig["layerContainer"] = layerContainer;
 		}
 
-		if (config["layerContainer"] === undefined) {
-			config["layerContainer"] = layerContainer;
+		var layer = new Layer(layerConfig);
+		var type = layer.getType();
+		if (type == TYPE_LAYER_COLLISION) {
+			collisionLayers.push(layer);
+		} else if (type == TYPE_LAYER_GRAPHICAL || type == TYPE_LAYER_OBJECTS) {
+			collidingLayers.push(layer);
+		} else {
+			normalLayers.push(layer);
 		}
-
-		var layer = new Layer(config);
-
-		self.addLayer(layer);
+		
+		layers.push(layer); // add to general layers array
 
 		return layer;
 	}
 
 	/**
-	* add layer
+	* TODO: description
 	*
-	* layer: 			Layer
+	* layerID: 			id
 	*/
-	this.addLayer = function(layer) {
-		var id = layer.getID();
-		layers[id] = layer;
+	this.removeLayerByID = function(layerID) {
+		var i;
+		var layer;
+		var id;
+
+		for (i = 0; i < layers.length; ++i) {
+			layer = layers[i];
+			id = layer.getID();
+			if (id == layerID) {
+				break;
+			}
+		}
+
+		// check if we found the layer with layerID
+		if (id == layerID) {
+			var type = layer.getType();
+			layer.destroy();
+			if (type == TYPE_LAYER_COLLISION) {
+				collisionLayers.erase(layer);
+			} else if (type == TYPE_LAYER_GRAPHICAL || type == TYPE_LAYER_OBJECTS) {
+				collidingLayers.erase(layer);
+			} else {
+				normalLayers.erase(layer);
+			}
+
+			layers.erase(layer);
+			layer = null;
+
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -190,21 +329,26 @@ function Engine2D(config) {
 	* invertOthers: 	boolean - default true
 	*/
 	this.setLayerDisplayByID = function(layerID, display, invertOthers) {
-		if (!(layerID in layers) || display === undefined) {
+
+		if (layerID === undefined || display === undefined) {
 			EngineUtils.error("cant set layer display - id: " + layerID);
+			return false;
 		}
 
 		if (invertOthers === undefined) {
 			invertOthers = true;
 		}
 
-		if (invertOthers) {
-			$.each(layers, function(key, value){
-				layers[key].setDisplay(!display);
-			});
+		for (var i = 0; i < layers.length; ++i) {
+			var layer = layers[i];
+			if (layer.getID() == layerID) {
+				layer.setDisplay(display);
+			} else if (invertOthers) {
+				layer.setDisplay(!display);
+			}
 		}
 
-		layers[layerID].setDisplay(display);
+		return true;
 	}
 
 	/**
@@ -221,7 +365,7 @@ function Engine2D(config) {
 	*
 	* playerID: 		id
 	*/
-	this.removePlayer = function(playerID) {
+	this.removePlayerByID = function(playerID) {
 
 	}
 
@@ -229,6 +373,11 @@ function Engine2D(config) {
 	* destroy & remove all events, intervals, timeouts
 	*/
 	this.destroy = function() {
-		
+		self.stop();
+
+		if (currentBuildMapName) {
+			self.destroyMap(currentBuildMapName);
+			currentBuildMapName = null;
+		}
 	}
 }

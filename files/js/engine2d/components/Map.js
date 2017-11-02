@@ -16,31 +16,42 @@ function Map(config) {
 	var self = this;
 
 	var id = self.getID();
-	var name = config.name;
-	var layers = config.layers;
-	var engine2d = config.engine2d;
+	var name = config["name"];
+	var layers = config["layers"];
+	var engine2d = config["engine2d"];
 
-	/**
-	* error reporting feature (TODO: maybe not optimal like this...)
-	*
-	* type: 			string
-	*/
-	var errorNullData = function(type) {
-		EngineUtils.error("map name '" + name + "' - " + type + " is null!");
+	this.init = function() {
+		if (!layers || layers.length < 1) {
+			EngineUtils.error("map name: " + name + " - layers are not defined!");
+			return false;
+		} else if (!engine2d) {
+			EngineUtils.error("map name: " + name + " - engine2d reference not defined!");
+			return false;
+		}
+
+		for (var i = 0; i < layers.length; ++i) {
+			if (layers[i]["config"] !== undefined && layers[i]["config"]["id"] !== undefined) {
+				engine2d.createAddLayer(layers[i]["config"]);
+			} else {
+				EngineUtils.error("map name: " + name + " - tried to createAdd layer to engine2d but layer config or layer id is undefined!");
+			}
+		}
+
+		return true;
 	}
 
-	if (!layers) {
-		errorNullData("layers");
-		return;
-	} else if (!engine2d) {
-		errorNullData("engine2d");
-		return;
-	}
-
 	/**
-	* destroy & remove all events, intervals, timeouts
+	* TODO desc
 	*/
 	this.destroy = function() {
-		
+		for (var i = 0; i < layers.length; ++i) {
+			if (layers[i]["config"] !== undefined && layers[i]["config"]["id"] !== undefined) {
+				engine2d.removeLayerByID(layers[i]["config"]["id"]);
+			} else {
+				EngineUtils.error("map name: " + name + " - tried to remove layer from engine2d but layer config or layer id is undefined!");
+			}
+		}
 	}
+
+	self.init();
 }

@@ -87,7 +87,7 @@ function EngineUtils() {
     };
 
     Array.prototype.erase = function(item) {
-        for(var i = this.length; i--;) {
+        for(var i = this.length; --i;) {
             if(this[i] === item) {
                 this.splice(i, 1);
             }
