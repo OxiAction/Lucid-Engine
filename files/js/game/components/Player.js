@@ -1,7 +1,7 @@
 /**
-* Game custom menu Layer - extends Layer.
+* Game custom Player - extends Entity.
 */
-var LayerMenu = Layer.extend({
+var Player = Entity.extend({
     // config variables and their default values
     // ...
 
@@ -15,21 +15,10 @@ var LayerMenu = Layer.extend({
       * @return     {boolean}  Returns true on success.
       */
     init: function(config) {
-        this.componentName = "LayerMenu";
+        this.componentName = "Player";
 
         this._super(config);
 
         return true;
-    },
-
-    /**
-     * Update step.
-     *
-     * @param      {Object}  config  The configuration.
-     */
-    update: function(config) {
-      // TODO: implement override stuff here!
-      
-      this._super(config);
     }
 });

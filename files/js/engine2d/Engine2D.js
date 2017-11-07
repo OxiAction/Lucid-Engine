@@ -1,14 +1,3 @@
-// engine types
-const TYPE_ENGINE_SIDE_SCROLL = "typeEngineSideScroll";
-const TYPE_ENGINE_TOP_DOWN = "typeEngineTopDown";
-
-// egine events
-const EVENT_ENGINE_TOGGLE_LAYER = "eventEngineToggleLayer";
-const EVENT_ENGINE_PAUSE = "eventEnginePause";
-const EVENT_ENGINE_PLAY = "eventEnginePlay";
-const EVENT_ENGINE_LOADED_MAP_FILE_SUCCESS = "eventEngineLoadedMapFileSuccess";
-const EVENT_ENGINE_LOADED_MAP_FILE_ERROR = "eventEngineLoadedMapFileError";
-
 // global utils
 var EngineUtils;
 
@@ -50,12 +39,12 @@ function Engine2D(config) {
 
 	var loadedMapFiles = []; // already loaded files of maps
 	var buildMaps = {}; // already build maps - key is mapName and value Map object TODO switch to array!
-	var currentBuildMapName = null; // the currently build Map
+	var currentBuildMapFileName = null; // the currently build map file name
 
 	// ------------------------------
 
 	/**
-	* TODO: description
+	* Starts the Engine2D.
 	*/
 	this.start = function() {
 		EngineUtils.log("starting engine2d");
@@ -77,7 +66,7 @@ function Engine2D(config) {
 	}
 
 	/**
-	* TODO: description
+	* Stops the Engine2D.
 	*/
 	this.stop = function() {
 		EngineUtils.log("stopping engine2d");
@@ -93,193 +82,218 @@ function Engine2D(config) {
 	}
 
 	/**
-	* TODO: description
+	* Engine2D update "step"
 	*/
 	this.update = function() {
 		EngineUtils.log("engine2d update step...");
 
-		self.updateLayers();
+		var updateConfig = {
+			"viewportWidth": this.getViewportWidth(),
+			"viewportHeight": this.getViewportWidth(),
+			"viewportHalfWidth": this.getViewportWidth() / 2,
+			"viewportHalfHeight": this.getViewportHeight() / 2
+		};
+
+		self.updateLayers(updateConfig);
 	}
 
 	/**
-	* get the "list" of already build maps
-	*/
+	 * Gets the already build maps.
+	 *
+	 * @return     {Object}  The already build maps.
+	 */
 	this.getBuildMaps = function() {
 		return buildMaps;
 	}
 
 	/**
-	* get the array of already into the DOM loaded map files
-	*/
+	 * Get the array of already into the DOM loaded map files.
+	 *
+	 * @return     {Array}  The loaded map files.
+	 */
 	this.getLoadedMapFiles = function() {
 		return loadedMapFiles;
 	}
 
 	/**
-	* TODO: description
-	*/
-	this.updateLayers = function() {
+	 * TODO: description
+	 *
+	 * @param      {Object}  config  The configuration.
+	 */
+	this.updateLayers = function(config) {
 		var i;
 		var layer;
 
 		var collisionData = [];
-		var updateConfig = {
-			"viewportWidth": this.getViewportWidth(),
-			"viewportHeight": this.getViewportHeight()
-		};
 
 		// skip through collisionLayer
 		// update them and collect collisionData
 		for (i = 0; i < collisionLayers.length; ++i) {
 			layer = collisionLayers[i];
-			layer.update(updateConfig);
+			var currCollisionData = layer.update(config);
 
-			var currCollisionData = layer.getCollisionData();
 			if (currCollisionData) {
 				collisionData.push(currCollisionData);
 			}
 		}
 
 		// set collisionData for the next layers we want to
-		updateConfig["collisionData"] = collisionData;
+		config.collisionData = collisionData;
 
 		for (i = 0; i < collidingLayers.length; ++i) {
 			layer = collidingLayers[i];
-			layer.update(updateConfig);
+			layer.update(config);
 		}
 
 		for (i = 0; i < normalLayers.length; ++i) {
 			layer = normalLayers[i];
-			layer.update(updateConfig);
+			layer.update(config);
 		}
 	}
 
 	/**
-	* TODO: description
-	*/
+	 * Gets the viewport width.
+	 *
+	 * @return     {number}  The viewport width.
+	 */
 	this.getViewportWidth = function() {
 		// TODO...
 		return 300;
 	}
 
 	/**
-	* TODO: description
-	*/
+	 * Gets the viewport height.
+	 *
+	 * @return     {number}  The viewport height.
+	 */
 	this.getViewportHeight = function() {
 		// TODO...
 		return 150;
 	}
 
 	/**
-	* loads a map file into the DOM
-	*
-	* mapName: 			string
-	*/
-	this.loadMapFile = function(mapName) {
+	 * Loads a map file in the DOM.
+	 *
+	 * @param      {string}  mapFileName  The map file name.
+	 */
+	this.loadMapFile = function(mapFileName) {
 		// full path to file
-		var mapFullPath = mapsPath + mapName + mapsExtension;
+		var mapFullPath = mapsPath + mapFileName + mapsExtension;
 
 		// check if already loaded
-		if (loadedMapFiles.contains(mapName)) {
+		if (loadedMapFiles.contains(mapFileName)) {
 			EngineUtils.log("map already loaded: " + mapFullPath);
-			$(document).trigger(EVENT_ENGINE_LOADED_MAP_FILE_SUCCESS, [mapName]);
+			$(document).trigger(Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS, [mapFileName]);
 		}
 
 		EngineUtils.log("attempting to load map: " + mapFullPath);
 
 		$.loadScript(mapFullPath, function() {
 	        EngineUtils.log("loaded map: " + mapFullPath);
-	        loadedMapFiles.push(mapName);
-	        $(document).trigger(EVENT_ENGINE_LOADED_MAP_FILE_SUCCESS, [mapName]);
+	        loadedMapFiles.push(mapFileName);
+	        $(document).trigger(Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS, [mapFileName]);
 	    }, function() {
 	    	EngineUtils.error("couldnt load map: " + mapFullPath);
-	    	$(document).trigger(EVENT_ENGINE_LOADED_MAP_FILE_ERROR, mapName);
+	    	$(document).trigger(Engine2D.EVENT.LOADED_MAP_FILE_ERROR, mapFileName);
 	    });
 	}
 
 	/**
-	* build an already loaded map
-	*
-	* mapName: 			string
-	* return: 			Map
-	*/
-	this.buildMap = function(mapName) {
-		if (!loadedMapFiles.contains(mapName)) {
-			EngineUtils.error("cannot enter map - not loaded yet: " + mapName);
+	 * Build an already loaded map.
+	 *
+	 * @param      {string}  mapFileName  The map file name.
+	 * @return     {Map}     The map.
+	 */
+	this.buildMap = function(mapFileName) {
+		if (!loadedMapFiles.contains(mapFileName)) {
+			EngineUtils.error("cannot enter map - not loaded yet: " + mapFileName);
 			return null;
 		}
 
-		EngineUtils.log("building map: " + mapName);
-		var mapData = window[mapName];
+		EngineUtils.log("building map: " + mapFileName);
+		var mapData = window[mapFileName];
 		var mapConfig = mapData["config"];
 		if (mapConfig === undefined) {
-			EngineUtils.error("map data doesnt have a config: " + mapName);
+			EngineUtils.error("map data doesnt have a config: " + mapFileName);
 			return null;
 		}
 
 		// reference to engine2d
-		mapConfig["engine2d"] = self;
+		mapConfig.engine2d = self;
 
 		// create actual map object...
 		var map = new Map(mapConfig);
 
 		// ...and add it to our build "list"
-		buildMaps[mapName] = map;
+		buildMaps[mapFileName] = map;
 
-		currentBuildMapName = mapName;
+		currentBuildMapFileName = mapFileName;
 
 		return map;
 	}
 
 	/**
-	* destroy an already build map
-	*
-	* mapName: 			string
-	*/
-	this.destoryMap = function(mapName) {
-		if (!(mapName in buildMaps)) {
-			EngineUtils.error("cannot destroy map - not build yet: " + mapName);
+	 * Destroy an already build map.
+	 *
+	 * @param      {string}   mapFileName  The map file name.
+	 * @return     {boolean}  Returns true on success.
+	 */
+	this.destoryMap = function(mapFileName) {
+		if (!(mapFileName in buildMaps)) {
+			EngineUtils.error("cannot destroy map - not build yet: " + mapFileName);
 			return false;
 		}
 
-		var map = buildMaps[mapName];
+		var map = buildMaps[mapFileName];
 		map.destroy();
-		buildMaps[mapName] = null;
+		buildMaps[mapFileName] = null;
 		map = null;
 
-		currentBuildMapName = null;
+		currentBuildMapFileName = null;
 
 		return true;
 	}
 
+	
 	/**
-	* TODO: description
-	*
-	* layerConfig: 			object
-	* return: 				Layer
-	*/
+	 * Creates and adds a layer.
+	 *
+	 * @param      {Object}  layerConfig  The Layer configuration.
+	 * @return     {Layer}   Returns the created Layer.
+	 */
 	this.createAddLayer = function(layerConfig) {
 		if (!layerConfig) {
 			layerConfig = {};
 		}
 
-		if (layerConfig["layerContainer"] === undefined) {
-			layerConfig["layerContainer"] = layerContainer;
+		if (layerConfig.layerContainer === undefined) {
+			layerConfig.layerContainer = layerContainer;
 		}
 
 		var layer = new Layer(layerConfig);
+		
+		this.addLayer(layer);
+
+		return layer;
+	}
+
+	/**
+	 * Adds a layer.
+	 *
+	 * @param      {Layer}  layer   The Layer.
+	 */
+	this.addLayer = function(layer) {
 		var type = layer.getType();
-		if (type == TYPE_LAYER_COLLISION) {
+		if (type == Layer.TYPE.COLLISION) {
 			collisionLayers.push(layer);
-		} else if (type == TYPE_LAYER_GRAPHICAL || type == TYPE_LAYER_OBJECTS) {
+		} else if (type == Layer.TYPE.GRAPHICAL || type == Layer.TYPE.OBJECTS) {
 			collidingLayers.push(layer);
 		} else {
 			normalLayers.push(layer);
 		}
 		
-		layers.push(layer); // add to general layers array
-
-		return layer;
+		// add to general layers array
+		layers.push(layer);
 	}
 
 	/**
@@ -287,7 +301,14 @@ function Engine2D(config) {
 	*
 	* layerID: 			id
 	*/
-	this.removeLayerByID = function(layerID) {
+
+	/**
+	 * Removes a layer.
+	 *
+	 * @param      {string}   layerID  The Layer id.
+	 * @return     {boolean}  Returns true if Layer was removed successfully.
+	 */
+	this.removeLayer = function(layerID) {
 		var i;
 		var layer;
 		var id;
@@ -304,9 +325,9 @@ function Engine2D(config) {
 		if (id == layerID) {
 			var type = layer.getType();
 			layer.destroy();
-			if (type == TYPE_LAYER_COLLISION) {
+			if (type == Layer.TYPE.COLLISION) {
 				collisionLayers.erase(layer);
-			} else if (type == TYPE_LAYER_GRAPHICAL || type == TYPE_LAYER_OBJECTS) {
+			} else if (type == Layer.TYPE.GRAPHICAL || type == Layer.TYPE.OBJECTS) {
 				collidingLayers.erase(layer);
 			} else {
 				normalLayers.erase(layer);
@@ -322,13 +343,14 @@ function Engine2D(config) {
 	}
 
 	/**
-	* set layer display
-	*
-	* layerID: 			id
-	* display: 			boolean
-	* invertOthers: 	boolean - default true
-	*/
-	this.setLayerDisplayByID = function(layerID, display, invertOthers) {
+	 * Sets the display property of a Layer
+	 *
+	 * @param      {string}   layerID       The Layer id.
+	 * @param      {boolean}  display       The display state.
+	 * @param      {boolean}  invertOthers  Invert other layers display state.
+	 * @return     {boolean}  Returns true on success.
+	 */
+	this.setLayerDisplay = function(layerID, display, invertOthers) {
 
 		if (layerID === undefined || display === undefined) {
 			EngineUtils.error("cant set layer display - id: " + layerID);
@@ -339,45 +361,68 @@ function Engine2D(config) {
 			invertOthers = true;
 		}
 
+		var success = false;
+
 		for (var i = 0; i < layers.length; ++i) {
 			var layer = layers[i];
 			if (layer.getID() == layerID) {
+				success = true;
 				layer.setDisplay(display);
 			} else if (invertOthers) {
 				layer.setDisplay(!display);
 			}
 		}
 
-		return true;
+		return success;
 	}
 
 	/**
-	* add player
-	*
-	* player: 			Player
-	*/
+	 * Adds a player.
+	 *
+	 * @param      {Player}  player  The player.
+	 */
 	this.addPlayer = function(player) {
 		players[player.getID()] = player;
 	}
 
+
 	/**
-	* remove player
-	*
-	* playerID: 		id
-	*/
-	this.removePlayerByID = function(playerID) {
+	 * Removes a player.
+	 *
+	 * @param      {string}  playerID  The player id.
+	 */
+	this.removePlayer = function(playerID) {
 
 	}
 
 	/**
-	* destroy & remove all events, intervals, timeouts
-	*/
+	 * Destroy & remove all events, intervals, timeouts
+	 *
+	 * @return     {boolean}  Returns true on success.
+	 */
 	this.destroy = function() {
 		self.stop();
 
-		if (currentBuildMapName) {
-			self.destroyMap(currentBuildMapName);
-			currentBuildMapName = null;
+		if (currentBuildMapFileName) {
+			self.destroyMap(currentBuildMapFileName);
+			currentBuildMapFileName = null;
 		}
+
+		return true;
 	}
+}
+
+// type constants
+Engine2D.TYPE = {
+	SIDE_SCROLL: "sideScroll", // side scroll game type
+	TOP_DOWN: "topDown" // top down game type
+};
+
+// event constants
+Engine2D.EVENT = {
+	TOGGLE_LAYER: "toggleLayer",
+	PAUSE: "pause",
+	PLAY: "play",
+	LOADED_MAP_FILE_SUCCESS: "loadedMapFileSuccess",
+	LOADED_MAP_FILE_ERROR: "loadedMapFileError"
 }

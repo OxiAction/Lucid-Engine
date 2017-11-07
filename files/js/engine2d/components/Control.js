@@ -1,31 +1,38 @@
-const TYPE_CONTROL_UP = "typeControlUp";
-const TYPE_CONTROL_DOWN = "typeControlDown";
-const TYPE_CONTROL_LEFT = "typeControlLeft";
-const TYPE_CONTROL_RIGHT = "typeControlRight";
-const TYPE_CONTROL_SHOOT = "typeControlShoot"; // shoot attack
-const TYPE_CONTROL_MELEE = "typeControlMelee"; // melee attack
-const TYPE_CONTROL_CUSTOM = "typeControlCustom"; // for custom events
+/**
+* Engine2D default Control
+*/
+var Control = BaseComponent.extend({
+	// config variables and their default values
+	key: null, // keycode
 
-function Control(config) {
-	EngineUtils.log("Control");
+	// local variables
+	// ...
+	
+	/**
+	  * Automatically called when instantiated.
+	  *
+	  * @param      {Object}   config  The configuration.
+	  * @return     {boolean}  Returns true on success.
+	  */
+	init: function(config) {
+		this.componentName = "Control";
 
-	var configDefault = {
-		"type": null, // TYPE_CONTROL_xxx
-		"active": true, // activate control
-		"key": null // key code
-	};
+		this._super(config);
 
-	var config = $.extend({}, configDefault, config);
+		if (this.type == null) {
+			EngineUtils.error("Control type is null");
+			return;
+		}
 
-	Component.call(this, config);
-
-	var self = this;
-
-	var type = self.getType();
-	var active = self.getActive();
-
-	if (type == null) {
-		EngineUtils.error("control type is null");
-		return;
+		return true;
 	}
+});
+
+// type constants
+Control.TYPE = {
+	UP: "up",
+	DOWN: "down",
+	LEFT: "left",
+	RIGHT: "right",
+	CUSTOM: "custom"
 }

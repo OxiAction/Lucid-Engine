@@ -1,122 +1,145 @@
-const TYPE_LAYER_MENU = "typeLayerMenu"; // menus
-const TYPE_LAYER_UI = "typeLayerUI"; // ui interfaces
-const TYPE_LAYER_GRAPHICAL = "typeLayerGraphical"; // precise graphics rendering
-const TYPE_LAYER_COLLISION = "typeLayerCollision"; // invisible collision layer
-const TYPE_LAYER_OBJECTS = "typeLayerObjects"; // objects (e.g. invisible triggers)
+/**
+* Engine2D default Layer.
+*/
+var Layer = BaseComponent.extend({
+	// config variables and their default values
+	effects: null, // effects
+	display: false, // initial hide / show
+	persistent: false, // determines if this layer will be auto deleted by the Engine2D
+	layerContainer: "layer-container", // target HTML container ID for layers
+	data: null, // holds data for tiles
 
-function Layer(config) {
-	EngineUtils.log("Layer");
-
-	var configDefault = {
-		"id": null, // id
-		"type": null, // TYPE_LAYER_xxx
-		"active": true, // if active => render
-		"effects": null, // effects
-		"display": false, // initial hide / show
-		"persistent": false, // determines if this layer will be auto deleted by the Engine2D
-		"layerContainer": "layer-container" // target HTML container ID for layers
-	};
-
-	var config = $.extend({}, configDefault, config);
-
-	Component.call(this, config);
-
-	var self = this;
-	
-	var id = self.getID();
-	var type = self.getType();
-	var active = self.getActive();
-	var effects = config["effects"];
-	var display = config["display"];
-	var persistent = config["persistent"];
-
-	// check for type
-	if (type == null) {
-		EngineUtils.error("layer type is null");
-		return;
-	}
-
-	// create canvas
-	var canvas = document.createElement("canvas");
-	canvas.id = id;
-
-	// get container for canvas
-	var layerContainer = document.getElementById(config["layerContainer"]);
-	if (!layerContainer) {
-		EngineUtils.error("layer layerContainer is null")
-		return;
-	}
-	layerContainer.append(canvas);
+	// local variables
+	canvas: null, // canvas for rendering
+	layerContainer: null, // container which will contain the canvas
 
 	/**
-	* TODO: description
-	*
-	* value: 			boolean
-	*/
-	this.setDisplay = function(value) {
+	  * Automatically called when instantiated.
+	  *
+	  * @param      {Object}   config  The configuration.
+	  * @return     {boolean}  Returns true on success.
+	  */
+	init: function(config) {
+		this.componentName = "Layer";
+		
+		this._super(config);
+
+		if (this.type == null) {
+			EngineUtils.error("layer type is null");
+			return;
+		}
+
+		// create canvas
+		this.canvas = document.createElement("canvas");
+		this.canvas.id = this.id;
+
+		// get container for canvas
+		this.layerContainer = document.getElementById(this.layerContainer);
+		if (!this.layerContainer) {
+			EngineUtils.error("layer layerContainer is null")
+			return;
+		}
+		this.layerContainer.append(this.canvas);
+
+		this.setDisplay(this.display);
+
+		return true;
+	},
+
+	/**
+	 * Sets the display state.
+	 *
+	 * @param      {boolean}  value   The value.
+	 */
+	setDisplay: function(value) {
 		if (value) {
-			display = true;
-			canvas.style.display = "block";
+			this.display = true;
+			this.canvas.style.display = "block";
 		} else {
 			display = false;
-			canvas.style.display = "none";
+			this.canvas.style.display = "none";
 		}
-	}
+	},
 
 	/**
-	* TODO: description
-	*/
-	this.getDisplay = function() {
-		return display;
-	}
+	 * Gets the display state.
+	 *
+	 * @return     {boolean}  The display state.
+	 */
+	getDisplay: function() {
+		return this.display;
+	},
 
 	/**
-	* TODO: description
-	*/
-	this.getCanvas = function() {
-		return canvas;
-	}
+	 * Gets the canvas.
+	 *
+	 * @return     {Canvas}  The canvas.
+	 */
+	getCanvas: function() {
+		return this.canvas;
+	},
 
 	/**
-	* TODO: description
-	*/
-	this.getPersistent = function() {
-		return persistent;
-	}
+	 * Gets the persistent state.
+	 *
+	 * @return     {boolean}  The persistent state.
+	 */
+	getPersistent: function() {
+		return this.persistent;
+	},
 
 	/**
-	* TODO: description
-	*
-	* updateConfig: 		object
-	*/
-	this.update = function(updateConfig) {
-		
-	}
+	 * TODO: description
+	 *
+	 * @param      {object}  config  The configuration.
+	 * @return     {Array}   Collected collision data.
+	 */
+	update: function(config) {
+		var collisionData = null; // will be returned - this is used e.g. for collision blocks
 
-	/**
-	* TODO: description
-	*/
-	this.getCollisionData = function() {
-		if (type != TYPE_LAYER_COLLISION) {
-			EngineUtils.error("cant get collision data from a layer with type: " + type);
-			return false;
+		var viewportWidth = config.viewportWidth;
+		var viewportHeight = config.viewportHeight;
+		var halfViewportWidth = config.halfViewportWidth;
+		var halfViewportHeight = config.halfViewportHeight;
+
+		// calculations (only if layer is active)
+		if (this.active) {
+			// for collision layers we need to collect stuff from the viewport
+			if (this.type == Layer.TYPE.COLLISION) {
+				collisionData = [];
+
+
+			}
+
+			// drawings (only if layer is being displayed)
+			if (this.display) {
+
+			}
 		}
 
-		//...
-	}
+		return collisionData;
+	},
 
 	/**
-	* TODO: description
-	*/
-	this.destroy = function() {
-		EngineUtils.log("destroying layer with id: " + id);
+	 * Destroys the Layer and all its corresponding objects.
+	 *
+	 * @return     {boolean}  Returns true on success.
+	 */
+	destroy: function() {
+		EngineUtils.log("destroying layer with id: " + this.id);
 
-		layerContainer.removeChild(canvas);
-		canvas = null;
+		this.layerContainer.removeChild(this.canvas);
+		this.canvas = null;
+
+		return true;
 	}
+});
 
-	// default display state
-	this.setDisplay(display);
-
-	// this.update();
-}
+// type constants
+Layer.TYPE = {
+	MENU: "menu", // menus
+	UI: "ui", // ui
+	GRAPHICAL: "graphical", // precise graphics rendering
+	COLLISION: "collision", // invisible collision layer
+	OBJECTS: "objects" // objects (e.g. invisible triggers)
+};
