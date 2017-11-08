@@ -35,7 +35,12 @@ function Editor() {
     var namespace = ".Editor";
 
     // engine2d
-    var engine2d;  
+    var engine2d;
+
+    // forms
+    $("#select-map").selectmenu({
+        width: "auto"
+    });
 
     // custom update function
     this.update = function() {

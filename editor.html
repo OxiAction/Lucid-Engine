@@ -54,10 +54,18 @@
 		<div id="layer-container">
 			<!-- Engine2D canvas layers will be set on runtime -->
 		</div>
-		<canvas id="layer-fallback" >Your Browser is not supported by the game.</canvas>
 	</div>
 	<div id="sidebar">
-
+		<form action="#">
+			<fieldset>
+				<label for="select-map">Select a map:</label>
+				<select name="select-map" id="select-map">
+					<option value="" selected="selected">...</option>
+					<option value="Map1">Map 1</option>
+					<option value="Map2">Map 2</option>
+				</select>
+			</fieldset>
+		</form>
 	</div>
 </body>
 </html>
