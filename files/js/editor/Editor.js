@@ -18,31 +18,24 @@ $(document).ready(function() {
         return;
     }
     
-    var game = new Game();
+    var editor = new Editor();
 });
 
-
 /**
- * This is the Game class. It uses custom plugins and the Engine2D API to build
- * the game.
+ * This is the Editor class. It uses custom plugins and the Engine2D API to
+ * build the editor.
  *
- * @class      Game (name)
+ * @class      Editor (name)
  */
-function Game() {
+function Editor() {
     // say hello
-    EngineUtils.log("Game");
+    EngineUtils.log("Editor");
 
     // required for event listener removing
-    var namespace = ".Game";
+    var namespace = ".Editor";
 
     // engine2d
-    var engine2d;
-    
-    // create player object
-    var player1 = new Player({
-        id: 1,
-       name: "John Doe"
-    });
+    var engine2d;  
 
     // custom update function
     this.update = function() {
@@ -56,39 +49,8 @@ function Game() {
     engine2d = new Engine2D({
         "layerContainer": "layer-container",
         "customUpdateFunction": this.update,
-        "editMode": false
+        "editMode": true
     });
-
-    // custom layer for menu - persistent
-    var layerMenu = engine2d.createAddLayer({
-        "id": "layer-menu",
-        "persistent": true,
-        "type": Layer.TYPE.MENU
-    });
-
-    // custom layer for ui - persitent
-    var layerUI = engine2d.createAddLayer({
-        "id": "layer-ui",
-        "persistent": true,
-        "type": Layer.TYPE.UI
-    });
-
-    // engine2d.removeLayer("layer-ui");
-    
-    // create player object
-    var player1 = new Player({
-        "id": 1,
-        "name": "John Doe"
-    });
-    
-    // add player
-    engine2d.addPlayer(player1);
-
-    // enable player interaction abillities
-    player1.setActive(true);
-    
-    // show menu
-    engine2d.setLayerDisplay("layer-menu", true);
 
     // start engine2d
     engine2d.start();

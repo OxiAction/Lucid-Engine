@@ -1,19 +1,21 @@
-// global utils
-var EngineUtils;
-
-$(document).ready(function() {
-	EngineUtils = new EngineUtils();
-});
-
+/**
+ * Engine2D game engine.
+ *
+ * @class      Engine2D (name)
+ * @param      {Object}   config  The configuration.
+ * @return     {boolean}  Returns true on success.
+ */
 function Engine2D(config) {
 
 	var configDefault = {
-		"mapsPath": "files/maps/",
-		"mapsExtension": ".js",
-		"layerContainer": "layer-container", // target HTML container ID for layers
-		"renderCollisionLayer": false,
-		"renderingInterval": 30,
-		"customUpdateFunction": null // use custom update function istead the default one
+		mapsPath: "files/maps/",
+		mapsExtension: ".map",
+		tilesetsPath: "files/tilesets/",
+		tilesetsExtension: ".ts",
+		layerContainer: "layer-container", // target HTML container ID for layers
+		renderCollisionLayer: false,
+		renderingInterval: 30,
+		customUpdateFunction: null // use custom update function istead the default one
 	};
 
 	var config = $.extend({}, configDefault, config);
@@ -22,13 +24,15 @@ function Engine2D(config) {
 
 	var namespace = ".Engine2D";
 
-	var mapsPath = config["mapsPath"];
-	var mapsExtension = config["mapsExtension"];
-	var layerContainer = config["layerContainer"];
-	var renderCollisionLayer = config["renderCollisionLayer"];
-	var renderingInterval = config["renderingInterval"];
-	var customUpdateFunction = config["customUpdateFunction"];
+	// config variables
+	var mapsPath = config.mapsPath;
+	var mapsExtension = config.mapsExtension;
+	var layerContainer = config.layerContainer;
+	var renderCollisionLayer = config.renderCollisionLayer;
+	var renderingInterval = config.renderingInterval;
+	var customUpdateFunction = config.customUpdateFunction;
 
+	// local variables
 	var updateInterval = null; // interval id
 	var collisionLayers = []; // collision layers
 	var collidingLayers = []; // layers which acquire collision data
@@ -40,8 +44,7 @@ function Engine2D(config) {
 	var loadedMapFiles = []; // already loaded files of maps
 	var buildMaps = {}; // already build maps - key is mapName and value Map object TODO switch to array!
 	var currentBuildMapFileName = null; // the currently build map file name
-
-	// ------------------------------
+	var loadedTilesetsData = {}; // contains the data of loaded tilesets
 
 	/**
 	* Starts the Engine2D.
@@ -174,47 +177,41 @@ function Engine2D(config) {
 	/**
 	 * Loads a map file in the DOM.
 	 *
-	 * @param      {string}  mapFileName  The map file name.
+	 * @param      {string}  fileName  The map file name.
 	 */
-	this.loadMapFile = function(mapFileName) {
-		// full path to file
-		var mapFullPath = mapsPath + mapFileName + mapsExtension;
+	this.loadMapFile = function(fileName) {
+		var filePath = mapsPath + fileName + mapsExtension;
 
-		// check if already loaded
-		if (loadedMapFiles.contains(mapFileName)) {
-			EngineUtils.log("map already loaded: " + mapFullPath);
-			$(document).trigger(Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS, [mapFileName]);
-		}
-
-		EngineUtils.log("attempting to load map: " + mapFullPath);
-
-		$.loadScript(mapFullPath, function() {
-	        EngineUtils.log("loaded map: " + mapFullPath);
-	        loadedMapFiles.push(mapFileName);
-	        $(document).trigger(Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS, [mapFileName]);
-	    }, function() {
-	    	EngineUtils.error("couldnt load map: " + mapFullPath);
-	    	$(document).trigger(Engine2D.EVENT.LOADED_MAP_FILE_ERROR, mapFileName);
+		var loaderItem = new EngineLoaderItem({
+	        id: fileName,
+	        dataType: "script",
+	        filePath: filePath,
+	        eventSuccessName: Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS,
+	        eventErrorName: Engine2D.EVENT.LOADED_MAP_FILE_ERROR
 	    });
+
+	    EngineLoader.add(loaderItem);
 	}
 
 	/**
 	 * Build an already loaded map.
 	 *
-	 * @param      {string}  mapFileName  The map file name.
+	 * @param      {string}  fileName  The map file name.
 	 * @return     {Map}     The map.
 	 */
-	this.buildMap = function(mapFileName) {
-		if (!loadedMapFiles.contains(mapFileName)) {
-			EngineUtils.error("cannot enter map - not loaded yet: " + mapFileName);
+	this.buildMap = function(fileName) {
+		var loaderItem = EngineLoader.get(fileName);
+
+		if (!loaderItem) {
+			EngineUtils.error("cannot enter map - not loaded yet: " + fileName);
 			return null;
 		}
 
-		EngineUtils.log("building map: " + mapFileName);
-		var mapData = window[mapFileName];
+		EngineUtils.log("building map: " + fileName);
+		var mapData = window[fileName];
 		var mapConfig = mapData["config"];
 		if (mapConfig === undefined) {
-			EngineUtils.error("map data doesnt have a config: " + mapFileName);
+			EngineUtils.error("map data doesnt have a config: " + fileName);
 			return null;
 		}
 
@@ -225,28 +222,47 @@ function Engine2D(config) {
 		var map = new Map(mapConfig);
 
 		// ...and add it to our build "list"
-		buildMaps[mapFileName] = map;
+		buildMaps[fileName] = map;
 
-		currentBuildMapFileName = mapFileName;
+		currentBuildMapFileName = fileName;
 
 		return map;
 	}
 
 	/**
+	 * Loads a tileset file.
+	 *
+	 * @param      {string}  fileName  The tileset file name.
+	 */
+	this.loadTilesetFile = function(fileName) {
+		var filePath = tilesetsPath + fileName + tilesetsExtension;
+
+		var loaderItem = new EngineLoaderItem({
+	        id: fileName,
+	        dataType: "xml",
+	        filePath: filePath,
+	        eventSuccessName: Engine2D.EVENT.LOADED_TILESET_FILE_SUCCESS,
+	        eventErrorName: Engine2D.EVENT.LOADED_TILESET_FILE_ERROR
+	    });
+
+	    EngineLoader.add(loaderItem);
+	}
+
+	/**
 	 * Destroy an already build map.
 	 *
-	 * @param      {string}   mapFileName  The map file name.
+	 * @param      {string}   fileName  The map file name.
 	 * @return     {boolean}  Returns true on success.
 	 */
-	this.destoryMap = function(mapFileName) {
-		if (!(mapFileName in buildMaps)) {
-			EngineUtils.error("cannot destroy map - not build yet: " + mapFileName);
+	this.destoryMap = function(fileName) {
+		if (!(fileName in buildMaps)) {
+			EngineUtils.error("cannot destroy map - not build yet: " + fileName);
 			return false;
 		}
 
-		var map = buildMaps[mapFileName];
+		var map = buildMaps[fileName];
 		map.destroy();
-		buildMaps[mapFileName] = null;
+		buildMaps[fileName] = null;
 		map = null;
 
 		currentBuildMapFileName = null;
@@ -295,12 +311,6 @@ function Engine2D(config) {
 		// add to general layers array
 		layers.push(layer);
 	}
-
-	/**
-	* TODO: description
-	*
-	* layerID: 			id
-	*/
 
 	/**
 	 * Removes a layer.
@@ -380,6 +390,7 @@ function Engine2D(config) {
 	 * Adds a player.
 	 *
 	 * @param      {Player}  player  The player.
+	 * @deprecated Switched to general Entity system
 	 */
 	this.addPlayer = function(player) {
 		players[player.getID()] = player;
@@ -390,6 +401,7 @@ function Engine2D(config) {
 	 * Removes a player.
 	 *
 	 * @param      {string}  playerID  The player id.
+	 * @deprecated Switched to general Entity system
 	 */
 	this.removePlayer = function(playerID) {
 
@@ -410,6 +422,8 @@ function Engine2D(config) {
 
 		return true;
 	}
+
+	return true;
 }
 
 // type constants
@@ -424,5 +438,7 @@ Engine2D.EVENT = {
 	PAUSE: "pause",
 	PLAY: "play",
 	LOADED_MAP_FILE_SUCCESS: "loadedMapFileSuccess",
-	LOADED_MAP_FILE_ERROR: "loadedMapFileError"
+	LOADED_MAP_FILE_ERROR: "loadedMapFileError",
+	LOADED_TILESET_FILE_SUCCESS: "loadedTilesetFileSuccess",
+	LOADED_TILESET_FILE_ERROR: "loadedTilesetFileError"
 }

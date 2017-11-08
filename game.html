@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="utf-8" />
+	<meta name="robots" content="index,follow,noodp" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1" />
+	<meta property="og:title" content="Engine2D Game" />
+	<meta name="description" content="Engine2D Game Beschreibung TODO" />
+	<meta property="og:description" content="Engine2D Game Beschreibung TODO" />
+	<!-- <meta property="og:image" content="images/logo.png" /> -->
+	<meta name="robots" content="index,follow" />
+
+	<title>Engine2D Game</title>
+
+<!-- CSS >>> -->
+
+	<!-- Engine2D -->
+	<link rel="stylesheet" type="text/css" href="files/css/engine2d.css" media="all" />
+	
+	<!-- Game -->
+	<link rel="stylesheet" type="text/css" href="files/css/game.css" media="all" />
+
+<!-- <<< CSS -->
+
+<!-- JAVASCRIPT >>> -->
+
+	<!-- Vendor -->
+	<script src="files/js/vendor/jquery-3.2.1.min.js" type="text/javascript"></script>
+
+	<!-- Engine2D -->
+	<script src="files/js/engine2d/EngineUtils.js" type="text/javascript"></script>
+	<script src="files/js/engine2d/EngineLoader.js" type="text/javascript"></script>
+	<script src="files/js/engine2d/Engine2D.js" type="text/javascript"></script>
+	<script src="files/js/engine2d/components/base/BaseComponent.js" type="text/javascript"></script>
+	<script src="files/js/engine2d/components/Entity.js" type="text/javascript"></script>
+	<script src="files/js/engine2d/components/Layer.js" type="text/javascript"></script>
+	<script src="files/js/engine2d/components/Control.js" type="text/javascript"></script>
+	<script src="files/js/engine2d/components/Map.js" type="text/javascript"></script>
+
+	<!-- Game -->
+	<script src="files/js/game/Game.js" type="text/javascript"></script>
+	<script src="files/js/game/components/LayerMenu.js" type="text/javascript"></script>
+	<script src="files/js/game/components/LayerUI.js" type="text/javascript"></script>
+	<script src="files/js/game/components/Player.js" type="text/javascript"></script>
+
+<!-- <<< JAVASCRIPT -->
+</head>
+
+<body>
+	<div id="content">
+		<div id="layer-container">
+			<!-- Engine2D canvas layers will be set on runtime -->
+		</div>
+		<canvas id="layer-fallback" >Your Browser is not supported by the game.</canvas>
+	</div>
+</body>
+</html>

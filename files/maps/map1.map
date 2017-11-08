@@ -1,7 +1,8 @@
 /*JSON[*/
 // object name has to be the same as the filename!
-var levelMap1 = {
+var map1 = {
 	"config": {
+		"id": "map1",
 		"name": "Map 1",
 		"width": 3000,
 		"height": 500,

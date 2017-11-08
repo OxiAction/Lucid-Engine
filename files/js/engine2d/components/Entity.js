@@ -14,12 +14,13 @@ var Entity = BaseComponent.extend({
     	y: 0
     },
     health: {
-    	init: 100, // initial health
+    	current: 100, // current health
     	min: 0, // minimum health (if reached entity is dead)
     	max: 100 // maximum health
     },
 	name: "Unknown", // name
 	speed: 1, // speed
+	vulnerable: 1,
 	weight: 80, // weight in kilograms
 
 	// local variables
@@ -59,3 +60,15 @@ var Entity = BaseComponent.extend({
 		this._super(value);
 	}
 });
+
+// forms setup for the editor
+Entity.FORMS = {
+	position: {
+		x: "int",
+		y: "int"
+	},
+	name: "string",
+	speed: "number",
+	vulnerable: "boolean",
+	weight: "number"
+}
