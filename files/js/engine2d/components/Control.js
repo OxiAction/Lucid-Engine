@@ -35,4 +35,4 @@ Control.TYPE = {
 	LEFT: "left",
 	RIGHT: "right",
 	CUSTOM: "custom"
-}
+};

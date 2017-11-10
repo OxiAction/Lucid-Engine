@@ -1,11 +1,419 @@
+
+/**
+ * Engine2D core.
+ *
+ * @type       {Engine2D}
+ */
+var Engine2D = BaseComponent.extend({
+	// config variables and their default values
+	// file names of files required by Engine2D
+	fileNames: {
+		config: "engine"
+	},
+	// folder structure
+	folderPaths: {
+		maps: "files/maps/",
+		tileSets: "files/tilesets/",
+		config: "files/config/"
+	},
+	// extensions
+	extensions: {
+		maps: ".map",
+		tileSets: ".ts",
+		config: ".cfg"
+	},
+	containerID: "engine2d-container", // wrapper / container ID
+	canvasID: "engine2d-canvas", // cavas ID
+
+	// local variables
+	animationFrameID: null,
+	prevElapsed: 0,
+	container: null, // the wrapper / container
+	canvas: null, // EVERYTHING will be rendered into this canvas yo
+	canvasContext: null,
+	camera: null,
+	map: null,
+	currentBuildMapFileName: null, // the currently build map file name
+
+	collisionLayers: [], // collision layers
+	collidingLayers: [], // layers which acquire collision data
+	normalLayers: [], // normal layers 
+	layers: [], // collection of all layers
+
+/**
+ * Core
+ */
+
+	/**
+	  * Automatically called when instantiated.
+	  *
+	  * @param      {Object}   config  The configuration.
+	  * @return     {boolean}  Returns true on success.
+	  */
+	init: function(config) {
+		this.componentName = "Engine2D";
+		
+		this._super(config);
+
+		// get wrapper / container from HTML
+		this.container = document.getElementById(this.containerID);
+		if (!this.container) {
+			return;
+		}
+
+		// get canvas from HTML
+		this.canvas = document.getElementById(this.canvasID);
+		if (!this.canvas) {
+			return;
+		}
+
+		// assign context
+		this.canvasContext = this.canvas.getContext("2d");
+
+		/*
+		// setup camera
+		this.camera = new Camera();
+
+		// setup map
+		this.map = new Map({
+			camera: this.camera
+		});
+		quick & dirty asign
+		this.normalLayers = this.map.getLayer();
+		*/
+
+		return true;
+	},
+
+	start: function() {
+		this.animationFrameID = window.requestAnimationFrame(this.tick.bind(this));
+		EngineUtils.log("Engine2D @ start: animationFrameID: " + this.animationFrameID);
+	},
+
+	stop: function() {
+		EngineUtils.log("Engine2D @ stop: animationFrameID: " + this.animationFrameID);
+		if (this.animationFrameID != null) {
+			window.cancelAnimationFrame(this.animationFrameID);
+			this.animationFrameID = null;
+		}
+	},
+
+	// note: "this" scope is now "window"!
+	// FIXED: with bind(this)
+	tick: function(elapsed) {
+		var elapsedSeconds = elapsed / 1000.0; // convert in seconds
+		var delta = (elapsed - engine.prevElapsed) / 1000.0; // delta in seconds
+    	delta = Math.min(delta, 0.06); // maximum delta of 60 ms
+		// EngineUtils.log("Engine2D @ tick: elapsedTimeSeconds: " + elapsedSeconds + " prevElapsed: " + this.prevElapsed + " delta: " + delta);
+		
+		this.prevElapsed = elapsed;
+
+		this.draw();
+
+		// check if we should keep on shaking!
+		// TLD: https://www.youtube.com/watch?v=mhzc5ZeAXYY
+		// \o/
+		if (this.animationFrameID) {
+			// recursive call
+			window.requestAnimationFrame(this.tick.bind(this));
+		}
+	},
+
+	draw: function() {
+		if (!this.canvasContext) {
+			return;
+		}
+
+		this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+		var i;
+		var layer;
+
+		// config for them lay0rs!
+		var config = {
+			collisionData: []
+		}
+
+		// skip through collisionLayer
+		// update them and collect collisionData
+		var collisionData = [];
+		for (i = 0; i < this.collisionLayers.length; ++i) {
+			layer = this.collisionLayers[i];
+			layer.draw(config);
+
+			var currCollisionData = layer.getCollisionData();
+
+			if (currCollisionData) {
+				collisionData.push(currCollisionData);
+			}
+		}
+
+		if (this.camera) {
+			this.camera.draw(config);
+		}
+
+		// TODO: eeerm some kind of z-sorting is required here I guess :D
+
+		// set collisionData for the next layers
+		config.collisionData = collisionData;
+
+		for (i = 0; i < this.collidingLayers.length; ++i) {
+			layer = this.collidingLayers[i];
+
+			// draw layer & engine canvas
+			layer.draw(config);
+			this.canvasContext.drawImage(layer.getCanvas(), 0, 0);
+		}
+
+		for (i = 0; i < this.normalLayers.length; ++i) {
+			layer = this.normalLayers[i];
+
+			// draw layer & engine canvas
+			layer.draw(config);
+			this.canvasContext.drawImage(layer.getCanvas(), 0, 0);
+		}
+	},
+
+	resize: function(config) {
+		// update engine canvas
+		this.canvas.width = config.wWidth;
+		this.canvas.height = config.wHeight;
+
+		// update layers
+		var i;
+		var layer;
+
+		for (i = 0; i < this.collisionLayers.length; ++i) {
+			layer = this.collisionLayers[i];
+			layer.resize(config);
+		}
+
+		for (i = 0; i < this.collidingLayers.length; ++i) {
+			layer = this.collidingLayers[i];
+			layer.resize(config);
+		}
+
+		for (i = 0; i < this.normalLayers.length; ++i) {
+			layer = this.normalLayers[i];
+			layer.resize(config);
+		}
+
+		// update map
+		if (this.map) {
+			this.map.resize(config);
+		}
+	},
+
+	/**
+	 * Destroy & remove all events, intervals, timeouts
+	 *
+	 * @return     {boolean}  Returns true on success.
+	 */
+	destroy: function() {
+		this.stop();
+
+		if (this.currentBuildMapFileName) {
+			this.destroyMap(this.currentBuildMapFileName);
+			this.currentBuildMapFileName = null;
+		}
+
+		return true;
+	},
+
+/**
+ * Map
+ */
+
+	/**
+	 * Loads a map file into the DOM.
+	 *
+	 * @param      {string}  fileName  The map file name.
+	 */
+	loadMapFile: function(fileName) {
+		var filePath = this.folderPaths.maps + fileName + this.extensions.maps;
+
+		var loaderItem = new EngineLoaderItem({
+	        id: fileName,
+	        dataType: "script",
+	        filePath: filePath,
+	        eventSuccessName: Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS,
+	        eventErrorName: Engine2D.EVENT.LOADED_MAP_FILE_ERROR
+	    });
+
+	    EngineLoader.add(loaderItem);
+	},
+
+	/**
+	 * Build a Map by fileName.
+	 *
+	 * @param      {string}  fileName  The Map file name.
+	 * @return     {Map}     The build Map.
+	 */
+	buildMap: function(fileName) {
+		var loaderItem = EngineLoader.get(fileName);
+
+		if (!loaderItem) {
+			EngineUtils.error("Engine2D @ buildMap: cannot build Map - not loaded yet: " + fileName);
+			return null;
+		}
+
+		EngineUtils.log("Engine2D @ buildMap: building Map: " + fileName);
+
+		var mapData = window[fileName];
+		var mapConfig = mapData["config"];
+		if (mapConfig === undefined) {
+			EngineUtils.error("Engine2D @ buildMap: Map data doesnt have a config: " + fileName);
+			return null;
+		}
+
+		// reference to engine2d
+		mapConfig.engine2d = this;
+
+		// create actual map object...
+		this.map = new Map(mapConfig);
+
+		// ...and add it to our build "list"
+		this.buildMaps[fileName] = this.map;
+
+		this.currentBuildMapFileName = fileName;
+
+		return this.map;
+	},
+
+	/**
+	 * Destroy an already build Map.
+	 *
+	 * @param      {string}   fileName  The map file name.
+	 * @return     {boolean}  Returns true on success.
+	 */
+	destoryMap: function(fileName) {
+		if (!(fileName in this.buildMaps)) {
+			EngineUtils.error("Engine2D @ destroyMap: cannot destroy map - not build yet: " + fileName);
+			return false;
+		}
+
+		var map = this.buildMaps[fileName];
+		map.destroy();
+		this.buildMaps[fileName] = null;
+		map = null;
+
+		this.currentBuildMapFileName = null;
+
+		return true;
+	},
+
+/**
+ * Layer
+ */
+ 	/**
+	 * Creates and adds a Layer.
+	 *
+	 * @param      {Object}  layerConfig  The Layer configuration.
+	 * @return     {Layer}   Returns the created Layer.
+	 */
+	createAddLayer: function(layerConfig) {
+		if (!layerConfig) {
+			layerConfig = {};
+		}
+
+		// if (layerConfig.layerContainer === undefined) {
+		// 	layerConfig.layerContainer = layerContainer;
+		// }
+
+		var layer = new Layer(layerConfig);
+		
+		this.addLayer(layer);
+
+		return layer;
+	},
+
+	/**
+	 * Adds a Layer.
+	 *
+	 * @param      {Layer}  layer   The Layer.
+	 */
+	addLayer: function(layer) {
+		var type = layer.getType();
+		if (type == Layer.TYPE.COLLISION) {
+			this.collisionLayers.push(layer);
+		} else if (type == Layer.TYPE.GRAPHICAL || type == Layer.TYPE.OBJECTS) {
+			this.collidingLayers.push(layer);
+		} else {
+			this.normalLayers.push(layer);
+		}
+		
+		// add to general layers array
+		this.layers.push(layer);
+	},
+
+	/**
+	 * Removes a Layer.
+	 *
+	 * @param      {string}   layerID  The Layer id.
+	 * @return     {boolean}  Returns true if Layer was removed successfully.
+	 */
+	removeLayer: function(layerID) {
+		var i;
+		var layer;
+		var id;
+
+		for (i = 0; i < this.layers.length; ++i) {
+			layer = this.layers[i];
+			id = layer.getID();
+			if (id == layerID) {
+				break;
+			}
+		}
+
+		// check if we found the layer with layerID
+		if (id == layerID) {
+			var type = layer.getType();
+			layer.destroy();
+			if (type == Layer.TYPE.COLLISION) {
+				this.collisionLayers.erase(layer);
+			} else if (type == Layer.TYPE.GRAPHICAL || type == Layer.TYPE.OBJECTS) {
+				this.collidingLayers.erase(layer);
+			} else {
+				this.normalLayers.erase(layer);
+			}
+
+			this.layers.erase(layer);
+			layer = null;
+
+			return true;
+		} else {
+			return false;
+		}
+	}
+});
+
+// type constants
+Engine2D.TYPE = {
+	SIDE_SCROLL: "sideScroll", // side scroll game type
+	TOP_DOWN: "topDown" // top down game type
+};
+
+// event constants
+Engine2D.EVENT = {
+	TOGGLE_LAYER: "toggleLayer",
+	PAUSE: "pause",
+	PLAY: "play",
+	LOADED_MAP_FILE_SUCCESS: "loadedMapFileSuccess",
+	LOADED_MAP_FILE_ERROR: "loadedMapFileError",
+	LOADED_TILESET_FILE_SUCCESS: "loadedTilesetFileSuccess",
+	LOADED_TILESET_FILE_ERROR: "loadedTilesetFileError"
+};
+
 /**
  * Engine2D game engine.
  *
  * @class      Engine2D (name)
  * @param      {Object}   config  The configuration.
  * @return     {boolean}  Returns true on success.
+ * 
+ * @deprecated Deprecated since 10.11.2017
  */
-function Engine2D(config) {
+function Engine2D_deprecated(config) {
 
 	var configDefault = {
 		mapsPath: "files/maps/",
@@ -91,10 +499,10 @@ function Engine2D(config) {
 		EngineUtils.log("engine2d update step...");
 
 		var updateConfig = {
-			"viewportWidth": this.getViewportWidth(),
-			"viewportHeight": this.getViewportWidth(),
-			"viewportHalfWidth": this.getViewportWidth() / 2,
-			"viewportHalfHeight": this.getViewportHeight() / 2
+			viewportWidth: this.getViewportWidth(),
+			viewportHeight: this.getViewportWidth(),
+			viewportHalfWidth: this.getViewportWidth() / 2,
+			viewportHalfHeight: this.getViewportHeight() / 2
 		};
 
 		self.updateLayers(updateConfig);
@@ -424,21 +832,4 @@ function Engine2D(config) {
 	}
 
 	return true;
-}
-
-// type constants
-Engine2D.TYPE = {
-	SIDE_SCROLL: "sideScroll", // side scroll game type
-	TOP_DOWN: "topDown" // top down game type
-};
-
-// event constants
-Engine2D.EVENT = {
-	TOGGLE_LAYER: "toggleLayer",
-	PAUSE: "pause",
-	PLAY: "play",
-	LOADED_MAP_FILE_SUCCESS: "loadedMapFileSuccess",
-	LOADED_MAP_FILE_ERROR: "loadedMapFileError",
-	LOADED_TILESET_FILE_SUCCESS: "loadedTilesetFileSuccess",
-	LOADED_TILESET_FILE_ERROR: "loadedTilesetFileError"
 }

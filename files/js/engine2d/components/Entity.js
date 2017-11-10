@@ -71,4 +71,4 @@ Entity.FORMS = {
 	speed: "number",
 	vulnerable: "boolean",
 	weight: "number"
-}
+};

@@ -1,65 +1,107 @@
 /*JSON[*/
 // object name has to be the same as the filename!
 var map1 = {
-	"config": {
-		"id": "map1",
-		"name": "Map 1",
-		"width": 3000,
-		"height": 500,
-		"tilesize": 20,
-		"type": Engine2D.TYPE.SIDE_SCROLL,
-		"velocity": 1,
-		"tileset": 1,
-		"layers": [
+	config: {
+		id: "map1",
+		name: "Map 1",
+		cols: 16,
+		rows: 16,
+		tileSize: 64,
+		type: Engine2D.TYPE.SIDE_SCROLL,
+		velocity: 1,
+		tileset: 1,
+		layers: [
 			/*
 			{
-				"config": {
-					"id": "layer-background",
-					"width": 200,
-					"height": 200,
-					"type": TYPE_LAYER_GRAPHICAL,
-					"effects": ["repeat", "parallax"], // TODO -> constants for this
-					"data": [
+				config: {
+					id: "layer-background",
+					width: 200,
+					height: 200,
+					type: TYPE_LAYER_GRAPHICAL,
+					effects: ["repeat", "parallax"], // TODO -> constants for this
+					data: [
 					//...
 					]
 				}
 			},
 			*/
 			{
-				"config": {
-					"id": "layer-foreground",
-					"width": 3000,
-					"height": 500,
-					"type": Layer.TYPE.GRAPHICAL,
-					"effects": [],
-					"data": [
-						// [tiletype, posX, posY]
-						[0, 0, 70], [0, 20, 70], [0, 40, 70]
+				config: {
+					id: "layer-background",
+					cols: 16,
+					rows: 16,
+					type: Layer.TYPE.GRAPHICAL,
+					effects: [],
+					data: [
+						3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+						3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
+						3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
+						3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
+						3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
+						3, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 3,
+						3, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 3,
+						3, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 3,
+						3, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 3,
+						3, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 3,
+						3, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 3,
+						3, 3, 3, 1, 1, 2, 3, 3, 3, 3, 3, 3
 					]
 				}
 			},
 			{
-				"config": {
-					"id": "layer-objects",
-					"width": 3000,
-					"height": 500,
-					"type": Layer.TYPE.OBJECTS,
-					"effects": [],
-					"data": [
-						// spawn point - type 0
-						[0, 10, 50]
+				config: {
+					id: "layer-objects",
+					// TODO: I dont want to use cols / rows logic for objects...
+					type: Layer.TYPE.OBJECTS,
+					effects: [],
+					data: [
+						// ...still need to think about this structure though!
 					]
 				}
 			},
 			{
-				"config": {
-					"id": "layer-collision",
-					"width": 3000,
-					"height": 500,
-					"type": Layer.TYPE.COLLISION,
-					"effects": [],
-					"data": [
-						[0, 0, 20], [0, 20, 20], [0, 40, 20]
+				config: {
+					id: "layer-foreground",
+					cols: 16,
+					rows: 16,
+					type: Layer.TYPE.GRAPHICAL,
+					effects: [],
+					data: [
+						4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4,
+						4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+						4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+						4, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 4,
+						4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+						4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+						4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+						4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+						4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+						4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+						4, 4, 4, 0, 5, 4, 4, 4, 4, 4, 4, 4,
+						4, 4, 4, 0, 0, 3, 3, 3, 3, 3, 3, 3
+					]
+				}
+			},
+			{
+				config: {
+					id: "layer-collision",
+					cols: 16,
+					rows: 16,
+					type: Layer.TYPE.COLLISION,
+					effects: [],
+					data: [
+						1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+						1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+						1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+						1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+						1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+						1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+						1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+						1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+						1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+						1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+						1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+						1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1
 					]
 				}
 			}

@@ -3,15 +3,22 @@
 */
 var Layer = BaseComponent.extend({
 	// config variables and their default values
+	id: null,
+	map: null,
+	image: null,
+	type: null,
+	data: null,
 	effects: null, // effects
-	display: false, // initial hide / show
+	render: true, // determines if the content is rendered
 	persistent: false, // determines if this layer will be auto deleted by the Engine2D
-	layerContainer: "layer-container", // target HTML container ID for layers
-	data: null, // holds data for tiles
 
 	// local variables
-	canvas: null, // canvas for rendering
-	layerContainer: null, // container which will contain the canvas
+	canvas: null,
+	canvasContext: null,
+
+/**
+ * Core
+ */
 
 	/**
 	  * Automatically called when instantiated.
@@ -24,50 +31,148 @@ var Layer = BaseComponent.extend({
 		
 		this._super(config);
 
-		if (this.type == null) {
-			EngineUtils.error("layer type is null");
+		if (this.map == null 	||
+			this.image == null 	||
+			this.type == null	||
+			this.data == null) {
+			EngineUtils.error("Layer @ init: map, image, type or data is null");
 			return;
 		}
 
-		// create canvas
 		this.canvas = document.createElement("canvas");
-		this.canvas.id = this.id;
-
-		// get container for canvas
-		this.layerContainer = document.getElementById(this.layerContainer);
-		if (!this.layerContainer) {
-			EngineUtils.error("layer layerContainer is null")
-			return;
-		}
-		this.layerContainer.append(this.canvas);
-
-		this.setDisplay(this.display);
+		this.canvasContext = this.canvas.getContext("2d");
 
 		return true;
 	},
 
+
 	/**
-	 * Sets the display state.
+	 * Draws a Canvas. TODO: More documentation.
 	 *
-	 * @param      {boolean}  value   The value.
+	 * @param      {Object}  config  The configuration
+	 * @return     {Canvas}  Returns the drawn Canvas.
 	 */
-	setDisplay: function(value) {
-		if (value) {
-			this.display = true;
-			this.canvas.style.display = "block";
-		} else {
-			display = false;
-			this.canvas.style.display = "none";
+	draw: function(config) {
+		// if there is NO map reference, its probably a custom Layer
+		// and in this case, the draw function should be overriden
+		// with custom draw logic
+		var map = this.map; // variable caching -> performance inc.
+		if (!map) {
+			EngineUtils.log("Layer @ draw: map is not defined");
+			return null;
 		}
+
+		var camera = this.map.getCamera(); // variable caching -> performance inc.
+		if (!camera) {
+			EngineUtils.log("Layer @ draw: camera is not defined");
+			return null;
+		}
+
+		if (!this.data) {
+			EngineUtils.log("Layer @ draw: data is not defined");
+			return null;
+		}
+
+		if (!this.image) {
+			EngineUtils.log("Layer @ draw: image is not defined");
+			return null;
+		}
+
+		var cameraWidth = camera.width;
+		var cameraHeight = camera.height;
+
+		var canvasContext = this.canvasContext;
+
+		// draw stuff
+		canvasContext.width = cameraWidth;
+		canvasContext.height = cameraHeight;
+		canvasContext.clearRect(0, 0, cameraWidth, cameraHeight);
+
+		var cols = map.cols;
+		var rows = map.rows;
+		var tileSize = map.tileSize;
+
+		var startCol = Math.floor(camera.x / tileSize);
+		var endCol = Math.min(cols - 1, (startCol + cameraWidth / tileSize) + 1);
+
+		var startRow = Math.floor(camera.y / tileSize);
+		var endRow = Math.min(rows - 1, (startRow + cameraHeight / tileSize) + 1);
+
+		var offsetX = -camera.x + startCol * tileSize;
+		var offsetY = -camera.y + startRow * tileSize;
+
+		for (var col = startCol; col <= endCol; ++col) {
+			for (var row = startRow; row <= endRow; ++row) {
+
+				
+				var x = Math.round((col - startCol) * tileSize + offsetX);// 100;
+				var y = Math.round((row - startRow) * tileSize + offsetY);
+
+				if (x >= -camera.x && y >= -camera.y) {
+					var tileIndex = row * cols + col;
+					var tileType = this.getTile(tileIndex);
+
+					if (tileType !== 0) { // 0 => empty tile
+						canvasContext.drawImage(
+							this.image, // image
+							(tileType - 1) * tileSize, // source x
+							0, // source y
+							tileSize, // source width
+							tileSize, // source height
+							x,  // target x
+							y, // target y
+							tileSize, // target width
+							tileSize // target height
+						);
+					}
+				}
+			}
+		}
+
+		return this.canvas;
+	},
+
+	resize: function(config) {
+		this.canvas.width = config.wWidth;
+		this.canvas.height = config.wHeight;
 	},
 
 	/**
-	 * Gets the display state.
+	 * Destroys the Layer and all its corresponding objects.
 	 *
-	 * @return     {boolean}  The display state.
+	 * @return     {boolean}  Returns true on success.
 	 */
-	getDisplay: function() {
-		return this.display;
+	destroy: function() {
+		EngineUtils.log("Layer @ destory: destroying Layer with id: " + this.id);
+
+		this.map = null;
+		this.canvas = null;
+		this.canvasContext = null;
+
+		return true;
+	},
+
+/**
+ * Getter & Setter
+ */
+
+	/**
+	 * Sets the render state. If set to false, content of this Layer wont be
+	 * rendered.
+	 *
+	 * @param      {boolean}  value   The value.
+	 */
+	setRender: function(value) {
+		this.render = value;
+	},
+
+	/**
+	 * Gets the render state.
+	 *
+	 * @return     {boolean}  The render state.
+	 */
+	getRender: function() {
+		return this.render;
 	},
 
 	/**
@@ -80,6 +185,15 @@ var Layer = BaseComponent.extend({
 	},
 
 	/**
+	 * Gets the canvas context 2d.
+	 *
+	 * @return     {Canvas}  The canvas context 2d.
+	 */
+	getCanvasContext: function() {
+		return this.canvasContext;
+	},
+
+	/**
 	 * Gets the persistent state.
 	 *
 	 * @return     {boolean}  The persistent state.
@@ -88,50 +202,20 @@ var Layer = BaseComponent.extend({
 		return this.persistent;
 	},
 
-	/**
-	 * TODO: description
-	 *
-	 * @param      {object}  config  The configuration.
-	 * @return     {Array}   Collected collision data.
-	 */
-	update: function(config) {
-		var collisionData = null; // will be returned - this is used e.g. for collision blocks
-
-		var viewportWidth = config.viewportWidth;
-		var viewportHeight = config.viewportHeight;
-		var halfViewportWidth = config.halfViewportWidth;
-		var halfViewportHeight = config.halfViewportHeight;
-
-		// calculations (only if layer is active)
-		if (this.active) {
-			// for collision layers we need to collect stuff from the viewport
-			if (this.type == Layer.TYPE.COLLISION) {
-				collisionData = [];
-
-
-			}
-
-			// drawings (only if layer is being displayed)
-			if (this.display) {
-
-			}
+	getTile: function (index) {
+		if (index < this.data.length) {
+			return this.data[index];
+		} else {
+			return 0;
 		}
-
-		return collisionData;
 	},
 
-	/**
-	 * Destroys the Layer and all its corresponding objects.
-	 *
-	 * @return     {boolean}  Returns true on success.
-	 */
-	destroy: function() {
-		EngineUtils.log("destroying layer with id: " + this.id);
+	getCollisionData: function() {
+		return null;
+	},
 
-		this.layerContainer.removeChild(this.canvas);
-		this.canvas = null;
-
-		return true;
+	getCanvas: function() {
+		return this.canvas;
 	}
 });
 
@@ -142,4 +226,10 @@ Layer.TYPE = {
 	GRAPHICAL: "graphical", // precise graphics rendering
 	COLLISION: "collision", // invisible collision layer
 	OBJECTS: "objects" // objects (e.g. invisible triggers)
+};
+
+// forms setup for the editor
+Layer.FORMS = {
+	id: "string",
+	type: "string"
 };

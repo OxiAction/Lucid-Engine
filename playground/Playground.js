@@ -439,10 +439,18 @@ var Camera = Class.extend({
 	// usually this should be done using a Control component and accessing the Camera.x / Camera.y
 	pressedKeys: {},
 
+	keyDownHandler: null,
+	keyUpHandler: null,
+
 	init: function(config) {
 		console.log("Camera init");
-		window.addEventListener("keydown", this.onKeyDown.bind(this));
-    	window.addEventListener("keyup", this.onKeyUp.bind(this));
+
+		this.keyDownHandler = this.onKeyDown.bind(this);
+		window.addEventListener("keydown", this.keyDownHandler);
+    	this.keyUpHandler = this.onKeyUp.bind(this);
+    	window.addEventListener("keyup", this.keyUpHandler);
+
+    	// window.removeEventListener("keydown", this.keyDownHandler);
 	},
 
 	// TODO: remove this

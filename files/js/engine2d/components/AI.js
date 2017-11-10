@@ -79,4 +79,4 @@ AI.BEHAVIOR = {
 	 * }
 	 */
 	HOLD: "holdPosition"
-}
+};

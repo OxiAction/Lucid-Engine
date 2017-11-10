@@ -37,12 +37,6 @@ function Game() {
 
     // engine2d
     var engine2d;
-    
-    // create player object
-    var player1 = new Player({
-        id: 1,
-       name: "John Doe"
-    });
 
     // custom update function
     this.update = function() {
@@ -53,32 +47,27 @@ function Game() {
     }
 
     // init engine
-    engine2d = new Engine2D({
-        "layerContainer": "layer-container",
-        "customUpdateFunction": this.update,
-        "editMode": false
-    });
+    engine2d = new Engine2D();
 
     // custom layer for menu - persistent
     var layerMenu = engine2d.createAddLayer({
-        "id": "layer-menu",
-        "persistent": true,
-        "type": Layer.TYPE.MENU
+        id: "layer-menu",
+        persistent: true,
+        type: Layer.TYPE.MENU
     });
 
     // custom layer for ui - persitent
     var layerUI = engine2d.createAddLayer({
-        "id": "layer-ui",
-        "persistent": true,
-        "type": Layer.TYPE.UI
+        id: "layer-ui",
+        persistent: true,
+        type: Layer.TYPE.UI
     });
 
-    // engine2d.removeLayer("layer-ui");
-    
+    /*
     // create player object
     var player1 = new Player({
-        "id": 1,
-        "name": "John Doe"
+        id: 1,
+        name: "John Doe"
     });
     
     // add player
@@ -111,5 +100,5 @@ function Game() {
             $(document).off(Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS + namespace);
         }, 3000);
     });
-    
+    */
 }

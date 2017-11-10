@@ -21,7 +21,7 @@ function EngineLoader() {
      */
     this.add = function(item) {
         if (!item.isValid()) {
-            EngineUtils.error("can not add invalid item to EngineLoader - id: " + item.getID());
+            EngineUtils.error("EngineUtils @ add: can not add invalid item to EngineLoader - id: " + item.getID());
             return false;
         }
 
@@ -29,7 +29,7 @@ function EngineLoader() {
         // loaded. in some cases you may want to load the same file again
 
         if (!loadingQueue.contains(item)) {
-            EngineUtils.log("item added to EngineLoader - id: " + item.getID());
+            EngineUtils.log("EngineUtils @ add: item added to EngineLoader - id: " + item.getID());
             loadingQueue.push(item);
         }
 
@@ -45,7 +45,7 @@ function EngineLoader() {
      */
     this.loadNext = function() {
         if (loadingQueue.length < 1) {
-            EngineUtils.log("EngineLoader has finished loading. Queue is empty");
+            EngineUtils.log("EngineUtils @ loadNext: finished loading. Queue is empty");
             loading = false;
             $(document).trigger(EngineLoader.EVENT.READY);
             return;
@@ -57,10 +57,10 @@ function EngineLoader() {
         var item = loadingQueue.pop();
         var id = item.getID();
 
-        EngineUtils.log("EngineLoader attempting to load item - id: " + id + " filePath: " + item.getFilePath());
+        EngineUtils.log("EngineUtils @ loadNext: attempting to load item - id: " + id + " filePath: " + item.getFilePath());
 
         $.loadFile(item.getFilePath(), item.getDataType(), function(data) {
-            EngineUtils.log("EngineLoader success loading item - id: " + id);
+            EngineUtils.log("EngineUtils @ loadNext: success loading item - id: " + id);
 
             item.setData(data);
             item.setLoaded(true);
@@ -70,7 +70,7 @@ function EngineLoader() {
             $(document).trigger(item.getEventSuccessName(), [item]);
             self.loadNext();
         }, function() {
-            EngineUtils.log("EngineLoader error loading item - id: " + id);
+            EngineUtils.log("EngineUtils @ loadNext: error loading item - id: " + id);
             $(document).trigger(item.getEventErrorName(), [item]);
             self.loadNext();
         });

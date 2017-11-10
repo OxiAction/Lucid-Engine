@@ -22,10 +22,10 @@ var Map = BaseComponent.extend({
 		this._super(config);
 
 		if (!this.layers || this.layers.length < 1) {
-			EngineUtils.error("map name: " + this.name + " - layers are not defined!");
+			EngineUtils.error("Map @ init: " + this.name + " - layers are not defined!");
 			return false;
 		} else if (!this.engine2d) {
-			EngineUtils.error("map name: " + this.name + " - engine2d reference not defined!");
+			EngineUtils.error("Map @ init: " + this.name + " - Engine2D reference not defined!");
 			return false;
 		}
 
@@ -33,7 +33,7 @@ var Map = BaseComponent.extend({
 			if (this.layers[i].config !== undefined && this.layers[i].config.id !== undefined) {
 				this.engine2d.createAddLayer(this.layers[i].config);
 			} else {
-				EngineUtils.error("map name: " + this.name + " - tried to createAdd layer to engine2d but layer config or layer id is undefined!");
+				EngineUtils.error("Map name: " + this.name + " - tried to createAdd layer in Engine2D but Layer config or Layer id is undefined!");
 			}
 		}
 
@@ -50,7 +50,7 @@ var Map = BaseComponent.extend({
 			if (this.layers[i].config !== undefined && this.layers[i].config.id !== undefined) {
 				this.engine2d.removeLayer(this.layers[i].config.id);
 			} else {
-				EngineUtils.error("map name: " + this.name + " - tried to remove layer from engine2d but layer config or layer id is undefined!");
+				EngineUtils.error("Map name: " + this.name + " - tried to remove Layer from Engine2D but Layer config or Layer id is undefined!");
 			}
 		}
 
@@ -59,6 +59,6 @@ var Map = BaseComponent.extend({
 });
 
 // forms setup for the editor
-Entity.FORMS = {
+Map.FORMS = {
 	name: "string"
-}
+};
