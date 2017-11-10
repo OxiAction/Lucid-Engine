@@ -87,6 +87,6 @@ You may encounter some warnings in the console when loading files, but those are
 
 ### Dependencies (third party libraries)
 
-* John Resigs [[Class / Inheritance]](https://johnresig.com/blog/simple-javascript-inheritance/) code - which is really awesome!
+* John Resigs [[Class / Inheritance]](https://johnresig.com/blog/simple-javascript-inheritance/) code - which is really awesome! - required by **Engine2D** and **Editor**
 * [[jQuery]](https://jquery.com/) version 3.2.1+ - required by **Engine2D** and **Editor**
 * [[jQueryUI]](https://jqueryui.com/) version 1.12.1+ - required by **Editor**
