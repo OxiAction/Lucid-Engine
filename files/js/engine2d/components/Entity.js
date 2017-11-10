@@ -43,7 +43,7 @@ var Entity = BaseComponent.extend({
 	/**
 	 * Adds a control.
 	 *
-	 * @param      {Control}  control  The control
+	 * @param      {Control}  control  The control.
 	 */
 	addControl: function(control) {
 		this.controls[control.getType()] = control;
