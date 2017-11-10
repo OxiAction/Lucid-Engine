@@ -57,3 +57,8 @@ var Map = BaseComponent.extend({
 		return true;
 	}
 });
+
+// forms setup for the editor
+Entity.FORMS = {
+	name: "string"
+}

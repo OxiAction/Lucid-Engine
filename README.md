@@ -31,11 +31,12 @@ The following covers the structured project tasks. Every task is followed by the
 
 * we should switch to SVG for smooth graphics when dynamically scaling - e.g. using [[this]](https://opengameart.org/content/free-platformer-game-tileset) as a base tileset
 
-## Coding Conventions for this Project
+## Code Details
 This project is being developed with Sublime Text 3, a powerful editor.
 
-If you want to work on the code of the project, you should:
+Tips (in case you want to work on the project):
 
+* for notifications / messaging we use the [[Publish–subscribe pattern]](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern)
 * use the official [[JSDoc]](http://usejsdoc.org/) documentation guidelines
 * install [[DoxyDoxygen]](https://github.com/20Tauri/DoxyDoxygen), which makes documentation in Sublime Text 3 easy and continuous
 * use the following Sublime Text 3 snippet, to create your own Engine2D plugins:
@@ -86,5 +87,6 @@ You may encounter some warnings in the console when loading files, but those are
 
 ### Dependencies (third party libraries)
 
+* John Resigs [[Class / Inheritance]](https://johnresig.com/blog/simple-javascript-inheritance/) code - which is really awesome!
 * [[jQuery]](https://jquery.com/) version 3.2.1+ - required by **Engine2D** and **Editor**
 * [[jQueryUI]](https://jqueryui.com/) version 1.12.1+ - required by **Editor**

@@ -64,7 +64,7 @@ var Engine = Class.extend({
 		console.log("Engine init");
 
 		// get canvas from HTML
-		this.canvas = document.getElementById("engine");
+		this.canvas = document.getElementById("engine2d-canvas");
 		if (!this.canvas) {
 			return;
 		}

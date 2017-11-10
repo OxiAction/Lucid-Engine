@@ -13,7 +13,7 @@ var BaseComponent = Class.extend({
 	// local variables
 	// component name
 	componentName: "UndefinedComponentName",
-	// namespace - e.g. required for proper event adding/removing
+	// namespace - e.g. required event publishing
 	componentNamespace: ".UndefinedComponentName",
 
 	/**
