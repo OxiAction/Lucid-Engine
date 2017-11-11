@@ -1,14 +1,4 @@
-// global utils - mandatory
-var EngineUtils;
-
-// global loader - mandatory
-var EngineLoader;
-
 $(document).ready(function() {
-    // mandatory Engine2D stuff
-    EngineUtils = new EngineUtils();
-    EngineLoader = new EngineLoader();
-
     // setup
     EngineUtils.setDebug(1);
 
@@ -61,6 +51,20 @@ function Game() {
         id: "layer-ui",
         persistent: true,
         type: Layer.TYPE.UI
+    });
+
+    var loaderItem = new EngineLoaderItem({
+        id: "tiles",
+        dataType: EngineLoader.TYPE.IMAGE,
+        filePath: "playground/tiles.png",
+        eventSuccessName: Map.EVENT.LOADED_TILESET_FILE_SUCCESS,
+        eventErrorName: Map.EVENT.LOADED_TILESET_FILE_ERROR
+    });
+
+    EngineLoader.add(loaderItem);
+
+    $(document).on(Map.EVENT.LOADED_TILESET_FILE_SUCCESS + namespace, function(event, loaderItem) {
+        console.log(loaderItem.getData());
     });
 
     /*

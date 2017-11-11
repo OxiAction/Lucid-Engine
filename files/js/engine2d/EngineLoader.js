@@ -1,194 +1,215 @@
 /**
  * EngineLoader is a loader with a queue and event system (which notifies the
- * observers on success / error).
+ * subscribers on success / error).
  *
  * @class      EngineLoader (name)
- * @return     {boolean}  Returns true on success.
+ * @return     {Object}  Reutns public methods.
  */
-function EngineLoader() {
-    var self = this;
-
+var EngineLoader = function() {
+    // private variables
+    var instance = null;
     var loaded = {};
     var loadingQueue = [];
     var loading = false;
 
-    /**
-     * Add a new EngineLoaderItem to the loading queue. This also starts loading
-     * the queue.
-     *
-     * @param      {EngineLoaderItem}  item    The EngineLoaderItem.
-     * @return     {boolean}           Returns true on success.
-     */
-    this.add = function(item) {
-        if (!item.isValid()) {
-            EngineUtils.error("EngineUtils @ add: can not add invalid item to EngineLoader - id: " + item.getID());
-            return false;
+/**
+ * Public methods
+ */
+
+    return {
+        /**
+         * Add a new EngineLoaderItem to the loading queue. This also starts
+         * loading the queue.
+         *
+         * @param      {EngineLoaderItem}  item    The EngineLoaderItem.
+         * @return     {boolean}           Returns true on success.
+         */
+        add: function(item) {
+            if (!item.isValid()) {
+                EngineUtils.error("EngineUtils @ add: can not add invalid item to EngineLoader - id: " + item.id);
+                return false;
+            }
+
+            // TODO: not sure if it makes sense to check if the item IS already
+            // loaded. in some cases you may want to load the same file again.
+            // For now we just check if its already in the loading queue:
+            if (!loadingQueue.contains(item)) {
+                EngineUtils.log("EngineUtils @ add: item added to EngineLoader - id: " + item.id);
+                loadingQueue.push(item);
+            }
+
+            if (!loading) {
+                this.loadNext();
+            }
+
+            return true;
+        },
+
+        /**
+         * Load next EngineLoaderItem in queue.
+         */
+        loadNext: function() {
+            // check if queue is empty
+            if (loadingQueue.length < 1) {
+                EngineUtils.log("EngineUtils @ loadNext: finished loading. Queue is empty");
+                loading = false;
+                // publish
+                $(document).trigger(EngineLoader.EVENT.READY);
+
+                // leave this place
+                return;
+            }
+
+            // set state
+            loading = true;
+
+            // publish
+            $(document).trigger(EngineLoader.EVENT.LOADING, [loadingQueue]);
+
+            // get item
+            var item = loadingQueue.pop();
+
+            EngineUtils.log("EngineUtils @ loadNext: attempting to load item - id: " + item.id + " filePath: " + item.filePath);
+
+            // the success function
+            function success(data) {
+                EngineUtils.log("EngineUtils @ loadNext: success loading item - id: " + item.id);
+
+                item.setData(data);
+                item.setLoaded(true);
+
+                loaded[item.id] = item;
+
+                $(document).trigger(item.eventSuccessName, [item]);
+                this.loadNext();
+            }
+
+            // the error function
+            function error(data) {
+                EngineUtils.log("EngineUtils @ loadNext: error loading item - id: " + item.id);
+                $(document).trigger(item.eventErrorName, [item]);
+                this.loadNext();
+            }
+
+            // different treatment for different dataTypes
+            if (item.dataType == EngineLoader.TYPE.IMAGE) {
+                var image = new Image();
+                image.onload = success.bind(this);
+                image.onerror = error.bind(this);
+                image.src = item.filePath;
+            } else {
+                $.loadFile(item.filePath, item.dataType, success.bind(this), error.bind(this));
+            }
+        },
+
+        /**
+         * Get already loaded EngineLoaderItem by id.
+         *
+         * @param      {string}                 id      The identifier.
+         * @return     {EngineLoaderItem|null}  Returns EngineLoaderItem if
+         *                                      found - otherwise null.
+         */
+        get: function(id) {
+            if (id in loaded) {
+                return loaded[id];
+            }
+
+            return null;
+        },
+
+        /**
+         * Determines if loading.
+         *
+         * @return     {boolean}  True if loading, False otherwise.
+         */
+        isLoading: function() {
+            return loading;
         }
+    };
+}();
 
-        // TODO: not sure if it makes sense to check if the item IS already
-        // loaded. in some cases you may want to load the same file again
+// event constants
+EngineLoader.EVENT = {
+    LOADING: "loading",
+    READY: "ready"
+};
 
-        if (!loadingQueue.contains(item)) {
-            EngineUtils.log("EngineUtils @ add: item added to EngineLoader - id: " + item.getID());
-            loadingQueue.push(item);
-        }
-
-        if (!loading) {
-            self.loadNext();
-        }
-
-        return true;
-    }
-
-    /**
-     * Load next EngineLoaderItem in queue.
-     */
-    this.loadNext = function() {
-        if (loadingQueue.length < 1) {
-            EngineUtils.log("EngineUtils @ loadNext: finished loading. Queue is empty");
-            loading = false;
-            $(document).trigger(EngineLoader.EVENT.READY);
-            return;
-        }
-
-        loading = true;
-        $(document).trigger(EngineLoader.EVENT.LOADING, [loadingQueue]);
-
-        var item = loadingQueue.pop();
-        var id = item.getID();
-
-        EngineUtils.log("EngineUtils @ loadNext: attempting to load item - id: " + id + " filePath: " + item.getFilePath());
-
-        $.loadFile(item.getFilePath(), item.getDataType(), function(data) {
-            EngineUtils.log("EngineUtils @ loadNext: success loading item - id: " + id);
-
-            item.setData(data);
-            item.setLoaded(true);
-
-            loaded[id] = item;
-
-            $(document).trigger(item.getEventSuccessName(), [item]);
-            self.loadNext();
-        }, function() {
-            EngineUtils.log("EngineUtils @ loadNext: error loading item - id: " + id);
-            $(document).trigger(item.getEventErrorName(), [item]);
-            self.loadNext();
-        });
-    }
-
-    /**
-     * Get already loaded EngineLoaderItem by id.
-     *
-     * @param      {string}                 id      The identifier.
-     * @return     {EngineLoaderItem|null}  Returns EngineLoaderItem if found -
-     *                                      otherwise null.
-     */
-    this.get = function(id) {
-        if (id in loaded) {
-            return loaded[id];
-        }
-
-        return null;
-    }
-
-    // event constants
-    this.EVENT = {
-        LOADING: "loading",
-        READY: "ready"
-    }
-
-    return true;
-}
+// type constants
+EngineLoader.TYPE = {
+    XML: "xml",
+    SCRIPT: "script",
+    IMAGE: "image",
+    DEFAULT: "application/x-www-form-urlencoded; charset=UTF-8"
+};
 
 /**
  * Item for the EngineLoader. Use EngineLoader.add(item).
  *
- * @class      EngineLoaderItem (name)
- * @param      {Object}   config  The configuration.
- * @return     {boolean}  Returns true on success.
+ * @type       {EngineLoader}
  */
-function EngineLoaderItem(config) {
-    var configDefault = {
-        id: null, // id - required
-        filePath: null, // filePath - required
-        dataType: "application/x-www-form-urlencoded; charset=UTF-8", // data type - e.g. "script", "xml" - see
-                                                                      // http://api.jquery.com/jquery.ajax/
-        eventSuccessName: null, // event name which will be triggered on success - required
-        eventErrorName: null, // event name which will be triggered on error - required
-        extraData: null // custom extra data which you can pass through
-    };
+var EngineLoaderItem = BaseComponent.extend({
+    // config variables and their default values
+    id: null, // id - required
+    filePath: null, // filePath - required
+    dataType: EngineLoader.TYPE.DEFAULT, // data type - use EngineLoader.TYPE.XXX
+    eventSuccessName: null, // event name which will be triggered on success - required
+    eventErrorName: null, // event name which will be triggered on error - required
+    extraData: null, // custom extra data which you can pass through
 
-    var config = $.extend({}, configDefault, config);
+    // local variables
+    loaded: false,
+    data: null,
 
-    var self = this;
+    /**
+      * Automatically called when instantiated.
+      *
+      * @param      {Object}   config  The configuration.
+      * @return     {boolean}  Returns true on success.
+      */
+    init: function(config) {
+        this.componentName = "EngineLoaderItem";
+        
+        this._super(config);
 
-    var id = config.id;
-    var filePath = config.filePath;
-    var dataType = config.dataType;
-    var success = config.success;
-    var error = config.error;
-    var eventSuccessName = config.eventSuccessName;
-    var eventErrorName = config.eventErrorName;
-    var extraData = config.extraData;
+        return true;
+    },
 
-    var loaded = false;
-    var data = null;
+    setLoaded: function(value) {
+        this.loaded = value;
+    },
 
-    this.getID = function() {
-        return id;
-    }
-
-    this.setID = function(value) {
-        id = value;
-    }
-
-    this.getFilePath = function() {
-        return filePath;
-    }
-
-    this.getDataType = function() {
-        return dataType;
-    }
-
-    this.getEventSuccessName = function() {
-        return eventSuccessName;
-    }
-
-    this.getEventErrorName = function() {
-        return eventErrorName;
-    }
-
-    this.getExtraData = function() {
-        return extraData;
-    }
-
-    this.setExtraData = function(value) {
-        extraData = value;
-    }
-
-    this.getLoaded = function() {
-        return loaded;
-    }
-
-    this.setLoaded = function(value) {
-        loaded = value;
-    }
-
-    this.getData = function() {
-        return data;
-    }
-
-    this.setData = function(value) {
-        if (dataType == "xml") {
+    /**
+     * Sets the data.
+     *
+     * @param      {Object}  value   The value which then will proceeded -
+     *                               depending on dataType.
+     */
+    setData: function(value) {
+        if (this.dataType == EngineLoader.TYPE.XML) {
             value = $(value);
+        } else if (this.dataType == EngineLoader.TYPE.IMAGE) {
+            value = value.target;
         }
 
-        data = value;
-    }
+        this.data = value;
+    },
 
-    this.isValid = function() {
-        return id != null && filePath != null && eventSuccessName != null && eventErrorName != null;
-    }
 
-    return true;
-}
+    /**
+     * Gets the data.
+     *
+     * @return     {Object}  The data.
+     */
+    getData: function() {
+        return this.data;
+    },
+
+    /**
+     * Determines if valid.
+     *
+     * @return     {boolean}  True if valid, False otherwise.
+     */
+    isValid: function() {
+        return this.id != null && this.filePath != null && this.eventSuccessName != null && this.eventErrorName != null;
+    }
+});

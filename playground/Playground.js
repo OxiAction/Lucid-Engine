@@ -24,7 +24,7 @@ window.onload = function() {
 	image = new Image();
 	image.onload = function () {
 		console.log("Image loaded " + image.src);
-
+		
 	    // engine
 		engine = new Engine();
 

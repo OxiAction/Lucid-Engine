@@ -62,3 +62,9 @@ var Map = BaseComponent.extend({
 Map.FORMS = {
 	name: "string"
 };
+
+// event constants
+Map.EVENT = {
+	LOADED_TILESET_FILE_SUCCESS: "loadedTilesetFileSuccess",
+	LOADED_TILESET_FILE_ERROR: "loadedTilesetFileError"
+};

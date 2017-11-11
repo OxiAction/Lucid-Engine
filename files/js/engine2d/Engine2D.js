@@ -1,4 +1,3 @@
-
 /**
  * Engine2D core.
  *
@@ -234,7 +233,7 @@ var Engine2D = BaseComponent.extend({
 
 		var loaderItem = new EngineLoaderItem({
 	        id: fileName,
-	        dataType: "script",
+	        dataType: EngineLoader.TYPE.SCRIPT,
 	        filePath: filePath,
 	        eventSuccessName: Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS,
 	        eventErrorName: Engine2D.EVENT.LOADED_MAP_FILE_ERROR
