@@ -194,7 +194,6 @@ var EngineLoaderItem = BaseComponent.extend({
         this.data = value;
     },
 
-
     /**
      * Gets the data.
      *

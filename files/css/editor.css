@@ -1,21 +1,46 @@
 /* Editor specific CSS */
 
-#content {
-	margin-right: 300px;
-}
-
 fieldset {
     border: 0;
 }
 
+#topbar {
+	background-color: #535353;
+	padding: 0 5px;
+	width: 100%;
+	height: 25px;
+	line-height: 25px;
+	border-bottom: 1px solid #282828;
+}
+
+#content {
+	float: left;
+	width: calc(100vw - 300px);
+	height: calc(100vh - 50px); /* substract topbar+bottombar height */
+	overflow: hidden; /* disable scrolling! */
+	border: 1px solid #4a4a4a;
+}
+
 #sidebar {
-	background-color: #999;
-	width: 300px;
-	height: 100%;
-	position: absolute;
-	right: 0;
-	top: 0;
+	background-color: #535353;
 	padding: 10px;
+	width: 300px;
+	float: right;
+	height: calc(100vh - 50px); /* substract topbar+bottombar height */
+	overflow: auto; /* enable scrolling! */
+	border: 1px solid #6a6a6a;
+}
+
+#bottombar {
+	background-color: #393939;
+	padding: 0 5px;
+	width: 100%;
+	height: 25px;
+	line-height: 25px;
+	text-align: right;
+	position: absolute;
+	bottom: 0;
+	border-top: 1px solid #282828;
 }
 
 /* forms */
