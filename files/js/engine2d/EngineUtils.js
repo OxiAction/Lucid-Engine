@@ -65,6 +65,44 @@ var EngineUtils = function() {
         return false;
     }
 
+    // extending jQuery
+
+    /**
+     * Loads a file.
+     *
+     * @param      {string}            url       The url.
+     * @param      {string}            dataType  The data type. E.g. "script",
+     *                                           "xml",
+     *                                           "application/x-www-form-urlencoded; charset=UTF-8"
+     * @param      {loadFileCallback}  success   The success callback function.
+     * @param      {loadFileCallback}  error     The error callback function.
+     */
+    $.loadFile = function (url, dataType, success, error) {
+        jQuery.ajax({
+            url: url,
+            dataType: dataType,
+            success: success,
+            error: error,
+            async: true
+        });
+    }
+
+    /**
+     * GET parameter value.
+     *
+     * @param      {string}  parameter  The parameter.
+     * @return     {string}  Value of the parameter
+     */
+    $.urlParam = function(parameter) {
+        var results = new RegExp('[\?&]' + parameter + '=([^&#]*)').exec(window.location.href);
+        if (results == null){
+           return null;
+        }
+        else{
+           return decodeURI(results[1]) || 0;
+        }
+    }
+
 /**
  * Public methods
  */

@@ -1,14 +1,4 @@
-// global utils - mandatory
-var EngineUtils;
-
-// global loader - mandatory
-var EngineLoader;
-
 $(document).ready(function() {
-    // mandatory Engine2D stuff
-    EngineUtils = new EngineUtils();
-    EngineLoader = new EngineLoader();
-
     // setup
     EngineUtils.setDebug(1);
 
@@ -42,41 +32,6 @@ function Editor() {
         width: "auto"
     });
 
-    // custom update function
-    this.update = function() {
-        // call original
-        engine2d.update();
-
-        // custom code goes here...
-    }
-
     // init engine
-    engine2d = new Engine2D({
-        "layerContainer": "layer-container",
-        "customUpdateFunction": this.update,
-        "editMode": true
-    });
-
-    // start engine2d
-    engine2d.start();
-
-    var mapName = "map1";
-    
-    // load the file into DOM
-    engine2d.loadMapFile(mapName);
-
-    // event is triggered if map 
-    $(document).on(Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS + namespace, function(event, loaderItem) {
-        var mapFileName = loaderItem.getID();
-        var map = engine2d.buildMap(mapFileName);
-
-        // cleanup testing
-        setTimeout(function() {
-            engine2d.stop();
-            engine2d.destoryMap(mapFileName);
-            map = null;
-            $(document).off(Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS + namespace);
-        }, 3000);
-    });
-    
+    engine2d = new Engine2D();
 }
