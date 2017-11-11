@@ -42,6 +42,12 @@ var EngineUtils = function() {
         return (this * 180) / Math.PI;
     };
 
+    Array.prototype.sortByKey = function(key) {
+        return this.sort(function(a, b) {
+            return parseFloat(a[key]) - parseFloat(b[key]);
+        });
+    };
+
     Array.prototype.erase = function(item) {
         for(var i = this.length; --i;) {
             if(this[i] === item) {

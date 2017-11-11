@@ -3,6 +3,7 @@
 */
 var Layer = BaseComponent.extend({
 	// config variables and their default values
+	z: 0, // z-index!
 	id: null,
 	map: null,
 	image: null,
@@ -30,12 +31,18 @@ var Layer = BaseComponent.extend({
 		this.componentName = "Layer";
 		
 		this._super(config);
-
+		/*
 		if (this.map == null 	||
 			this.image == null 	||
 			this.type == null	||
 			this.data == null) {
 			EngineUtils.error("Layer @ init: map, image, type or data is null");
+			return;
+		}
+		*/
+
+		if (this.id == null, this.type == null) {
+			EngineUtils.error("Layer @ init: id or type is null - please asign an id and Layer.TYPE.XXX!");
 			return;
 		}
 
@@ -156,66 +163,12 @@ var Layer = BaseComponent.extend({
  * Getter & Setter
  */
 
-	/**
-	 * Sets the render state. If set to false, content of this Layer wont be
-	 * rendered.
-	 *
-	 * @param      {boolean}  value   The value.
-	 */
-	setRender: function(value) {
-		this.render = value;
-	},
-
-	/**
-	 * Gets the render state.
-	 *
-	 * @return     {boolean}  The render state.
-	 */
-	getRender: function() {
-		return this.render;
-	},
-
-	/**
-	 * Gets the canvas.
-	 *
-	 * @return     {Canvas}  The canvas.
-	 */
-	getCanvas: function() {
-		return this.canvas;
-	},
-
-	/**
-	 * Gets the canvas context 2d.
-	 *
-	 * @return     {Canvas}  The canvas context 2d.
-	 */
-	getCanvasContext: function() {
-		return this.canvasContext;
-	},
-
-	/**
-	 * Gets the persistent state.
-	 *
-	 * @return     {boolean}  The persistent state.
-	 */
-	getPersistent: function() {
-		return this.persistent;
-	},
-
 	getTile: function (index) {
 		if (index < this.data.length) {
 			return this.data[index];
 		} else {
 			return 0;
 		}
-	},
-
-	getCollisionData: function() {
-		return null;
-	},
-
-	getCanvas: function() {
-		return this.canvas;
 	}
 });
 

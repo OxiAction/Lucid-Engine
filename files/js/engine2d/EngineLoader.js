@@ -26,7 +26,7 @@ var EngineLoader = function() {
          */
         add: function(item) {
             if (!item.isValid()) {
-                EngineUtils.error("EngineUtils @ add: can not add invalid item to EngineLoader - id: " + item.id);
+                EngineUtils.error("EngineLoader @ add: can not add invalid item to EngineLoader - id: " + item.id);
                 return false;
             }
 
@@ -34,7 +34,7 @@ var EngineLoader = function() {
             // loaded. in some cases you may want to load the same file again.
             // For now we just check if its already in the loading queue:
             if (!loadingQueue.contains(item)) {
-                EngineUtils.log("EngineUtils @ add: item added to EngineLoader - id: " + item.id);
+                EngineUtils.log("EngineLoader @ add: item added to EngineLoader - id: " + item.id);
                 loadingQueue.push(item);
             }
 
@@ -51,7 +51,7 @@ var EngineLoader = function() {
         loadNext: function() {
             // check if queue is empty
             if (loadingQueue.length < 1) {
-                EngineUtils.log("EngineUtils @ loadNext: finished loading. Queue is empty");
+                EngineUtils.log("EngineLoader @ loadNext: finished loading. Queue is empty");
                 loading = false;
                 // publish
                 $(document).trigger(EngineLoader.EVENT.READY);
@@ -69,11 +69,11 @@ var EngineLoader = function() {
             // get item
             var item = loadingQueue.pop();
 
-            EngineUtils.log("EngineUtils @ loadNext: attempting to load item - id: " + item.id + " filePath: " + item.filePath);
+            EngineUtils.log("EngineLoader @ loadNext: attempting to load item - id: " + item.id + " filePath: " + item.filePath);
 
             // the success function
             function success(data) {
-                EngineUtils.log("EngineUtils @ loadNext: success loading item - id: " + item.id);
+                EngineUtils.log("EngineLoader @ loadNext: success loading item - id: " + item.id);
 
                 item.setData(data);
                 item.setLoaded(true);
@@ -86,7 +86,7 @@ var EngineLoader = function() {
 
             // the error function
             function error(data) {
-                EngineUtils.log("EngineUtils @ loadNext: error loading item - id: " + item.id);
+                EngineUtils.log("EngineLoader @ loadNext: error loading item - id: " + item.id);
                 $(document).trigger(item.eventErrorName, [item]);
                 this.loadNext();
             }

@@ -6,6 +6,26 @@
  * - https://hacks.mozilla.org/2011/08/animating-with-javascript-from-setinterval-to-requestanimationframe/
  */
 
+ /*
+    var newStyle = "";
+    
+    videoRatio = viewportWidth / viewportHeight;
+    windowRatio = window.innerHeight / window.innerWidth;
+    
+    if (windowRatio < videoRatio) {
+        video.height = window.innerHeight;
+    } else {
+        video.width = window.innerWidth;
+    }
+   
+    if (window.innerHeight < window.innerWidth) {
+        newStyle = " width: auto; height: " + window.innerHeight + "px;";
+    } else {
+        newStyle = " height: auto; width: " + window.innerWidth + "px;";
+    }
+    canvas.setAttribute("style", canvasDefaultStyle + newStyle);
+     */
+
  window.requestAnimationFrame = window.requestAnimationFrame
     || window.mozRequestAnimationFrame
     || window.webkitRequestAnimationFrame
@@ -377,7 +397,7 @@ var Map = Class.extend({
 				data: [
 					3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 					3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-					3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
+					3, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 3,
 					3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
 					3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
 					3, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 3,
@@ -394,7 +414,7 @@ var Map = Class.extend({
 				type: Layer.TYPE.GRAPHICAL,
 				data: [
 					4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4,
-					4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+					4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 4,
 					4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
 					4, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 4,
 					4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,

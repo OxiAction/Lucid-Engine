@@ -31,11 +31,12 @@ The following covers the structured project tasks. Every task is followed by the
 
 * we should switch to SVG for smooth graphics when dynamically scaling - e.g. using [[this]](https://opengameart.org/content/free-platformer-game-tileset) as a base tileset
 
-## Code Details
+## Code Details & Coding Conventions
 This project is being developed with Sublime Text 3, a powerful editor.
 
-Tips (in case you want to work on the project):
+###Tips (in case you want to work on the project)###
 
+* getter and setters are **only** used for complex data types (e.g. Objects like Camera, Map etc.) but **not** for primitive data types (e.g. string, number) **unless** there is some good reason for it (e.g. you need to manipulate something when setting / getting)
 * for notifications / messaging we use the [[Publish–subscribe pattern]](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern)
 * use the official [[JSDoc]](http://usejsdoc.org/) documentation guidelines
 * install [[DoxyDoxygen]](https://github.com/20Tauri/DoxyDoxygen), which makes documentation in Sublime Text 3 easy and continuous

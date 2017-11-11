@@ -39,8 +39,10 @@ function Game() {
     // init engine
     engine2d = new Engine2D();
 
+    
     // custom layer for menu - persistent
     var layerMenu = engine2d.createAddLayer({
+        z: 20,
         id: "layer-menu",
         persistent: true,
         type: Layer.TYPE.MENU
@@ -48,61 +50,35 @@ function Game() {
 
     // custom layer for ui - persitent
     var layerUI = engine2d.createAddLayer({
+        z: 19,
         id: "layer-ui",
         persistent: true,
         type: Layer.TYPE.UI
     });
-
-    var loaderItem = new EngineLoaderItem({
-        id: "tiles",
-        dataType: EngineLoader.TYPE.IMAGE,
-        filePath: "playground/tiles.png",
-        eventSuccessName: Map.EVENT.LOADED_TILESET_FILE_SUCCESS,
-        eventErrorName: Map.EVENT.LOADED_TILESET_FILE_ERROR
-    });
-
-    EngineLoader.add(loaderItem);
-
-    $(document).on(Map.EVENT.LOADED_TILESET_FILE_SUCCESS + namespace, function(event, loaderItem) {
-        console.log(loaderItem.getData());
-    });
-
-    /*
-    // create player object
-    var player1 = new Player({
-        id: 1,
-        name: "John Doe"
-    });
     
-    // add player
-    engine2d.addPlayer(player1);
-
-    // enable player interaction abillities
-    player1.setActive(true);
-    
-    // show menu
-    engine2d.setLayerDisplay("layer-menu", true);
 
     // start engine2d
-    engine2d.start();
+    // engine2d.start();
 
     var mapName = "map1";
     
+    // setup Camera
+    engine2d.setCamera(new Camera());
+
     // load the file into DOM
     engine2d.loadMapFile(mapName);
 
     // event is triggered if map 
     $(document).on(Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS + namespace, function(event, loaderItem) {
         var mapFileName = loaderItem.getID();
-        var map = engine2d.buildMap(mapFileName);
+        var map = engine2d.setMap(mapFileName);
 
         // cleanup testing
         setTimeout(function() {
-            engine2d.stop();
-            engine2d.destoryMap(mapFileName);
+            // engine2d.stop();
+            engine2d.destoryMap();
             map = null;
             $(document).off(Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS + namespace);
         }, 3000);
     });
-    */
 }
