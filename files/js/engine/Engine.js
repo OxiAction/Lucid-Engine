@@ -2,12 +2,16 @@
 // TODO: namespace all the Engine parts
 var Lucid = Lucid || {};
 
+Lucid.data = {
+	maps: {}
+}
+
 /**
  * Engine core.
  *
  * @type       {Engine}
  */
-var Engine = BaseComponent.extend({
+Lucid.Engine = BaseComponent.extend({
 	// config variables and their default values
 	// file names of files required by Engine
 	fileNames: {
@@ -75,11 +79,17 @@ var Engine = BaseComponent.extend({
 		return true;
 	},
 
+	/**
+	 * Start RAF
+	 */
 	start: function() {
 		this.animationFrameID = window.requestAnimationFrame(this.tick.bind(this));
 		EngineUtils.log("Engine @ start: animationFrameID: " + this.animationFrameID);
 	},
 
+	/**
+	 * Stop RAF
+	 */
 	stop: function() {
 		EngineUtils.log("Engine @ stop: animationFrameID: " + this.animationFrameID);
 		if (this.animationFrameID != null) {
@@ -88,8 +98,11 @@ var Engine = BaseComponent.extend({
 		}
 	},
 
-	// note: "this" scope is now "window"!
-	// FIXED: with bind(this)
+	/**
+	 * RAF tick
+	 *
+	 * @param      {number}  elapsed  The elapsed RAF time.
+	 */
 	tick: function(elapsed) {
 		var elapsedSeconds = elapsed / 1000.0; // convert in seconds
 		var delta = (elapsed - this.prevElapsed) / 1000.0; // delta in seconds
@@ -115,6 +128,9 @@ var Engine = BaseComponent.extend({
 		}
 	},
 
+	/**
+	 * Draw stuff on this.canvasContext.
+	 */
 	draw: function() {
 		if (!this.canvasContext) {
 			return;
@@ -170,6 +186,11 @@ var Engine = BaseComponent.extend({
 		}
 	},
 
+	/**
+	 * Main resize event. Iterates through all all relevant Objects and updates them.
+	 *
+	 * @param      {Object}  config  The configuration.
+	 */
 	resize: function(config) {
 		// if nothing is set...
 		if (config === undefined) {
@@ -267,8 +288,8 @@ var Engine = BaseComponent.extend({
 	        id: fileName,
 	        dataType: EngineLoader.TYPE.SCRIPT,
 	        filePath: filePath,
-	        eventSuccessName: Engine.EVENT.LOADED_MAP_FILE_SUCCESS,
-	        eventErrorName: Engine.EVENT.LOADED_MAP_FILE_ERROR
+	        eventSuccessName: Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS,
+	        eventErrorName: Lucid.Engine.EVENT.LOADED_MAP_FILE_ERROR
 	    });
 
 	    EngineLoader.add(loaderItem);
@@ -290,7 +311,7 @@ var Engine = BaseComponent.extend({
 
 		EngineUtils.log("Engine @ setBuildMapByFileName: building Map: " + fileName);
 
-		var mapData = window[fileName];
+		var mapData = window.Lucid.data.maps[fileName];
 		var mapConfig = mapData.config;
 		if (mapConfig === undefined) {
 			EngineUtils.error("Engine @ setBuildMapByFileName: Map data doesnt have a config: " + fileName);
@@ -450,13 +471,13 @@ var Engine = BaseComponent.extend({
 });
 
 // type constants
-Engine.TYPE = {
+Lucid.Engine.TYPE = {
 	SIDE_SCROLL: "sideScroll", // side scroll game type
 	TOP_DOWN: "topDown" // top down game type
 };
 
 // event constants
-Engine.EVENT = {
+Lucid.Engine.EVENT = {
 	TOGGLE_LAYER: "toggleLayer",
 	PAUSE: "pause",
 	PLAY: "play",

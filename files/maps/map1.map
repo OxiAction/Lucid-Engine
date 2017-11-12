@@ -1,9 +1,9 @@
 /*JSON[*/
 // object name has to be the same as the filename!
-var map1 = {
+Lucid.data.maps.map1 = {
 	config: {
 		id: "map1",
-		type: Engine.TYPE.SIDE_SCROLL,
+		type: Lucid.Engine.TYPE.SIDE_SCROLL,
 		name: "Map 1",
 		cols: 12,
 		rows: 12,

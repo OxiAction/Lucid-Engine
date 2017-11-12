@@ -37,7 +37,7 @@ function Game() {
     }
 
     // init engine
-    engine = new Engine();
+    engine = new Lucid.Engine();
 
     /*
     // custom layer for menu - persistent
@@ -56,7 +56,6 @@ function Game() {
         type: Layer.TYPE.UI
     });
     */
-    
 
     // start engine
     engine.start();
@@ -81,7 +80,7 @@ function Game() {
     engine.loadMapFile(mapName);
 
     // event is triggered if Engine has loaded the map file
-    $(document).on(Engine.EVENT.LOADED_MAP_FILE_SUCCESS + namespace, function(event, loaderItem) {
+    $(document).on(Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS + namespace, function(event, loaderItem) {
         var mapFileName = loaderItem.getID();
         var map = engine.buildMapByFileName(mapFileName);
 
@@ -96,7 +95,7 @@ function Game() {
                 // engine.stop();
                 // engine.destoryMap();
                 // map = null;
-                // $(document).off(Engine.EVENT.LOADED_MAP_FILE_SUCCESS + namespace);
+                // $(document).off(Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS + namespace);
             // }, 3000);
         });
 
