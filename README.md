@@ -5,15 +5,20 @@ The following covers the structured project tasks. Every task is followed by the
 
 ### Finished tasks:
 
+#### Milestones 1
+
 * engine base layout. This also includes stuff like the plugin system (inheritance), general structure and many mandatory functions required by the engine - **very hard**
 * loader - **medium**
 * utils - **medium**
 * map (currently done, but there is still some stuff to-do later on) - **easy**
 
+#### Milestones 2
+
+* graphics (layer) implementation - **medium**
+
 ### Open tasks (critical):
 
 * basic editor and its forms (**in progress**) - **hard**
-* graphics (layer) implementation (**in progress** due to editor being in progress) - **medium**
 * final data structures for entities, maps, tilesets (**in progress** due to editor being in progress) - **easy**
 * collision implementation - **medium**
 * ai implementation which also includes some form of Dijkstra algorithm - **medium**
@@ -34,7 +39,7 @@ The following covers the structured project tasks. Every task is followed by the
 ## Code Details & Coding Conventions
 This project is being developed with Sublime Text 3, a powerful editor.
 
-### Tips (in case you want to work on the project) ###
+### Tips (in case you want to work on the project)
 
 * getter and setters are **only** used for complex data types (e.g. Objects like Camera, Map etc.) but **not** for primitive data types (e.g. string, number) **unless** there is some good reason for it (e.g. you need to manipulate something when setting / getting)
 * for notifications / messaging we use the [[Publish–subscribe pattern]](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern)
