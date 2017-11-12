@@ -1,5 +1,5 @@
 /**
-* Engine2D default Layer.
+* Engine default Layer.
 */
 var Layer = BaseComponent.extend({
 	// config variables and their default values
@@ -11,7 +11,7 @@ var Layer = BaseComponent.extend({
 	data: null,
 	effects: null, // effects
 	render: true, // determines if the content is rendered
-	persistent: false, // determines if this layer will be auto deleted by the Engine2D
+	persistent: false, // determines if this layer will be auto deleted by the Engine
 
 	// local variables
 	canvas: null,
@@ -31,15 +31,6 @@ var Layer = BaseComponent.extend({
 		this.componentName = "Layer";
 		
 		this._super(config);
-		/*
-		if (this.map == null 	||
-			this.image == null 	||
-			this.type == null	||
-			this.data == null) {
-			EngineUtils.error("Layer @ init: map, image, type or data is null");
-			return;
-		}
-		*/
 
 		if (this.id == null, this.type == null) {
 			EngineUtils.error("Layer @ init: id or type is null - please asign an id and Layer.TYPE.XXX!");
@@ -89,7 +80,7 @@ var Layer = BaseComponent.extend({
 		var cameraHeight = camera.height;
 
 		var canvasContext = this.canvasContext;
-
+		
 		// draw stuff
 		canvasContext.width = cameraWidth;
 		canvasContext.height = cameraHeight;

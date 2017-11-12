@@ -1,5 +1,5 @@
 /**
-* Engine2D BaseComponent
+* Engine BaseComponent
 */
 var BaseComponent = Class.extend({
 	// config variables and their default values

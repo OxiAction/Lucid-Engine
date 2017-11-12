@@ -4,7 +4,7 @@ $(document).ready(function() {
 
     // check support
     if (!EngineUtils.engineSupported()) {
-        EngineUtils.error("Sorry - your browser does NOT support Engine2D - please update your browser")
+        EngineUtils.error("Sorry - your browser does NOT support Engine - please update your browser")
         return;
     }
     
@@ -12,7 +12,7 @@ $(document).ready(function() {
 });
 
 /**
- * This is the Editor class. It uses custom plugins and the Engine2D API to
+ * This is the Editor class. It uses custom plugins and the Engine API to
  * build the editor.
  *
  * @class      Editor (name)
@@ -24,8 +24,8 @@ function Editor() {
     // required for event listener removing
     var namespace = ".Editor";
 
-    // engine2d
-    var engine2d;
+    // engine
+    var engine;
 
     // forms
     $("#select-map").selectmenu({
@@ -33,5 +33,5 @@ function Editor() {
     });
 
     // init engine
-    engine2d = new Engine2D();
+    engine = new Engine();
 }

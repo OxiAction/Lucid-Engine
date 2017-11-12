@@ -1,5 +1,5 @@
 /**
- * Engine2D default Camera.
+ * Engine default Camera.
  *
  * @type       {Camera}
  */

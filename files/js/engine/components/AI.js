@@ -1,5 +1,5 @@
 /**
- * Engine2D default AI.
+ * Engine default AI.
  * This component also handles pathfinding.
  *
  * @type       {AI}

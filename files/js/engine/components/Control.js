@@ -1,5 +1,5 @@
 /**
-* Engine2D default Control.
+* Engine default Control.
 */
 var Control = BaseComponent.extend({
 	// config variables and their default values

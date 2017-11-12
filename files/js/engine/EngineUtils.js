@@ -1,5 +1,5 @@
 /**
- * EngingeUtils is a utils collection for the Engine2D. It also extends some
+ * EngingeUtils is a utils collection for the Engine. It also extends some
  * JavaScript data types with new features.
  *
  * @class      EngineUtils (name)
@@ -125,7 +125,7 @@ var EngineUtils = function() {
 
         /**
          * General check if the browser has all the features which are required
-         * by Engine2D.
+         * by Engine.
          *
          * @return     {boolean}  Returns true if supported.
          */

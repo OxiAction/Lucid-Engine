@@ -1,5 +1,5 @@
 /**
- * Engine2D default Entity.
+ * Engine default Entity.
  *
  * @type       {Entity}
  */

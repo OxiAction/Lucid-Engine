@@ -4,7 +4,7 @@ $(document).ready(function() {
 
     // check support
     if (!EngineUtils.engineSupported()) {
-        EngineUtils.error("Sorry - your browser does NOT support Engine2D - please update your browser")
+        EngineUtils.error("Sorry - your browser does NOT support Engine - please update your browser")
         return;
     }
     
@@ -13,7 +13,7 @@ $(document).ready(function() {
 
 
 /**
- * This is the Game class. It uses custom plugins and the Engine2D API to build
+ * This is the Game class. It uses custom plugins and the Engine API to build
  * the game.
  *
  * @class      Game (name)
@@ -25,23 +25,23 @@ function Game() {
     // required for event listener removing
     var namespace = ".Game";
 
-    // engine2d
-    var engine2d;
+    // engine
+    var engine;
 
     // custom update function
     this.update = function() {
         // call original
-        engine2d.update();
+        engine.update();
 
         // custom code goes here...
     }
 
     // init engine
-    engine2d = new Engine2D();
+    engine = new Engine();
 
-    
+    /*
     // custom layer for menu - persistent
-    var layerMenu = engine2d.createAddLayer({
+    var layerMenu = engine.createAddLayer({
         z: 20,
         id: "layer-menu",
         persistent: true,
@@ -49,36 +49,58 @@ function Game() {
     });
 
     // custom layer for ui - persitent
-    var layerUI = engine2d.createAddLayer({
+    var layerUI = engine.createAddLayer({
         z: 19,
         id: "layer-ui",
         persistent: true,
         type: Layer.TYPE.UI
     });
+    */
     
 
-    // start engine2d
-    // engine2d.start();
+    // start engine
+    engine.start();
+
+    // resize stuff
+    function resize() {
+        engine.resize();
+    }
+
+    // listener for resize event
+    window.addEventListener("resize", resize, false);
+
+    // update all the components initially! mandatory
+    resize();
 
     var mapName = "map1";
     
     // setup Camera
-    engine2d.setCamera(new Camera());
+    engine.setCamera(new Camera());
 
     // load the file into DOM
-    engine2d.loadMapFile(mapName);
+    engine.loadMapFile(mapName);
 
-    // event is triggered if map 
-    $(document).on(Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS + namespace, function(event, loaderItem) {
+    // event is triggered if Engine has loaded the map file
+    $(document).on(Engine.EVENT.LOADED_MAP_FILE_SUCCESS + namespace, function(event, loaderItem) {
         var mapFileName = loaderItem.getID();
-        var map = engine2d.setMap(mapFileName);
+        var map = engine.buildMapByFileName(mapFileName);
 
-        // cleanup testing
-        setTimeout(function() {
-            // engine2d.stop();
-            engine2d.destoryMap();
-            map = null;
-            $(document).off(Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS + namespace);
-        }, 3000);
+        // event is triggered if Map has loaded all the required assets
+        $(document).on(Map.EVENT.LOADED_ASSETS_SUCCESS + namespace, function(event, map) {
+            // build the map
+            map.build();
+
+            resize();
+
+            // setTimeout(function() {
+                // engine.stop();
+                // engine.destoryMap();
+                // map = null;
+                // $(document).off(Engine.EVENT.LOADED_MAP_FILE_SUCCESS + namespace);
+            // }, 3000);
+        });
+
+        // set the map - this will also start loading the map assets
+        engine.setMap(map);
     });
 }

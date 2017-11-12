@@ -1,11 +1,15 @@
+// namespace
+// TODO: namespace all the Engine parts
+var Lucid = Lucid || {};
+
 /**
- * Engine2D core.
+ * Engine core.
  *
- * @type       {Engine2D}
+ * @type       {Engine}
  */
-var Engine2D = BaseComponent.extend({
+var Engine = BaseComponent.extend({
 	// config variables and their default values
-	// file names of files required by Engine2D
+	// file names of files required by Engine
 	fileNames: {
 		config: "engine"
 	},
@@ -21,8 +25,8 @@ var Engine2D = BaseComponent.extend({
 		tileSets: ".ts",
 		config: ".cfg"
 	},
-	containerID: "engine2d-container", // wrapper / container ID
-	canvasID: "engine2d-canvas", // cavas ID
+	containerID: "engine-container", // wrapper / container ID
+	canvasID: "engine-canvas", // cavas ID
 
 	// local variables
 	animationFrameID: null, // the RAF ID
@@ -32,14 +36,11 @@ var Engine2D = BaseComponent.extend({
 	canvasContext: null,
 	camera: null,
 	map: null,
-	// currentBuildMapFileName: null, // the currently build map file name
 
 	collisionLayers: [], // collision layers
 	collidingLayers: [], // layers which acquire collision data
 	normalLayers: [], // normal layers 
 	layers: [], // collection of all layers
-
-	// buildMaps: {}, // already build maps - key is mapName and value Map object TODO switch to array!
 
 /**
  * Core
@@ -52,7 +53,7 @@ var Engine2D = BaseComponent.extend({
 	  * @return     {boolean}  Returns true on success.
 	  */
 	init: function(config) {
-		this.componentName = "Engine2D";
+		this.componentName = "Engine";
 		
 		this._super(config);
 
@@ -71,28 +72,16 @@ var Engine2D = BaseComponent.extend({
 		// assign context
 		this.canvasContext = this.canvas.getContext("2d");
 
-		/*
-		// setup camera
-		this.camera = new Camera();
-
-		// setup map
-		this.map = new Map({
-			camera: this.camera
-		});
-		quick & dirty asign
-		this.normalLayers = this.map.getLayer();
-		*/
-
 		return true;
 	},
 
 	start: function() {
 		this.animationFrameID = window.requestAnimationFrame(this.tick.bind(this));
-		EngineUtils.log("Engine2D @ start: animationFrameID: " + this.animationFrameID);
+		EngineUtils.log("Engine @ start: animationFrameID: " + this.animationFrameID);
 	},
 
 	stop: function() {
-		EngineUtils.log("Engine2D @ stop: animationFrameID: " + this.animationFrameID);
+		EngineUtils.log("Engine @ stop: animationFrameID: " + this.animationFrameID);
 		if (this.animationFrameID != null) {
 			window.cancelAnimationFrame(this.animationFrameID);
 			this.animationFrameID = null;
@@ -104,12 +93,18 @@ var Engine2D = BaseComponent.extend({
 	tick: function(elapsed) {
 		var elapsedSeconds = elapsed / 1000.0; // convert in seconds
 		var delta = (elapsed - this.prevElapsed) / 1000.0; // delta in seconds
-    	delta = Math.min(delta, 0.06); // maximum delta of 60 ms
-		// EngineUtils.log("Engine2D @ tick: elapsedTimeSeconds: " + elapsedSeconds + " prevElapsed: " + this.prevElapsed + " delta: " + delta);
-		
-		this.prevElapsed = elapsed;
+    	// delta = Math.min(delta, 0.06); // cap delta @ 60ms
 
 		this.draw();
+
+		if (this.canvasContext) {
+			this.canvasContext.fillStyle = "Red";
+			this.canvasContext.font      = "normal 12px Arial, Helvetica Neue, Helvetica, sans-serif";
+			this.canvasContext.fillText("FPS: " + Math.ceil((1 / delta)), 10, 26);
+		}
+
+		// set prevElapsed
+		this.prevElapsed = elapsed;
 
 		// check if we should keep on shaking!
 		// TLD: https://www.youtube.com/watch?v=mhzc5ZeAXYY
@@ -176,6 +171,18 @@ var Engine2D = BaseComponent.extend({
 	},
 
 	resize: function(config) {
+		// if nothing is set...
+		if (config === undefined) {
+			config = {};
+		}
+		// we use the canvas containers width / height
+		if (config.wWidth === undefined) {
+			config.wWidth = this.container.clientWidth;
+		}
+		if (config.wHeight === undefined) {
+			config.wHeight = this.container.clientHeight;
+		}
+
 		// update engine canvas
 		this.canvas.width = config.wWidth;
 		this.canvas.height = config.wHeight;
@@ -252,7 +259,7 @@ var Engine2D = BaseComponent.extend({
 	 * @param      {string}  fileName  The map file name.
 	 */
 	loadMapFile: function(fileName) {
-		EngineUtils.log("Engine2D @ loadMapFile: load map with fileName: " + fileName);
+		EngineUtils.log("Engine @ loadMapFile: load map with fileName: " + fileName);
 
 		var filePath = this.folderPaths.maps + fileName + this.extensions.maps;
 
@@ -260,56 +267,54 @@ var Engine2D = BaseComponent.extend({
 	        id: fileName,
 	        dataType: EngineLoader.TYPE.SCRIPT,
 	        filePath: filePath,
-	        eventSuccessName: Engine2D.EVENT.LOADED_MAP_FILE_SUCCESS,
-	        eventErrorName: Engine2D.EVENT.LOADED_MAP_FILE_ERROR
+	        eventSuccessName: Engine.EVENT.LOADED_MAP_FILE_SUCCESS,
+	        eventErrorName: Engine.EVENT.LOADED_MAP_FILE_ERROR
 	    });
 
 	    EngineLoader.add(loaderItem);
 	},
 
 	/**
-	 * Set and build a Map by fileName and start loading its assets. This also
-	 * sets the Engine2D.map value to the new Map.
+	 * Build a Map by fileName.
 	 *
 	 * @param      {string}  fileName  The Map file name.
 	 * @return     {Map}     The build Map.
 	 */
-	setMap: function(fileName) {
+	buildMapByFileName: function(fileName) {
 		var loaderItem = EngineLoader.get(fileName);
 
 		if (!loaderItem) {
-			EngineUtils.error("Engine2D @ setMap: cannot build Map - not loaded yet: " + fileName);
+			EngineUtils.error("Engine @ setBuildMapByFileName: cannot build Map - not loaded yet: " + fileName);
 			return null;
 		}
 
-		EngineUtils.log("Engine2D @ setMap: building Map: " + fileName);
+		EngineUtils.log("Engine @ setBuildMapByFileName: building Map: " + fileName);
 
 		var mapData = window[fileName];
 		var mapConfig = mapData.config;
 		if (mapConfig === undefined) {
-			EngineUtils.error("Engine2D @ setMap: Map data doesnt have a config: " + fileName);
+			EngineUtils.error("Engine @ setBuildMapByFileName: Map data doesnt have a config: " + fileName);
 			return null;
 		}
 
 		// inject stuff
-		mapConfig.engine2d = this;
+		mapConfig.engine = this;
 		mapConfig.camera = this.getCamera();
 		mapConfig.fileNames = this.fileNames;
 		mapConfig.filePaths = this.filePaths;
 		mapConfig.extensions = this.extensions;
 
-		// create actual map object...
-		this.map = new Map(mapConfig);
+		return new Map(mapConfig);
+	},
 
-		// ...and add it to our build "list"
-		// this.buildMaps[fileName] = this.map;
-
-		// this.currentBuildMapFileName = fileName;
-
-		// ...
+	/**
+	 * Sets the map and loads its assets.
+	 *
+	 * @param      {Map}  map     The map.
+	 */
+	setMap: function(map) {
+		this.map = map;
 		this.map.loadAssets();
-
-		return this.map;
 	},
 
 	/**
@@ -322,27 +327,16 @@ var Engine2D = BaseComponent.extend({
 	},
 
 	/**
-	 * Destroy the current Engine2D.map.
+	 * Destroy the current Engine.map.
 	 *
 	 * @param      {string}   fileName  The map file name.
 	 * @return     {boolean}  Returns true on success.
 	 */
 	destoryMap: function() {
 		if (this.map == null) {
-			EngineUtils.log("Engine2D @ destroyMap: Enginge2D.map is null - nothing to destroy");
+			EngineUtils.log("Engine @ destroyMap: Engine.map is null - nothing to destroy");
 			return false;
 		}
-		// if (!(fileName in this.buildMaps)) {
-		// 	EngineUtils.error("Engine2D @ destroyMap: cannot destroy map - not build yet: " + fileName);
-		// 	return false;
-		// }
-
-		// var map = this.buildMaps[fileName];
-		// map.destroy();
-		// this.buildMaps[fileName] = null;
-		// map = null;
-
-		// this.currentBuildMapFileName = null;
 
 		this.map.destroy();
 		this.map = null;
@@ -361,10 +355,10 @@ var Engine2D = BaseComponent.extend({
 	 */
 	createAddLayer: function(config) {
 		if (config === undefined) {
-			EngineUtils.error("Engine2D @ createAddLayer: config is undefined!");
+			EngineUtils.error("Engine @ createAddLayer: config is undefined!");
 			return null;
 		} else if (config.id == null, config.type == null) {
-			EngineUtils.error("Engine2D @ createAddLayer: id or type is null - please asign an id and Layer.TYPE.XXX!");
+			EngineUtils.error("Engine @ createAddLayer: id or type is null - please asign an id and Layer.TYPE.XXX!");
 			return null;
 		}
 
@@ -384,7 +378,7 @@ var Engine2D = BaseComponent.extend({
 	 * @return     {Layer}   Returns a new Layer instance.
 	 */
 	createLayer: function(config) {
-		EngineUtils.log("Engine2D @ createLayer: creating / instantiating a new Layer - config: " + config);
+		EngineUtils.log("Engine @ createLayer: creating / instantiating a new Layer - config: " + config);
 		return new Layer(config);
 	},
 
@@ -397,7 +391,7 @@ var Engine2D = BaseComponent.extend({
 	addLayer: function(layer) {
 		var id = layer.id;
 		var type = layer.type;
-		EngineUtils.log("Engine2D @ addLayer: add layer id: " + id + " type: " + type);
+		EngineUtils.log("Engine @ addLayer: add layer id: " + id + " type: " + type);
 		
 		if (type == Layer.TYPE.COLLISION) {
 			this.collisionLayers.push(layer);
@@ -456,13 +450,13 @@ var Engine2D = BaseComponent.extend({
 });
 
 // type constants
-Engine2D.TYPE = {
+Engine.TYPE = {
 	SIDE_SCROLL: "sideScroll", // side scroll game type
 	TOP_DOWN: "topDown" // top down game type
 };
 
 // event constants
-Engine2D.EVENT = {
+Engine.EVENT = {
 	TOGGLE_LAYER: "toggleLayer",
 	PAUSE: "pause",
 	PLAY: "play",
