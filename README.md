@@ -1,4 +1,4 @@
-## Engine
+## Lucid Engine
 2D game engine, written in JavaScript (for the most part). Currently in development.
 
 The following covers the structured project tasks. Every task is followed by the difficulty (easy, medium, hard, very hard).
@@ -82,7 +82,7 @@ var TODO_NAME = BaseComponent.extend({
 
 ## Code Example
 ```javascript
-var engine2d = new Engine2D();
+var engine = new Lucid.Engine();
 ```
 
 TODO...
