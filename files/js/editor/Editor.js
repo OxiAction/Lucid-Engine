@@ -33,5 +33,5 @@ function Editor() {
     });
 
     // init engine
-    engine = new Engine();
+    engine = new Lucid.Engine();
 }
