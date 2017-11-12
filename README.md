@@ -1,4 +1,4 @@
-## Engine2D
+## Engine
 2D game engine, written in JavaScript (for the most part). Currently in development.
 
 The following covers the structured project tasks. Every task is followed by the difficulty (easy, medium, hard, very hard).
@@ -45,7 +45,7 @@ This project is being developed with Sublime Text 3, a powerful editor.
 * for notifications / messaging we use the [[Publish–subscribe pattern]](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern)
 * use the official [[JSDoc]](http://usejsdoc.org/) documentation guidelines
 * install [[DoxyDoxygen]](https://github.com/20Tauri/DoxyDoxygen), which makes documentation in Sublime Text 3 easy and continuous
-* use the following Sublime Text 3 snippet, to create your own Engine2D plugins:
+* use the following Sublime Text 3 snippet, to create your own Engine plugins:
 ```xml
 <snippet>
     <content><![CDATA[/**
