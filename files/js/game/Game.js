@@ -38,8 +38,7 @@ function Game() {
 
     // init engine
     engine = new Lucid.Engine();
-
-    /*
+    
     // custom layer for menu - persistent
     var layerMenu = engine.createAddLayer({
         z: 20,
@@ -55,7 +54,6 @@ function Game() {
         persistent: true,
         type: Layer.TYPE.UI
     });
-    */
 
     // start engine
     engine.start();

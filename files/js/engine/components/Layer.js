@@ -43,6 +43,11 @@ var Layer = BaseComponent.extend({
 		return true;
 	},
 
+	getCollisionData: function(config) {
+		// TODO
+
+		return null;
+	},
 
 	/**
 	 * Draws a Canvas. TODO: More documentation.
@@ -56,24 +61,24 @@ var Layer = BaseComponent.extend({
 		// with custom draw logic
 		var map = this.map; // variable caching -> performance inc.
 		if (!map) {
-			EngineUtils.log("Layer @ draw: map is not defined");
-			return null;
+			// EngineUtils.log("Layer @ draw: map is not defined");
+			return this.canvas;
 		}
 
 		var camera = this.map.getCamera(); // variable caching -> performance inc.
 		if (!camera) {
-			EngineUtils.log("Layer @ draw: camera is not defined");
-			return null;
+			// EngineUtils.log("Layer @ draw: camera is not defined");
+			return this.canvas;
 		}
 
 		if (!this.data) {
-			EngineUtils.log("Layer @ draw: data is not defined");
-			return null;
+			// EngineUtils.log("Layer @ draw: data is not defined");
+			return this.canvas;
 		}
 
 		if (!this.image) {
-			EngineUtils.log("Layer @ draw: image is not defined");
-			return null;
+			// EngineUtils.log("Layer @ draw: image is not defined");
+			return this.canvas;
 		}
 
 		var cameraWidth = camera.width;

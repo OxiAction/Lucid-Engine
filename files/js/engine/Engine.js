@@ -141,8 +141,9 @@ Lucid.Engine = BaseComponent.extend({
 		var i;
 		var layer;
 
-		// config for them lay0rs!
+		// config
 		var config = {
+			// collision data
 			collisionData: []
 		}
 
@@ -151,9 +152,8 @@ Lucid.Engine = BaseComponent.extend({
 		var collisionData = [];
 		for (i = 0; i < this.collisionLayers.length; ++i) {
 			layer = this.collisionLayers[i];
-			layer.draw(config);
 
-			var currCollisionData = layer.collisionData;
+			var currCollisionData = layer.getCollisionData(config);
 
 			if (currCollisionData) {
 				collisionData.push(currCollisionData);
@@ -164,23 +164,11 @@ Lucid.Engine = BaseComponent.extend({
 			this.camera.draw(config);
 		}
 
-		// TODO: eeerm some kind of z-sorting is required here I guess :D
-
 		// set collisionData for the next layers
 		config.collisionData = collisionData;
 
-		for (i = 0; i < this.collidingLayers.length; ++i) {
-			layer = this.collidingLayers[i];
-
-			// draw layer & engine canvas
-			layer.draw(config);
-			this.canvasContext.drawImage(layer.canvas, 0, 0);
-		}
-
-		for (i = 0; i < this.normalLayers.length; ++i) {
-			layer = this.normalLayers[i];
-
-			// draw layer & engine canvas
+		for (i = 0; i < this.layers.length; ++i) {
+			layer = this.layers[i];
 			layer.draw(config);
 			this.canvasContext.drawImage(layer.canvas, 0, 0);
 		}
@@ -219,21 +207,8 @@ Lucid.Engine = BaseComponent.extend({
 		}
 
 		// update layers
-		var i;
-		var layer;
-
-		for (i = 0; i < this.collisionLayers.length; ++i) {
-			layer = this.collisionLayers[i];
-			layer.resize(config);
-		}
-
-		for (i = 0; i < this.collidingLayers.length; ++i) {
-			layer = this.collidingLayers[i];
-			layer.resize(config);
-		}
-
-		for (i = 0; i < this.normalLayers.length; ++i) {
-			layer = this.normalLayers[i];
+		for (var i = 0; i < this.layers.length; ++i) {
+			var layer = this.layers[i];
 			layer.resize(config);
 		}
 	},
@@ -424,6 +399,9 @@ Lucid.Engine = BaseComponent.extend({
 		
 		// add to general layers array
 		this.layers.push(layer);
+
+		// update z-sorting
+		this.layers.sortByKey("z");
 
 		return true;
 	},

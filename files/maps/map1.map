@@ -26,6 +26,7 @@ Lucid.data.maps.map1 = {
 			*/
 			{
 				config: {
+					z: 10,
 					id: "layer-background",
 					cols: 16,
 					rows: 16,
@@ -49,6 +50,7 @@ Lucid.data.maps.map1 = {
 			},
 			{
 				config: {
+					z: 11,
 					id: "layer-objects",
 					// TODO: I dont want to use cols / rows logic for objects...
 					type: Layer.TYPE.OBJECTS,
@@ -60,6 +62,7 @@ Lucid.data.maps.map1 = {
 			},
 			{
 				config: {
+					z: 12,
 					id: "layer-foreground",
 					cols: 16,
 					rows: 16,
