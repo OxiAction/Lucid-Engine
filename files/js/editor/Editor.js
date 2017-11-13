@@ -1,14 +1,14 @@
 $(document).ready(function() {
     // setup
-    EngineUtils.setDebug(1);
+    Lucid.Utils.setDebug(1);
 
     // check support
-    if (!EngineUtils.engineSupported()) {
-        EngineUtils.error("Sorry - your browser does NOT support Engine - please update your browser")
+    if (!Lucid.Utils.engineSupported()) {
+        Lucid.Utils.error("Sorry - your browser does NOT support Engine - please update your browser")
         return;
     }
     
-    var editor = new Editor();
+    var editor = new Lucid.Editor();
 });
 
 /**
@@ -17,9 +17,9 @@ $(document).ready(function() {
  *
  * @class      Editor (name)
  */
-function Editor() {
+Lucid.Editor = function() {
     // say hello
-    EngineUtils.log("Editor");
+    Lucid.Utils.log("Editor");
 
     // required for event listener removing
     var namespace = ".Editor";

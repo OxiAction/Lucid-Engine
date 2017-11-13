@@ -4,7 +4,7 @@
  *
  * @type       {AI}
  */
-var AI = BaseComponent.extend({
+Lucid.AI = BaseComponent.extend({
 	// config variables and their default values
 	
 
@@ -50,7 +50,7 @@ var AI = BaseComponent.extend({
 });
 
 // behavior constants
-AI.BEHAVIOR = {
+Lucid.AI.BEHAVIOR = {
 	/**
 	 * follow another Entity
 	 * 

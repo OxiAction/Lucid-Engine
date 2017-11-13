@@ -1,7 +1,7 @@
 /**
 * Game custom Player - extends Entity.
 */
-var Player = Entity.extend({
+var Player = Lucid.Entity.extend({
     // config variables and their default values
     // ...
 

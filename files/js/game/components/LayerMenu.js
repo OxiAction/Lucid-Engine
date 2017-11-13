@@ -1,7 +1,7 @@
 /**
 * Game custom menu Layer - extends Layer.
 */
-var LayerMenu = Layer.extend({
+var LayerMenu = Lucid.Layer.extend({
     // config variables and their default values
     // ...
 

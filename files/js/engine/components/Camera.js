@@ -3,14 +3,18 @@
  *
  * @type       {Camera}
  */
-var Camera = BaseComponent.extend({
+Lucid.Camera = BaseComponent.extend({
 	// config variables and their default values
 
 	// local variables
-	x: 0,
-	y: 0,
-	width: 0,
-	height: 0,
+	position: {
+        x: 0,
+        y: 0
+    },
+    offset: {
+    	x: 0,
+    	y: 0
+    },
 	// TODO: remove this
 	// this is just quick & dirty controls implementation
 	// usually this should be done using a Control component and accessing the Camera.x / Camera.y
@@ -59,20 +63,26 @@ var Camera = BaseComponent.extend({
 		}
 	},
 
-	draw: function(config) {
+	/**
+	 * Draw.
+	 *
+	 * @param      {number}  delta   The delta.
+	 * @param      {Object}  config  The configuration.
+	 */
+	draw: function(delta, config) {
 		for (var key in this.pressedKeys) {
 			if (this.pressedKeys[key] == true) {
 				if (key == 38) {
-					this.y -= 1;
+					this.position.y -= 1;
 				}
 				if (key == 39) {
-					this.x += 1;
+					this.position.x += 1;
 				}
 				if (key == 40) {
-					this.y += 1;
+					this.position.y += 1;
 				}
 				if (key == 37) {
-					this.x -= 1;
+					this.position.x -= 1;
 				}
 			}
 		}
@@ -87,7 +97,7 @@ var Camera = BaseComponent.extend({
 // TODO: remove this
 // this is just quick & dirty controls implementation
 // usually this should be done using a Control component and accessing the Camera.x / Camera.y
-Camera.KEYCODE = {
+Lucid.Camera.KEYCODE = {
 	38: "up",
 	39: "right",
 	40: "down",

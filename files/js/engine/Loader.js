@@ -1,11 +1,11 @@
 /**
- * EngineLoader is a loader with a queue and event system (which notifies the
+ * Loader is a loader with a queue and event system (which notifies the
  * subscribers on success / error).
  *
- * @class      EngineLoader (name)
+ * @class      Loader (name)
  * @return     {Object}  Reutns public methods.
  */
-var EngineLoader = function() {
+Lucid.Loader = function() {
     // private variables
     var instance = null;
     var loaded = {};
@@ -18,15 +18,15 @@ var EngineLoader = function() {
 
     return {
         /**
-         * Add a new EngineLoaderItem to the loading queue. This also starts
+         * Add a new LoaderItem to the loading queue. This also starts
          * loading the queue.
          *
-         * @param      {EngineLoaderItem}  item    The EngineLoaderItem.
+         * @param      {LoaderItem}  item    The LoaderItem.
          * @return     {boolean}           Returns true on success.
          */
         add: function(item) {
             if (!item.isValid()) {
-                EngineUtils.error("EngineLoader @ add: can not add invalid item to EngineLoader - id: " + item.id);
+                Lucid.Utils.error("Loader @ add: can not add invalid item to Loader - id: " + item.id);
                 return false;
             }
 
@@ -34,7 +34,7 @@ var EngineLoader = function() {
             // loaded. in some cases you may want to load the same file again.
             // For now we just check if its already in the loading queue:
             if (!loadingQueue.contains(item)) {
-                EngineUtils.log("EngineLoader @ add: item added to EngineLoader - id: " + item.id);
+                Lucid.Utils.log("Loader @ add: item added to Loader - id: " + item.id);
                 loadingQueue.push(item);
             }
 
@@ -46,15 +46,15 @@ var EngineLoader = function() {
         },
 
         /**
-         * Load next EngineLoaderItem in queue.
+         * Load next LoaderItem in queue.
          */
         loadNext: function() {
             // check if queue is empty
             if (loadingQueue.length < 1) {
-                EngineUtils.log("EngineLoader @ loadNext: finished loading. Queue is empty");
+                Lucid.Utils.log("Loader @ loadNext: finished loading. Queue is empty");
                 loading = false;
                 // publish
-                $(document).trigger(EngineLoader.EVENT.READY);
+                $(document).trigger(Lucid.Loader.EVENT.READY);
 
                 // leave this place
                 return;
@@ -64,16 +64,16 @@ var EngineLoader = function() {
             loading = true;
 
             // publish
-            $(document).trigger(EngineLoader.EVENT.LOADING, [loadingQueue]);
+            $(document).trigger(Lucid.Loader.EVENT.LOADING, [loadingQueue]);
 
             // get item
             var item = loadingQueue.pop();
 
-            EngineUtils.log("EngineLoader @ loadNext: attempting to load item - id: " + item.id + " filePath: " + item.filePath);
+            Lucid.Utils.log("Loader @ loadNext: attempting to load item - id: " + item.id + " filePath: " + item.filePath);
 
             // the success function
             function success(data) {
-                EngineUtils.log("EngineLoader @ loadNext: success loading item - id: " + item.id);
+                Lucid.Utils.log("Loader @ loadNext: success loading item - id: " + item.id);
 
                 item.setData(data);
                 item.setLoaded(true);
@@ -86,13 +86,13 @@ var EngineLoader = function() {
 
             // the error function
             function error(data) {
-                EngineUtils.log("EngineLoader @ loadNext: error loading item - id: " + item.id);
+                Lucid.Utils.log("Loader @ loadNext: error loading item - id: " + item.id);
                 $(document).trigger(item.eventErrorName, [item]);
                 this.loadNext();
             }
 
             // different treatment for different dataTypes
-            if (item.dataType == EngineLoader.TYPE.IMAGE) {
+            if (item.dataType == Lucid.Loader.TYPE.IMAGE) {
                 var image = new Image();
                 image.onload = success.bind(this);
                 image.onerror = error.bind(this);
@@ -103,11 +103,11 @@ var EngineLoader = function() {
         },
 
         /**
-         * Get already loaded EngineLoaderItem by id.
+         * Get already loaded LoaderItem by id.
          *
-         * @param      {string}                 id      The identifier.
-         * @return     {EngineLoaderItem|null}  Returns EngineLoaderItem if
-         *                                      found - otherwise null.
+         * @param      {string}           id      The identifier.
+         * @return     {LoaderItem|null}  Returns LoaderItem if found -
+         *                                otherwise null.
          */
         get: function(id) {
             if (id in loaded) {
@@ -129,13 +129,13 @@ var EngineLoader = function() {
 }();
 
 // event constants
-EngineLoader.EVENT = {
+Lucid.Loader.EVENT = {
     LOADING: "loading",
     READY: "ready"
 };
 
 // type constants
-EngineLoader.TYPE = {
+Lucid.Loader.TYPE = {
     XML: "xml",
     SCRIPT: "script",
     IMAGE: "image",
@@ -143,15 +143,15 @@ EngineLoader.TYPE = {
 };
 
 /**
- * Item for the EngineLoader. Use EngineLoader.add(item).
+ * Item for the Loader. Use Loader.add(item).
  *
- * @type       {EngineLoader}
+ * @type       {Loader}
  */
-var EngineLoaderItem = BaseComponent.extend({
+Lucid.LoaderItem = BaseComponent.extend({
     // config variables and their default values
     id: null, // id - required
     filePath: null, // filePath - required
-    dataType: EngineLoader.TYPE.DEFAULT, // data type - use EngineLoader.TYPE.XXX
+    dataType: Lucid.Loader.TYPE.DEFAULT, // data type - use Lucid.Loader.TYPE.XXX
     eventSuccessName: null, // event name which will be triggered on success - required
     eventErrorName: null, // event name which will be triggered on error - required
     extraData: null, // custom extra data which you can pass through
@@ -167,7 +167,7 @@ var EngineLoaderItem = BaseComponent.extend({
       * @return     {boolean}  Returns true on success.
       */
     init: function(config) {
-        this.componentName = "EngineLoaderItem";
+        this.componentName = "LoaderItem";
         
         this._super(config);
 
@@ -185,9 +185,9 @@ var EngineLoaderItem = BaseComponent.extend({
      *                               depending on dataType.
      */
     setData: function(value) {
-        if (this.dataType == EngineLoader.TYPE.XML) {
+        if (this.dataType == Lucid.Loader.TYPE.XML) {
             value = $(value);
-        } else if (this.dataType == EngineLoader.TYPE.IMAGE) {
+        } else if (this.dataType == Lucid.Loader.TYPE.IMAGE) {
             value = value.target;
         }
 

@@ -1,11 +1,11 @@
 /**
- * EngingeUtils is a utils collection for the Engine. It also extends some
+ * Utils is a utils collection for the Engine. It also extends some
  * JavaScript data types with new features.
  *
- * @class      EngineUtils (name)
+ * @class      Utils (name)
  * @return     {Object}  Returns public methods.
  */
-var EngineUtils = function() {
+Lucid.Utils = function() {
     // private variables
     var cache = {};
     var debug = 0;

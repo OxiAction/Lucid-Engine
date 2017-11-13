@@ -1,7 +1,7 @@
 /**
 * Engine default Map.
 */
-var Map = BaseComponent.extend({
+Lucid.Map = BaseComponent.extend({
 	// config variables and their default values
 	name: "Untiteled Map",
 	cols: 16,
@@ -51,17 +51,17 @@ var Map = BaseComponent.extend({
 		return true;
 	},
 
-	draw: function(config) {
+	draw: function(delta, config) {
 
 	},
 
 	loadAssets: function() {
 		if (this.assetsLoaded()) {
-			EngineUtils.log("Map @ loadAssets: assets are already loaded");
+			Lucid.Utils.log("Map @ loadAssets: assets are already loaded");
 			return;
 		}
 
-		EngineUtils.log("Map @ loadAssets: " + this.name + " - loading assets");
+		Lucid.Utils.log("Map @ loadAssets: " + this.name + " - loading assets");
 
 		this.loading = true;
 		
@@ -72,19 +72,19 @@ var Map = BaseComponent.extend({
 	loadTileSet: function() {
 		this.tileSetLoaded = false;
 
-		var loaderItem = new EngineLoaderItem({
+		var loaderItem = new Lucid.LoaderItem({
 	        id: "tiles",
-	        dataType: EngineLoader.TYPE.IMAGE,
+	        dataType: Lucid.Loader.TYPE.IMAGE,
 	        filePath: "playground/tiles.png",
-	        eventSuccessName: Map.EVENT.LOADED_TILESET_FILE_SUCCESS,
-	        eventErrorName: Map.EVENT.LOADED_TILESET_FILE_ERROR
+	        eventSuccessName: Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS,
+	        eventErrorName: Lucid.Map.EVENT.LOADED_TILESET_FILE_ERROR
 	    });
 
-	    EngineLoader.add(loaderItem);
+	    Lucid.Loader.add(loaderItem);
 
-	    $(document).on(Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace, function(event, loaderItem) {
-	    	EngineUtils.log("Map @ loadTileset: loaded tileset");
-	    	$(document).off(Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
+	    $(document).on(Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace, function(event, loaderItem) {
+	    	Lucid.Utils.log("Map @ loadTileset: loaded tileset");
+	    	$(document).off(Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
 	        this.tileSetLoaded = true;
 	        this.tileSet = loaderItem.getData();
 	        this.checkLoadingState();
@@ -99,9 +99,9 @@ var Map = BaseComponent.extend({
 
 	checkLoadingState: function() {
 		if (this.assetsLoaded()) {
-			EngineUtils.log("Map @ checkLoadingState: assets are loaded! Much appreciated...");
+			Lucid.Utils.log("Map @ checkLoadingState: assets are loaded! Much appreciated...");
 			this.loading = false;
-			$(document).trigger(Map.EVENT.LOADED_ASSETS_SUCCESS, [this]);
+			$(document).trigger(Lucid.Map.EVENT.LOADED_ASSETS_SUCCESS, [this]);
 		}
 	},
 
@@ -114,19 +114,19 @@ var Map = BaseComponent.extend({
 
 	build: function() {
 		if (!this.assetsLoaded()) {
-			EngineUtils.log("Map @ build: assets are NOT loaded yet");
+			Lucid.Utils.log("Map @ build: assets are NOT loaded yet");
 			return false;
 		}
 
 		if (!this.layers || this.layers.length < 1) {
-			EngineUtils.error("Map @ build: " + this.name + " - layers are not defined!");
+			Lucid.Utils.error("Map @ build: " + this.name + " - layers are not defined!");
 			return false;
 		} else if (!this.engine) {
-			EngineUtils.error("Map @ build: " + this.name + " - Engine reference not defined!");
+			Lucid.Utils.error("Map @ build: " + this.name + " - Engine reference not defined!");
 			return false;
 		}
 
-		EngineUtils.log("Map @ build: createAddLayers in Engine");
+		Lucid.Utils.log("Map @ build: createAddLayers in Engine");
 		for (var i = 0; i < this.layers.length; ++i) {
 			if (this.layers[i].config !== undefined && this.layers[i].config.id !== undefined) {
 				// map reference
@@ -136,7 +136,7 @@ var Map = BaseComponent.extend({
 				this.layers[i].config.image = this.tileSet;
 				this.engine.createAddLayer(this.layers[i].config);
 			} else {
-				EngineUtils.error("Map @ build: tried to createAddLayer in Engine but Layer.config or Layer.id is not set!");
+				Lucid.Utils.error("Map @ build: tried to createAddLayer in Engine but Layer.config or Layer.id is not set!");
 			}
 		}
 
@@ -155,7 +155,7 @@ var Map = BaseComponent.extend({
 	 * @return     {boolean}  Returns true on success.
 	 */
 	destroy: function() {
-		$(document).off(Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
+		$(document).off(Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
 
 		// only if build we need to remove layers
 		if (this.build) {
@@ -165,7 +165,7 @@ var Map = BaseComponent.extend({
 					// no need for layer.destroy here - because the Engine will take care of this!
 					this.engine.removeLayer(layer.config.id);
 				} else {
-					EngineUtils.error("Map name: " + this.name + " - tried to remove Layer from Engine but Layer config or Layer id is undefined!");
+					Lucid.Utils.error("Map name: " + this.name + " - tried to remove Layer from Engine but Layer config or Layer id is undefined!");
 				}
 			}
 		}
@@ -197,12 +197,12 @@ var Map = BaseComponent.extend({
 });
 
 // forms setup for the editor
-Map.FORMS = {
+Lucid.Map.FORMS = {
 	name: "string"
 };
 
 // event constants
-Map.EVENT = {
+Lucid.Map.EVENT = {
 	LOADED_TILESET_FILE_SUCCESS: "loadedTileSetFileSuccess",
 	LOADED_TILESET_FILE_ERROR: "loadedTileSetFileError",
 	LOADED_ASSETS_SUCCESS: "loadedAssetsSuccess",

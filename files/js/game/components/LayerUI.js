@@ -1,7 +1,7 @@
 /**
 * Game custom ui Layer - extends Layer.
 */
-var LayerUI = Layer.extend({
+var LayerUI = Lucid.Layer.extend({
     // config variables and their default values
     // ...
 

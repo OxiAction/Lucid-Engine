@@ -23,7 +23,7 @@ var BaseComponent = Class.extend({
 	  * @return     {boolean}  Returns true on success.
 	  */
 	init: function(config){
-		EngineUtils.log("Component " + this.componentName);
+		Lucid.Utils.log("Component " + this.componentName);
 
 		this.componentNamespace = "." + this.componentName;
 

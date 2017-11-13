@@ -1,7 +1,7 @@
 /**
 * Engine default Layer.
 */
-var Layer = BaseComponent.extend({
+Lucid.Layer = BaseComponent.extend({
 	// config variables and their default values
 	z: 0, // z-index!
 	id: null,
@@ -33,7 +33,7 @@ var Layer = BaseComponent.extend({
 		this._super(config);
 
 		if (this.id == null, this.type == null) {
-			EngineUtils.error("Layer @ init: id or type is null - please asign an id and Layer.TYPE.XXX!");
+			Lucid.Utils.error("Layer @ init: id or type is null - please asign an id and Layer.TYPE.XXX!");
 			return;
 		}
 
@@ -43,41 +43,36 @@ var Layer = BaseComponent.extend({
 		return true;
 	},
 
-	getCollisionData: function(config) {
-		// TODO
-
-		return null;
-	},
-
 	/**
 	 * Draws a Canvas. TODO: More documentation.
 	 *
+	 * @param      {number}  delta   The delta.
 	 * @param      {Object}  config  The configuration
 	 * @return     {Canvas}  Returns the drawn Canvas.
 	 */
-	draw: function(config) {
+	draw: function(delta, config) {
 		// if there is NO map reference, its probably a custom Layer
 		// and in this case, the draw function should be overriden
 		// with custom draw logic
 		var map = this.map; // variable caching -> performance inc.
 		if (!map) {
-			// EngineUtils.log("Layer @ draw: map is not defined");
+			// Lucid.Utils.log("Layer @ draw: map is not defined");
 			return this.canvas;
 		}
 
 		var camera = this.map.getCamera(); // variable caching -> performance inc.
 		if (!camera) {
-			// EngineUtils.log("Layer @ draw: camera is not defined");
+			// Lucid.Utils.log("Layer @ draw: camera is not defined");
 			return this.canvas;
 		}
 
 		if (!this.data) {
-			// EngineUtils.log("Layer @ draw: data is not defined");
+			// Lucid.Utils.log("Layer @ draw: data is not defined");
 			return this.canvas;
 		}
 
 		if (!this.image) {
-			// EngineUtils.log("Layer @ draw: image is not defined");
+			// Lucid.Utils.log("Layer @ draw: image is not defined");
 			return this.canvas;
 		}
 
@@ -95,14 +90,14 @@ var Layer = BaseComponent.extend({
 		var rows = map.rows;
 		var tileSize = map.tileSize;
 
-		var startCol = Math.floor(camera.x / tileSize);
+		var startCol = Math.floor(camera.position.x / tileSize);
 		var endCol = Math.min(cols - 1, (startCol + cameraWidth / tileSize) + 1);
 
-		var startRow = Math.floor(camera.y / tileSize);
+		var startRow = Math.floor(camera.position.y / tileSize);
 		var endRow = Math.min(rows - 1, (startRow + cameraHeight / tileSize) + 1);
 
-		var offsetX = -camera.x + startCol * tileSize;
-		var offsetY = -camera.y + startRow * tileSize;
+		var offsetX = -camera.position.x + startCol * tileSize;
+		var offsetY = -camera.position.y + startRow * tileSize;
 
 		for (var col = startCol; col <= endCol; ++col) {
 			for (var row = startRow; row <= endRow; ++row) {
@@ -111,7 +106,7 @@ var Layer = BaseComponent.extend({
 				var x = Math.round((col - startCol) * tileSize + offsetX);// 100;
 				var y = Math.round((row - startRow) * tileSize + offsetY);
 
-				if (x >= -camera.x && y >= -camera.y) {
+				if (x >= -camera.position.x && y >= -camera.position.y) {
 					var tileIndex = row * cols + col;
 					var tileType = this.getTile(tileIndex);
 
@@ -146,7 +141,7 @@ var Layer = BaseComponent.extend({
 	 * @return     {boolean}  Returns true on success.
 	 */
 	destroy: function() {
-		EngineUtils.log("Layer @ destory: destroying Layer with id: " + this.id);
+		Lucid.Utils.log("Layer @ destory: destroying Layer with id: " + this.id);
 
 		this.map = null;
 		this.canvas = null;
@@ -165,11 +160,23 @@ var Layer = BaseComponent.extend({
 		} else {
 			return 0;
 		}
+	},
+
+	getCanvas: function() {
+		return this.canvas;
+	},
+
+	getCollisionData: function(config) {
+		if (this.type != Lucid.Layer.TYPE.COLLISION) {
+			return null;
+		}
+
+		return null;
 	}
 });
 
 // type constants
-Layer.TYPE = {
+Lucid.Layer.TYPE = {
 	MENU: "menu", // menus
 	UI: "ui", // ui
 	GRAPHICAL: "graphical", // precise graphics rendering
@@ -178,7 +185,7 @@ Layer.TYPE = {
 };
 
 // forms setup for the editor
-Layer.FORMS = {
+Lucid.Layer.FORMS = {
 	id: "string",
 	type: "string"
 };

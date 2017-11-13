@@ -1,7 +1,7 @@
 /**
 * Engine default Control.
 */
-var Control = BaseComponent.extend({
+Lucid.Control = BaseComponent.extend({
 	// config variables and their default values
 	key: null, // keycode
 
@@ -20,7 +20,7 @@ var Control = BaseComponent.extend({
 		this._super(config);
 
 		if (this.type == null) {
-			EngineUtils.error("Control type is null");
+			Lucid.Utils.error("Control type is null");
 			return;
 		}
 
@@ -29,7 +29,7 @@ var Control = BaseComponent.extend({
 });
 
 // type constants
-Control.TYPE = {
+Lucid.Control.TYPE = {
 	UP: "up",
 	DOWN: "down",
 	LEFT: "left",

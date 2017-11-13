@@ -1,10 +1,10 @@
 $(document).ready(function() {
     // setup
-    EngineUtils.setDebug(1);
+    Lucid.Utils.setDebug(1);
 
     // check support
-    if (!EngineUtils.engineSupported()) {
-        EngineUtils.error("Sorry - your browser does NOT support Engine - please update your browser")
+    if (!Lucid.Utils.engineSupported()) {
+        Lucid.Utils.error("Sorry - your browser does NOT support Engine - please update your browser")
         return;
     }
     
@@ -20,7 +20,7 @@ $(document).ready(function() {
  */
 function Game() {
     // say hello
-    EngineUtils.log("Game");
+    Lucid.Utils.log("Game");
 
     // required for event listener removing
     var namespace = ".Game";
@@ -44,7 +44,7 @@ function Game() {
         z: 20,
         id: "layer-menu",
         persistent: true,
-        type: Layer.TYPE.MENU
+        type: Lucid.Layer.TYPE.MENU
     });
 
     // custom layer for ui - persitent
@@ -52,7 +52,7 @@ function Game() {
         z: 19,
         id: "layer-ui",
         persistent: true,
-        type: Layer.TYPE.UI
+        type: Lucid.Layer.TYPE.UI
     });
 
     // start engine
@@ -72,7 +72,7 @@ function Game() {
     var mapName = "map1";
     
     // setup Camera
-    engine.setCamera(new Camera());
+    engine.setCamera(new Lucid.Camera());
 
     // load the file into DOM
     engine.loadMapFile(mapName);
@@ -83,18 +83,18 @@ function Game() {
         var map = engine.buildMapByFileName(mapFileName);
 
         // event is triggered if Map has loaded all the required assets
-        $(document).on(Map.EVENT.LOADED_ASSETS_SUCCESS + namespace, function(event, map) {
+        $(document).on(Lucid.Map.EVENT.LOADED_ASSETS_SUCCESS + namespace, function(event, map) {
             // build the map
             map.build();
 
             resize();
 
-            // setTimeout(function() {
+            setTimeout(function() {
                 // engine.stop();
                 // engine.destoryMap();
                 // map = null;
                 // $(document).off(Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS + namespace);
-            // }, 3000);
+            }, 3000);
         });
 
         // set the map - this will also start loading the map assets

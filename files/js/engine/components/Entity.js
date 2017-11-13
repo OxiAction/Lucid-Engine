@@ -3,7 +3,7 @@
  *
  * @type       {Entity}
  */
-var Entity = BaseComponent.extend({
+Lucid.Entity = BaseComponent.extend({
 	// config variables and their default values
 	position: {
         x: 0,
@@ -62,7 +62,7 @@ var Entity = BaseComponent.extend({
 });
 
 // forms setup for the editor
-Entity.FORMS = {
+Lucid.Entity.FORMS = {
 	position: {
 		x: "int",
 		y: "int"
