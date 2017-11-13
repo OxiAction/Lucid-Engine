@@ -16,7 +16,7 @@ Lucid.data.maps.map1 = {
 					id: "layer-background",
 					cols: 12,
 					rows: 12,
-					type: Lucid.Layer.TYPE.GRAPHICAL,
+					type: Lucid.Layer.TYPE.TILESET,
 					effects: [],
 					data: [
 						4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -52,7 +52,7 @@ Lucid.data.maps.map1 = {
 					id: "layer-foreground",
 					cols: 12,
 					rows: 12,
-					type: Lucid.Layer.TYPE.GRAPHICAL,
+					type: Lucid.Layer.TYPE.TILESET,
 					effects: [],
 					data: [
 						5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5,
@@ -76,7 +76,8 @@ Lucid.data.maps.map1 = {
 					id: "layer-collision",
 					cols: 12,
 					rows: 12,
-					type: Lucid.Layer.TYPE.COLLISION,
+					type: Lucid.Layer.TYPE.TILESET,
+					collision: true, // if true, all "1" tiles in the data will be used for collision detection
 					effects: [],
 					data: [
 						1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,

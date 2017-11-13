@@ -42,10 +42,8 @@ Lucid.Engine = BaseComponent.extend({
 	camera: null,
 	map: null,
 
-	collisionLayers: [], // collision layers
-	collidingLayers: [], // layers which acquire collision data
-	normalLayers: [], // normal layers 
-	layers: [], // collection of all layers
+	collisionLayers: [], // layers which have collision set to true only
+	layers: [], // collection of all layers (including collisionLayers)
 
 	started: false,
 
@@ -404,12 +402,9 @@ Lucid.Engine = BaseComponent.extend({
 		var type = layer.type;
 		Lucid.Utils.log("Engine @ addLayer: add layer id: " + id + " type: " + type);
 		
-		if (type == Lucid.Layer.TYPE.COLLISION) {
+		// check for collision layers
+		if (layer.collision) {
 			this.collisionLayers.push(layer);
-		} else if (type == Lucid.Layer.TYPE.GRAPHICAL || type == Lucid.Layer.TYPE.OBJECTS) {
-			this.collidingLayers.push(layer);
-		} else {
-			this.normalLayers.push(layer);
 		}
 		
 		// add to general layers array
@@ -445,12 +440,8 @@ Lucid.Engine = BaseComponent.extend({
 			var type = layer.type;
 			layer.destroy();
 
-			if (type == Lucid.Layer.TYPE.COLLISION) {
+			if (layer.collision) {
 				this.collisionLayers.erase(layer);
-			} else if (type == Lucid.Layer.TYPE.GRAPHICAL || type == Lucid.Layer.TYPE.OBJECTS) {
-				this.collidingLayers.erase(layer);
-			} else {
-				this.normalLayers.erase(layer);
 			}
 
 			this.layers.erase(layer);

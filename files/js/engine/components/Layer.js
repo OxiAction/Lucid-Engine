@@ -12,6 +12,7 @@ Lucid.Layer = BaseComponent.extend({
 	effects: null, // effects
 	render: true, // determines if the content is rendered
 	persistent: false, // determines if this layer will be auto deleted by the Engine
+	collision: false, // if true, all "1" tiles in the data will be used for collision detection
 
 	// local variables
 	canvas: null,
@@ -167,7 +168,7 @@ Lucid.Layer = BaseComponent.extend({
 	},
 
 	getCollisionData: function(config) {
-		if (this.type != Lucid.Layer.TYPE.COLLISION) {
+		if (this.collision) {
 			return null;
 		}
 
@@ -177,11 +178,9 @@ Lucid.Layer = BaseComponent.extend({
 
 // type constants
 Lucid.Layer.TYPE = {
-	MENU: "menu", // menus
-	UI: "ui", // ui
-	GRAPHICAL: "graphical", // precise graphics rendering
-	COLLISION: "collision", // invisible collision layer
-	OBJECTS: "objects" // objects (e.g. invisible triggers)
+	UI: "ui", // ui (e.g. menu, inventory)
+	TILESET: "tileSet", // tileSet grid with cols / rows
+	OBJECTS: "objects" // objects (e.g. player spawn point, invisible triggers)
 };
 
 // forms setup for the editor

@@ -57,7 +57,7 @@ Lucid.Camera = BaseComponent.extend({
 	// usually this should be done using a Control component and accessing the Camera.x / Camera.y
 	onKeyUp: function(e) {
 		var keyCode = e.keyCode;
-		if (keyCode in Camera.KEYCODE) {
+		if (keyCode in Lucid.Camera.KEYCODE) {
 			e.preventDefault();
 			this.pressedKeys[keyCode] = false;
 		}
