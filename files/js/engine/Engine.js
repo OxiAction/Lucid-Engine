@@ -44,6 +44,10 @@ Lucid.Engine = BaseComponent.extend({
 
 	collisionLayers: [], // layers which have collision set to true only
 	layers: [], // collection of all layers (including collisionLayers)
+	entitiesLayer: null, // this is the entity layer. There can only be one entity layer. 
+	                     // It is defined by setting the Layer.entitiesTarget to true
+
+	entities: [], // collection of all entities
 
 	started: false,
 
@@ -148,10 +152,13 @@ Lucid.Engine = BaseComponent.extend({
 		}
 
 		var i;
-		var layer;
+		var canvas;
 
-		// skip through collisionLayer
-		// update them and collect collisionData
+		/**
+		 * Collision Layers
+		 */
+
+		var layer;
 		var collisionData = [];
 		for (i = 0; i < this.collisionLayers.length; ++i) {
 			layer = this.collisionLayers[i];
@@ -163,22 +170,49 @@ Lucid.Engine = BaseComponent.extend({
 			}
 		}
 
+		// set collision data
+		config.collisionData = collisionData;
+
+		/**
+		 * Camera
+		 */
+
 		if (this.camera) {
 			this.camera.draw(delta, config);
 		}
 
-		// set collisionData for the next layers
-		config.collisionData = collisionData;
-
+		/**
+		 * Layers
+		 */
+		
 		for (i = 0; i < this.layers.length; ++i) {
 			layer = this.layers[i];
-			layer.draw(delta, config);
+			layer.draw(delta, this.camera, config);
 
-			var layerCanvas = layer.getCanvas();
-			if (layerCanvas != null) {
-				this.canvasContext.drawImage(layerCanvas, 0, 0);
+			canvas = layer.getCanvas();
+			if (canvas != null) {
+				this.canvasContext.drawImage(canvas, 0, 0);
 			}
 		}
+
+		/**
+		 * Entities
+		 */
+
+		var entity;
+		for (i = 0; i < this.entities.length; ++i) {
+			entity = this.entities[i];
+			entity.draw(delta, config);
+
+			canvas = entity.getCanvas();
+			if (canvas != null) {
+				this.canvasContext.drawImage(canvas, 0, 0);
+			}
+		}
+
+		/**
+		 * FPS
+		 */
 
 		if (this.showFPS) {
 			this.canvasContext.fillStyle = "Red";
@@ -309,9 +343,6 @@ Lucid.Engine = BaseComponent.extend({
 		// inject stuff
 		mapConfig.engine = this;
 		mapConfig.camera = this.getCamera();
-		mapConfig.fileNames = this.fileNames;
-		mapConfig.filePaths = this.filePaths;
-		mapConfig.extensions = this.extensions;
 
 		return new Lucid.Map(mapConfig);
 	},
@@ -371,10 +402,14 @@ Lucid.Engine = BaseComponent.extend({
 			return null;
 		}
 
+		// inject stuff
+		config.camera = this.getCamera();
+
 		var layer = this.createLayer(config);
 		if (this.addLayer(layer)) {
 			return layer;
 		} else {
+			layer.destroy();
 			layer = null;
 			return null;
 		}
@@ -388,7 +423,35 @@ Lucid.Engine = BaseComponent.extend({
 	 */
 	createLayer: function(config) {
 		Lucid.Utils.log("Engine @ createLayer: creating / instantiating a new Layer - config: " + config);
-		return new Lucid.Layer(config);
+
+		switch (config.type) {
+			case Lucid.BaseLayer.TYPE.UI:
+				return new Lucid.LayerUI(config);
+			break;
+
+			case Lucid.BaseLayer.TYPE.TILESET:
+				return new Lucid.LayerTileSet(config);
+			break;
+
+			case Lucid.BaseLayer.TYPE.COLLISION:
+				return new Lucid.LayerCollision(config);
+			break;
+
+			case Lucid.BaseLayer.TYPE.ITEMS:
+				return new Lucid.LayerItems(config);
+			break;
+
+			case Lucid.BaseLayer.TYPE.ENTITIES:
+				return new Lucid.LayerEntities(config);
+			break;
+
+			case Lucid.BaseLayer.TYPE.EVENTS:
+				return new Lucid.LayerEvents(config);
+			break;
+
+			default:
+				return new BaseLayer(config);
+		}
 	},
 
 	/**
@@ -403,7 +466,7 @@ Lucid.Engine = BaseComponent.extend({
 		Lucid.Utils.log("Engine @ addLayer: add layer id: " + id + " type: " + type);
 		
 		// check for collision layers
-		if (layer.collision) {
+		if (layer.type == Lucid.BaseLayer.TYPE.COLLISION) {
 			this.collisionLayers.push(layer);
 		}
 		
@@ -440,7 +503,7 @@ Lucid.Engine = BaseComponent.extend({
 			var type = layer.type;
 			layer.destroy();
 
-			if (layer.collision) {
+			if (layer.type == Lucid.BaseLayer.TYPE.COLLISION) {
 				this.collisionLayers.erase(layer);
 			}
 

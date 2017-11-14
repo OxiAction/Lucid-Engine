@@ -1,7 +1,7 @@
 /**
-* Game custom Player - extends Entity.
+* Game custom EntityFighter - extends Entity.
 */
-var Player = Lucid.Entity.extend({
+var EntityFighter = Lucid.Entity.extend({
     // config variables and their default values
     // ...
 
@@ -20,5 +20,20 @@ var Player = Lucid.Entity.extend({
         this._super(config);
 
         return true;
+    },
+
+    loadTileSet: function(filePath) {
+      if (filePath == undefined) {
+        filePath = "playground/entity_fighter.png";
+      }
+
+      this.tileSize.width = 32;
+      this.tileSize.height = 48;
+
+      this._super(filePath);
+    },
+
+    tileSetLoaded: function(event, loaderItem) {
+      this._super(event, loaderItem);
     }
 });

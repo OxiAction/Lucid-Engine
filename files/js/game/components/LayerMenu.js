@@ -1,7 +1,7 @@
 /**
 * Game custom menu Layer - extends Layer.
 */
-var LayerMenu = Lucid.Layer.extend({
+var LayerMenu = Lucid.BaseLayer.extend({
     // config variables and their default values
     // ...
 
@@ -20,16 +20,5 @@ var LayerMenu = Lucid.Layer.extend({
         this._super(config);
 
         return true;
-    },
-
-    /**
-     * Update step.
-     *
-     * @param      {Object}  config  The configuration.
-     */
-    update: function(config) {
-      // TODO: implement override stuff here!
-      
-      this._super(config);
     }
 });

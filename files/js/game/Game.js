@@ -39,12 +39,18 @@ function Game() {
     // init engine
     engine = new Lucid.Engine();
     
+    var player = new Lucid.User({
+        name: "Player 1"
+    });
+
+    var playerCharacter = new EntityFighter();
+    
     // custom layer for menu - persistent
     var layerMenu = engine.createAddLayer({
         z: 20,
         id: "layer-menu",
         persistent: true,
-        type: Lucid.Layer.TYPE.MENU
+        type: Lucid.BaseLayer.TYPE.UI
     });
 
     // custom layer for ui - persitent
@@ -52,7 +58,7 @@ function Game() {
         z: 19,
         id: "layer-ui",
         persistent: true,
-        type: Lucid.Layer.TYPE.UI
+        type: Lucid.BaseLayer.TYPE.UI
     });
 
     // start engine

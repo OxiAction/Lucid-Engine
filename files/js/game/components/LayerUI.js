@@ -1,7 +1,7 @@
 /**
 * Game custom ui Layer - extends Layer.
 */
-var LayerUI = Lucid.Layer.extend({
+var LayerUI = Lucid.BaseLayer.extend({
     // config variables and their default values
     // ...
 
@@ -20,16 +20,5 @@ var LayerUI = Lucid.Layer.extend({
         this._super(config);
 
         return true;
-    },
-
-    /**
-     * Update step.
-     *
-     * @param      {Object}  config  The configuration.
-     */
-    update: function(config) {
-    	// TODO: implement override stuff here!
-
-      this._super(config);
     }
 });

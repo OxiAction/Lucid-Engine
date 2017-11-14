@@ -10,27 +10,11 @@ Lucid.Map = BaseComponent.extend({
 	layers: null,
 	engine: null,
 	camera: null, // reference to camera
-	// file names of files
-	fileNames: {
-		config: "engine"
-	},
-	// folder structure
-	folderPaths: {
-		maps: "files/maps/",
-		tileSets: "files/tilesets/",
-		config: "files/config/"
-	},
-	// extensions
-	extensions: {
-		maps: ".map",
-		tileSets: ".ts",
-		config: ".cfg"
-	},
 
 	// local variables
 	loading: false,
-	tileSetLoaded: false,
-	entitySetLoaded: false,
+	_tileSetLoaded: false,
+	_entitySetLoaded: false,
 
 	tileSet: null,
 	entitySet: null,
@@ -51,7 +35,7 @@ Lucid.Map = BaseComponent.extend({
 		return true;
 	},
 
-	draw: function(delta, config) {
+	draw: function(delta, camera, config) {
 
 	},
 
@@ -70,30 +54,32 @@ Lucid.Map = BaseComponent.extend({
 	},
 
 	loadTileSet: function() {
-		this.tileSetLoaded = false;
+		this._tileSetLoaded = false;
 
 		var loaderItem = new Lucid.LoaderItem({
 	        id: "tiles",
 	        dataType: Lucid.Loader.TYPE.IMAGE,
-	        filePath: "playground/tiles.png",
+	        filePath: "playground/map_tiles.png",
 	        eventSuccessName: Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS,
 	        eventErrorName: Lucid.Map.EVENT.LOADED_TILESET_FILE_ERROR
 	    });
 
 	    Lucid.Loader.add(loaderItem);
 
-	    $(document).on(Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace, function(event, loaderItem) {
-	    	Lucid.Utils.log("Map @ loadTileset: loaded tileset");
-	    	$(document).off(Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
-	        this.tileSetLoaded = true;
-	        this.tileSet = loaderItem.getData();
-	        this.checkLoadingState();
-	    }.bind(this));
+	    $(document).on(Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace, this.tileSetLoaded.bind(this));
+	},
+
+	tileSetLoaded: function(event, loaderItem) {
+		Lucid.Utils.log("Map @ loadTileset: loaded tileset");
+    	$(document).off(Lucid.Entity.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
+        this._tileSetLoaded = true;
+        this.tileSet = loaderItem.getData();
+        this.checkLoadingState();
 	},
 
 	loadEntitySet: function() {
 		// TODO...
-		this.entitySetLoaded = true;
+		this._entitySetLoaded = true;
 		this.checkLoadingState();
 	},
 
@@ -106,7 +92,7 @@ Lucid.Map = BaseComponent.extend({
 	},
 
 	assetsLoaded: function() {
-		if (this.tileSetLoaded && this.entitySetLoaded) {
+		if (this._tileSetLoaded && this._entitySetLoaded) {
 			return true;
 		}
 		return false;
@@ -203,8 +189,8 @@ Lucid.Map.FORMS = {
 
 // event constants
 Lucid.Map.EVENT = {
-	LOADED_TILESET_FILE_SUCCESS: "loadedTileSetFileSuccess",
-	LOADED_TILESET_FILE_ERROR: "loadedTileSetFileError",
-	LOADED_ASSETS_SUCCESS: "loadedAssetsSuccess",
-	LOADED_ASSETS_ERROR: "loadedAssetsError"
+	LOADED_TILESET_FILE_SUCCESS: "MapLoadedTileSetFileSuccess",
+	LOADED_TILESET_FILE_ERROR: "MapLoadedTileSetFileError",
+	LOADED_ASSETS_SUCCESS: "MapLoadedAssetsSuccess",
+	LOADED_ASSETS_ERROR: "MapLoadedAssetsError"
 };

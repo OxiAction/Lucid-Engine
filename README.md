@@ -1,3 +1,5 @@
+![Lucid Logo](/misc/lucid_logo_small.jpg.jpg?raw=true "Lucid Logo")
+
 ## Lucid Engine
 2D game engine, written in JavaScript (for the most part). Currently in development.
 

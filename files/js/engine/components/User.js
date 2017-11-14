@@ -4,7 +4,7 @@
  * @type       {User}
  */
 Lucid.User = BaseComponent.extend({
-	name: "John Doe", // name
+	name: "Unknown User", // name
 	entity: null, // associated entity
 
 	// local variables
