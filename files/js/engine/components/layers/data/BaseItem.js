@@ -2,7 +2,7 @@
  * Engine default BaseItem. This Component is Layer related and represented by
  * the Layer.data value(s).
  *
- * @type       {Entity}
+ * @type       {BaseItem}
  */
 Lucid.BaseItem = Lucid.BaseEntity.extend({
 	/**
