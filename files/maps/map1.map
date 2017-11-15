@@ -47,8 +47,8 @@ Lucid.data.maps.map1 = {
 					data: [
 						{
 							name: "EntityFighter",
-							positionX: 300,
-							positionY: 300,
+							positionX: 350,
+							positionY: 350,
 							colliding: 1,
 							render: 1
 							// we could go crazy here with a lot of editor config fields... but we dont :D

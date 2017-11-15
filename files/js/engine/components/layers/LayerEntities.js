@@ -35,6 +35,7 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 
 					// instanciate entity! Apply the data object as config parameter
 					var entity = new window[data.name](data);
+					console.log(entity);
 					// start loading its assets
 					entity.loadTileSet();
 					// add to our entities render list
@@ -72,7 +73,6 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 		var cameraHeight = camera.height;
 
 		var canvasContext = this.canvasContext;
-
 		canvasContext.width = cameraWidth;
 		canvasContext.height = cameraHeight;
 		canvasContext.clearRect(0, 0, cameraWidth, cameraHeight);
@@ -99,6 +99,12 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 	 * @param      {object}  config  The configuration.
 	 */
 	resize: function(config) {
+		var entity;
+		for (var i = 0; i < this.entities.length; ++i) {
+			entity = this.entities[i];
+			entity.resize(config);
+		}
+		
 		this._super(config);
 	},
 

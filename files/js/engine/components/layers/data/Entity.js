@@ -98,6 +98,11 @@ Lucid.Entity = BaseComponent.extend({
 		}
 	},
 
+	resize: function(config) {
+		this.canvas.width = config.wWidth;
+		this.canvas.height = config.wHeight;
+	},
+
 	/**
 	 * Draws a Canvas.
 	 *
@@ -110,9 +115,6 @@ Lucid.Entity = BaseComponent.extend({
 		if (!this.isValid()) {
 			return this.canvas;
 		}
-
-		var width = this.width;
-		var height = this.height;
 
 		var camera = this.camera;
 		var cameraWidth = camera.width;
@@ -127,12 +129,12 @@ Lucid.Entity = BaseComponent.extend({
 			this.tileSet,
 			0, // source x
 			0, // source y
-			width, // source width
-			height, // source height
-			100,  // target x
-			100, // target y
-			width, // target width
-			height // target height
+			this.width, // source width
+			this.height, // source height
+			this.positionX,  // target x
+			this.positionY, // target y
+			this.width, // target width
+			this.height // target height
 		);
 
 		return this.canvas;
@@ -157,7 +159,7 @@ Lucid.Entity = BaseComponent.extend({
 
 		this._super(value);
 	},
-	
+
 	/**
 	 * Gets the canvas.
 	 *

@@ -82,6 +82,11 @@ Lucid.Item = BaseComponent.extend({
         // this.checkLoadingState();
 	},
 
+	resize: function(config) {
+		this.canvas.width = config.wWidth;
+		this.canvas.height = config.wHeight;
+	},
+
 	/**
 	 * Draws a Canvas.
 	 *
