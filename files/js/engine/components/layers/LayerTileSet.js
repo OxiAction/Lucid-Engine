@@ -42,7 +42,7 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 
 		var map = this.map;
 		var tileSet = map.getTileSet();
-
+		
 		if (!tileSet) {
 			return this.canvas;
 		}

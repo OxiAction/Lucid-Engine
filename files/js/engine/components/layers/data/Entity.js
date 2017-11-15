@@ -157,7 +157,7 @@ Lucid.Entity = BaseComponent.extend({
 
 		this._super(value);
 	},
-
+	
 	/**
 	 * Gets the canvas.
 	 *
