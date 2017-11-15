@@ -15,9 +15,12 @@ var EntityFighter = Lucid.Entity.extend({
       * @return     {boolean}  Returns true on success.
       */
     init: function(config) {
-        this.componentName = "Player";
+        this.componentName = "EntityFighter";
 
         this._super(config);
+
+        this.width = 32;
+        this.height = 48;
 
         return true;
     },
@@ -26,9 +29,6 @@ var EntityFighter = Lucid.Entity.extend({
       if (filePath == undefined) {
         filePath = "playground/entity_fighter.png";
       }
-
-      this.tileSize.width = 32;
-      this.tileSize.height = 48;
 
       this._super(filePath);
     },

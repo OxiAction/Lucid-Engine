@@ -1,3 +1,5 @@
+// TODO: rename to BaseItem! Extend the BaseEntity.
+
 /**
  * Engine default Item. This Component is Layer related and represented by the
  * Layer.data value(s).
@@ -6,27 +8,27 @@
  */
 Lucid.Item = BaseComponent.extend({
 	// config variables and their default values
-	position: {
-        x: 0,
-        y: 0
-    },
-    offset: {
-    	x: 0,
-    	y: 0
-    },
-    health: {
-    	current: 100, // current health
-    	min: 0, // minimum health - curent < minimum -> Lucid.Entity.STATE.DEAD
-    	max: 100 // maximum health
-    },
-    tileSize: {
-    	width: 0,
-    	height: 0
-    },
+	positionX: 0,
+    positionY: 0,
+    positionZ: 0,
+
+    offsetX: 0,
+    offsetY: 0,
+    offsetZ: 0,
+
+    healthCurrent: 100, // current health
+    healthMin: 0, // minimum health - curent < minimum -> Lucid.Entity.STATE.DEAD
+    healthMax: 100, // maximum health
+
+    width: 0,
+    height: 0,
+
 	name: "Unknown", // name
 	speed: 1, // speed
 	vulnerable: 1,
 	weight: 80, // weight in kilograms
+	camera: null,
+	render: true, // determines if the content is rendered
 
 	// local variables
 	controls: {}, // registered controls

@@ -5,16 +5,14 @@
  */
 Lucid.Camera = BaseComponent.extend({
 	// config variables and their default values
+	positionX: 0,
+    positionY: 0,
+
+    offsetX: 0,
+    offsetY: 0,
 
 	// local variables
-	position: {
-        x: 0,
-        y: 0
-    },
-    offset: {
-    	x: 0,
-    	y: 0
-    },
+
 	// TODO: remove this
 	// this is just quick & dirty controls implementation
 	// usually this should be done using a Control component and accessing the Camera.x / Camera.y
@@ -73,16 +71,16 @@ Lucid.Camera = BaseComponent.extend({
 		for (var key in this.pressedKeys) {
 			if (this.pressedKeys[key] == true) {
 				if (key == 38) {
-					this.position.y -= 1;
+					this.positionY -= 1;
 				}
 				if (key == 39) {
-					this.position.x += 1;
+					this.positionX += 1;
 				}
 				if (key == 40) {
-					this.position.y += 1;
+					this.positionY += 1;
 				}
 				if (key == 37) {
-					this.position.x -= 1;
+					this.positionX -= 1;
 				}
 			}
 		}

@@ -47,9 +47,10 @@ Lucid.data.maps.map1 = {
 					data: [
 						{
 							name: "EntityFighter",
-							x: 300,
-							y: 300,
-							colliding: 1
+							positionX: 300,
+							positionY: 300,
+							colliding: 1,
+							render: 1
 							// we could go crazy here with a lot of editor config fields... but we dont :D
 						}
 					]
@@ -68,16 +69,16 @@ Lucid.data.maps.map1 = {
 							name: "LayerEventMyEvent", // this is the variable name of the object which will be called
 							width: 10,
 							height: 10,
-							x: 100,
-							y: 100
+							positionX: 100,
+							positionY: 100
 						},
 						{
 							type: Lucid.BaseLayer.EVENTS.PLAYER_SPAWN,
 							name: "",
 							width: 10,
 							height: 10,
-							x: 200,
-							y: 200
+							positionX: 200,
+							positionY: 200
 						}
 					]
 				}
@@ -92,7 +93,7 @@ Lucid.data.maps.map1 = {
 					type: Lucid.BaseLayer.TYPE.TILESET,
 					effects: [],
 					data: [
-						5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5,
+						5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
 						5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
 						5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
 						5, 0, 0, 6, 0, 0, 0, 0, 0, 6, 0, 5,
@@ -102,8 +103,8 @@ Lucid.data.maps.map1 = {
 						5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
 						5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
 						5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-						5, 5, 5, 0, 6, 5, 5, 5, 5, 5, 5, 5,
-						5, 5, 5, 0, 0, 4, 4, 4, 4, 4, 4, 4
+						5, 5, 5, 0, 6, 0, 5, 5, 5, 5, 5, 5,
+						5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0
 					]
 				}
 			},

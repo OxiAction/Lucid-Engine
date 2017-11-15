@@ -7,6 +7,7 @@ Lucid.BaseLayer = BaseComponent.extend({
 	z: 0, // z-index!
 	id: null,
 	map: null,
+	camera: null,
 	image: null,
 	type: null,
 	data: null,
@@ -55,7 +56,6 @@ Lucid.BaseLayer = BaseComponent.extend({
 			!this.map ||
 			!this.camera ||
 			!this.data ||
-			!this.image ||
 			!this.render
 			) {
 			return false;

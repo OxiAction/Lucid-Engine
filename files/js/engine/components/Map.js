@@ -31,7 +31,7 @@ Lucid.Map = BaseComponent.extend({
 		this.componentName = "Map";
 		
 		this._super(config);
-		
+
 		return true;
 	},
 
@@ -119,7 +119,7 @@ Lucid.Map = BaseComponent.extend({
 				this.layers[i].config.map = this;
 				// TODO - tileSets, entitySet... seems a bit too static - maybe we have other types?
 				// tileset reference
-				this.layers[i].config.image = this.tileSet;
+				// this.layers[i].config.image = this.tileSet;
 				this.engine.createAddLayer(this.layers[i].config);
 			} else {
 				Lucid.Utils.error("Map @ build: tried to createAddLayer in Engine but Layer.config or Layer.id is not set!");
@@ -179,6 +179,14 @@ Lucid.Map = BaseComponent.extend({
 
 	setEngine: function(value) {
 		this.engine = value;
+	},
+
+	getTileSet: function() {
+		return this.tileSet;
+	},
+
+	setTileSet: function(value) {
+		this.tileSet = value;
 	}
 });
 

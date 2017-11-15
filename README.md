@@ -90,8 +90,8 @@ var engine = new Lucid.Engine();
 TODO...
 
 ## Installation
-For local testing, please use the latest Firefox version! 
-You will have the best results / performance with [[Firefox Quantum]](https://www.mozilla.org/en-US/firefox/).
+For local testing, please use the latest Firefox version!<br />
+You will have the best results / performance with [[Firefox Quantum]](https://www.mozilla.org/en-US/firefox/).<br />
 You may encounter some warnings in the console when loading files, but those are just warnings and wont appear when the project runs on a proper server.
 
 ### Dependencies (third party libraries)
