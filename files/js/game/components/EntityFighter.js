@@ -26,6 +26,7 @@ var EntityFighter = Lucid.Entity.extend({
     },
 
     loadTileSet: function(filePath) {
+      
       if (filePath == undefined) {
         filePath = "playground/entity_fighter.png";
       }

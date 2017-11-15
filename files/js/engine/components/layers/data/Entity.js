@@ -158,6 +158,11 @@ Lucid.Entity = BaseComponent.extend({
 		this._super(value);
 	},
 
+	/**
+	 * Gets the canvas.
+	 *
+	 * @return     {<type>}  The canvas.
+	 */
 	getCanvas: function() {
 		return this.canvas;
 	}

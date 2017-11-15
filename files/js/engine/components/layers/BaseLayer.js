@@ -1,6 +1,6 @@
 /**
  * Engine default BaseLayer.
- * Use this as a base for new Layers.
+ * Use this as base for new Layers.
  */
 Lucid.BaseLayer = BaseComponent.extend({
 	// config variables and their default values

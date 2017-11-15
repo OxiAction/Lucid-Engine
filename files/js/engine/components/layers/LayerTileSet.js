@@ -102,6 +102,11 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 		return this.canvas;
 	},
 
+	/**
+	 * Resize.
+	 *
+	 * @param      {object}  config  The configuration.
+	 */
 	resize: function(config) {
 		this._super(config);
 	},

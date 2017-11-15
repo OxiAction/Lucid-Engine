@@ -136,6 +136,15 @@ Lucid.Item = BaseComponent.extend({
 		// TODO: enable / disable controls.
 
 		this._super(value);
+	},
+
+	/**
+	 * Gets the canvas.
+	 *
+	 * @return     {<type>}  The canvas.
+	 */
+	getCanvas: function() {
+		return this.canvas;
 	}
 });
 
