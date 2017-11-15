@@ -1,7 +1,7 @@
 /**
-* Game custom EntityFighter - extends Entity.
+* Game custom EntityFighter - extends BaseEntity.
 */
-var EntityFighter = Lucid.Entity.extend({
+var EntityFighter = Lucid.BaseEntity.extend({
     // config variables and their default values
     // ...
 

@@ -71,7 +71,7 @@ Lucid.Map = BaseComponent.extend({
 
 	tileSetLoaded: function(event, loaderItem) {
 		Lucid.Utils.log("Map @ loadTileset: loaded tileset");
-    	$(document).off(Lucid.Entity.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
+    	$(document).off(Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
         this._tileSetLoaded = true;
         this.tileSet = loaderItem.getData();
         this.checkLoadingState();

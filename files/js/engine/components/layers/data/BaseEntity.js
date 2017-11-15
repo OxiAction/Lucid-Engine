@@ -1,14 +1,12 @@
-// TODO: rename to BaseItem! Extend the BaseEntity.
-
 /**
- * Engine default Item. This Component is Layer related and represented by the
- * Layer.data value(s).
+ * Engine default BaseEntity. This Component is Layer related and represented by
+ * the Layer.data value(s).
  *
- * @type       {Entity}
+ * @type       {BaseEntity}
  */
-Lucid.Item = BaseComponent.extend({
+Lucid.BaseEntity = BaseComponent.extend({
 	// config variables and their default values
-	positionX: 0,
+    positionX: 0,
     positionY: 0,
     positionZ: 0,
 
@@ -29,6 +27,7 @@ Lucid.Item = BaseComponent.extend({
 	weight: 80, // weight in kilograms
 	camera: null,
 	render: true, // determines if the content is rendered
+	colliding: true, // does it collide with collisionData?
 
 	// local variables
 	controls: {}, // registered controls
@@ -44,7 +43,7 @@ Lucid.Item = BaseComponent.extend({
 	  * @return     {boolean}  Returns true on success.
 	  */
 	init: function(config) {
-		this.componentName = "Entity";
+		this.componentName = "BaseEntity";
 		
 		this._super(config);
 
@@ -65,23 +64,44 @@ Lucid.Item = BaseComponent.extend({
 	        id: "tiles",
 	        dataType: Lucid.Loader.TYPE.IMAGE,
 	        filePath: filePath,
-	        eventSuccessName: Lucid.Entity.EVENT.LOADED_TILESET_FILE_SUCCESS,
-	        eventErrorName: Lucid.Entity.EVENT.LOADED_TILESET_FILE_ERROR
+	        eventSuccessName: Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_SUCCESS,
+	        eventErrorName: Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_ERROR
 	    });
 
 	    Lucid.Loader.add(loaderItem);
 
-	    $(document).on(Lucid.Entity.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace, this.tileSetLoaded.bind(this));
+	    $(document).on(Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace, this.tileSetLoaded.bind(this));
 	},
 
 	tileSetLoaded: function(event, loaderItem) {
-		Lucid.Utils.log("Entity @ loadTileset: loaded tileset");
-    	$(document).off(Lucid.Entity.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
+		Lucid.Utils.log("BaseEntity @ loadTileset: loaded tileset");
+    	$(document).off(Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
         this._tileSetLoaded = true;
         this.tileSet = loaderItem.getData();
         // this.checkLoadingState();
 	},
 
+	/**
+	 * Determines if valid.
+	 *
+	 * @return     {boolean}  True if valid, False otherwise.
+	 */
+	isValid: function() {
+		if (
+			!this.camera ||
+			!this.tileSet
+			) {
+			return false;
+		} else {
+			return true;
+		}
+	},
+
+	/**
+	 * Resize.
+	 *
+	 * @param      {Object}  config  The configuration.
+	 */
 	resize: function(config) {
 		this.canvas.width = config.wWidth;
 		this.canvas.height = config.wHeight;
@@ -91,21 +111,20 @@ Lucid.Item = BaseComponent.extend({
 	 * Draws a Canvas.
 	 *
 	 * @param      {number}  delta   The delta.
-	 * @param      {Camera}  camera  The Camera.
 	 * @param      {Object}  config  The configuration
 	 * @return     {Canvas}  Returns the drawn Canvas.
 	 */
-	draw: function(delta, camera, config) {
-		if (camera === undefined) {
-			return;
+	draw: function(delta, config) {
+		
+		if (!this.isValid()) {
+			return this.canvas;
 		}
 
-		var tileSizeWidth = this.tileSize.width;
-		var tileSizeHeight = this.tileSize.height;
-
+		var camera = this.camera;
 		var cameraWidth = camera.width;
 		var cameraHeight = camera.height;
 
+		var canvasContext = this.canvasContext;
 		canvasContext.width = cameraWidth;
 		canvasContext.height = cameraHeight;
 		canvasContext.clearRect(0, 0, cameraWidth, cameraHeight);
@@ -114,13 +133,15 @@ Lucid.Item = BaseComponent.extend({
 			this.tileSet,
 			0, // source x
 			0, // source y
-			tileSizeWidth, // source width
-			tileSizeHeight, // source height
-			100,  // target x
-			100, // target y
-			tileSizeWidth, // target width
-			tileSizeHeight // target height
+			this.width, // source width
+			this.height, // source height
+			this.positionX,  // target x
+			this.positionY, // target y
+			this.width, // target width
+			this.height // target height
 		);
+
+		return this.canvas;
 	},
 
 	/**
@@ -146,7 +167,7 @@ Lucid.Item = BaseComponent.extend({
 	/**
 	 * Gets the canvas.
 	 *
-	 * @return     {<type>}  The canvas.
+	 * @return     {Canvas}  The canvas.
 	 */
 	getCanvas: function() {
 		return this.canvas;
@@ -154,27 +175,25 @@ Lucid.Item = BaseComponent.extend({
 });
 
 // forms setup for the editor
-Lucid.Entity.FORMS = {
-	position: {
-		x: "int",
-		y: "int"
-	},
+Lucid.BaseEntity.FORMS = {
+	positionX: "integer",
+	positionY: "integer",
+	positionZ: "integer",
 	name: "string",
-	speed: "number",
-	vulnerable: "boolean",
-	weight: "number"
+	colliding: "boolean",
+	render: "boolean"
 };
 
 // event constants
-Lucid.Entity.EVENT = {
-	LOADED_TILESET_FILE_SUCCESS: "EntityLoadedTileSetFileSuccess",
-	LOADED_TILESET_FILE_ERROR: "EntityLoadedTileSetFileError",
-	LOADED_ASSETS_SUCCESS: "EntityLoadedAssetsSuccess",
-	LOADED_ASSETS_ERROR: "EntityLoadedAssetsError"
+Lucid.BaseEntity.EVENT = {
+	LOADED_TILESET_FILE_SUCCESS: "BaseEntityLoadedTileSetFileSuccess",
+	LOADED_TILESET_FILE_ERROR: "BaseEntityLoadedTileSetFileError",
+	LOADED_ASSETS_SUCCESS: "BaseEntityLoadedAssetsSuccess",
+	LOADED_ASSETS_ERROR: "BaseEntityLoadedAssetsError"
 };
 
 // some states for entities
-Lucid.Entity.STATE = {
+Lucid.BaseEntity.STATE = {
 	IDLE: "idle",
 	WALK: "walk",
 	RUN: "run",

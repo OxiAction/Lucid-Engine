@@ -3,7 +3,8 @@
 var Lucid = Lucid || {};
 
 Lucid.data = {
-	maps: {}
+	maps: {},
+	engine: null
 }
 
 /**
@@ -62,6 +63,13 @@ Lucid.Engine = BaseComponent.extend({
 	  * @return     {boolean}  Returns true on success.
 	  */
 	init: function(config) {
+		if (Lucid.data.engine != null) {
+			Lucid.Utils.error("Engine @ init: you can not instantiate the Engine more then once!");
+			return false;
+		} else {
+			Lucid.data.engine = this;
+		}
+
 		this.componentName = "Engine";
 		
 		this._super(config);
@@ -271,6 +279,8 @@ Lucid.Engine = BaseComponent.extend({
 		if (this.map) {
 			this.destroyMap();
 		}
+
+		Lucid.data.engine = null;
 
 		return true;
 	},
