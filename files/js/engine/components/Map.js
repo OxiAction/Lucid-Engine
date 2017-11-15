@@ -31,7 +31,7 @@ Lucid.Map = BaseComponent.extend({
 		this.componentName = "Map";
 		
 		this._super(config);
-		console.log(this);
+		
 		return true;
 	},
 

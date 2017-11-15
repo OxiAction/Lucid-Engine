@@ -86,6 +86,12 @@ Lucid.Utils = function() {
     $.loadFile = function (url, dataType, success, error) {
         jQuery.ajax({
             url: url,
+            // fix "XML Parsing Error: not well-formed" warnings when loading stuff locally
+            beforeSend: function(xhr){
+                if (xhr.overrideMimeType && (dataType == "script" || dataType == "application/json")) {
+                  xhr.overrideMimeType("application/json");
+                }
+            },
             dataType: dataType,
             success: success,
             error: error,
