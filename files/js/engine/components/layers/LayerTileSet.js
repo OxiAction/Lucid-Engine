@@ -37,18 +37,21 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 	draw: function(delta, config) {
 		
 		if (!this.isValid()) {
-			return this.canvas;
+			return this.canvas; // TODO: shouldnt this be null? Because we are not clearRect-ing.
 		}
 
 		var map = this.map;
-		var camera = this.camera;
+		var tileSet = map.getTileSet();
 
+		if (!tileSet) {
+			return this.canvas;
+		}
+
+		var camera = this.camera;
 		var cameraWidth = camera.width;
 		var cameraHeight = camera.height;
 
 		var canvasContext = this.canvasContext;
-		
-		// draw stuff
 		canvasContext.width = cameraWidth;
 		canvasContext.height = cameraHeight;
 		canvasContext.clearRect(0, 0, cameraWidth, cameraHeight);
@@ -57,14 +60,14 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 		var rows = map.rows;
 		var tileSize = map.tileSize;
 
-		var startCol = Math.floor(camera.position.x / tileSize);
+		var startCol = Math.floor(camera.positionX / tileSize);
 		var endCol = Math.min(cols - 1, (startCol + cameraWidth / tileSize) + 1);
 
-		var startRow = Math.floor(camera.position.y / tileSize);
+		var startRow = Math.floor(camera.positionY / tileSize);
 		var endRow = Math.min(rows - 1, (startRow + cameraHeight / tileSize) + 1);
 
-		var offsetX = -camera.position.x + startCol * tileSize;
-		var offsetY = -camera.position.y + startRow * tileSize;
+		var offsetX = -camera.positionX + startCol * tileSize;
+		var offsetY = -camera.positionY + startRow * tileSize;
 
 		for (var col = startCol; col <= endCol; ++col) {
 			for (var row = startRow; row <= endRow; ++row) {
@@ -73,13 +76,13 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 				var x = Math.round((col - startCol) * tileSize + offsetX);// 100;
 				var y = Math.round((row - startRow) * tileSize + offsetY);
 
-				if (x >= -camera.position.x && y >= -camera.position.y) {
+				if (x >= -camera.positionX && y >= -camera.positionY) {
 					var tileIndex = row * cols + col;
 					var tileType = this.getTile(tileIndex);
 
 					if (tileType !== 0) { // 0 => empty tile
 						canvasContext.drawImage(
-							this.image, // image
+							tileSet, // the tileSet image
 							(tileType - 1) * tileSize, // source x
 							0, // source y
 							tileSize, // source width

@@ -1,3 +1,5 @@
+// TODO: rename to BaseEntity!
+
 /**
  * Engine default Entity. This Component is Layer related and represented by the
  * Layer.data value(s).
@@ -6,27 +8,27 @@
  */
 Lucid.Entity = BaseComponent.extend({
 	// config variables and their default values
-	position: {
-        x: 0,
-        y: 0
-    },
-    offset: {
-    	x: 0,
-    	y: 0
-    },
-    health: {
-    	current: 100, // current health
-    	min: 0, // minimum health - curent < minimum -> Lucid.Entity.STATE.DEAD
-    	max: 100 // maximum health
-    },
-    tileSize: {
-    	width: 0,
-    	height: 0
-    },
+    positionX: 0,
+    positionY: 0,
+    positionZ: 0,
+
+    offsetX: 0,
+    offsetY: 0,
+    offsetZ: 0,
+
+    healthCurrent: 100, // current health
+    healthMin: 0, // minimum health - curent < minimum -> Lucid.Entity.STATE.DEAD
+    healthMax: 100, // maximum health
+
+    width: 0,
+    height: 0,
+
 	name: "Unknown", // name
 	speed: 1, // speed
 	vulnerable: 1,
 	weight: 80, // weight in kilograms
+	camera: null,
+	render: true, // determines if the content is rendered
 
 	// local variables
 	controls: {}, // registered controls
@@ -81,24 +83,42 @@ Lucid.Entity = BaseComponent.extend({
 	},
 
 	/**
+	 * Determines if valid.
+	 *
+	 * @return     {boolean}  True if valid, False otherwise.
+	 */
+	isValid: function() {
+		if (
+			!this.camera ||
+			!this.tileSet
+			) {
+			return false;
+		} else {
+			return true;
+		}
+	},
+
+	/**
 	 * Draws a Canvas.
 	 *
 	 * @param      {number}  delta   The delta.
-	 * @param      {Camera}  camera  The Camera.
 	 * @param      {Object}  config  The configuration
 	 * @return     {Canvas}  Returns the drawn Canvas.
 	 */
-	draw: function(delta, camera, config) {
-		if (camera === undefined) {
-			return;
+	draw: function(delta, config) {
+		
+		if (!this.isValid()) {
+			return this.canvas;
 		}
 
-		var tileSizeWidth = this.tileSize.width;
-		var tileSizeHeight = this.tileSize.height;
+		var width = this.width;
+		var height = this.height;
 
+		var camera = this.camera;
 		var cameraWidth = camera.width;
 		var cameraHeight = camera.height;
 
+		var canvasContext = this.canvasContext;
 		canvasContext.width = cameraWidth;
 		canvasContext.height = cameraHeight;
 		canvasContext.clearRect(0, 0, cameraWidth, cameraHeight);
@@ -107,13 +127,15 @@ Lucid.Entity = BaseComponent.extend({
 			this.tileSet,
 			0, // source x
 			0, // source y
-			tileSizeWidth, // source width
-			tileSizeHeight, // source height
+			width, // source width
+			height, // source height
 			100,  // target x
 			100, // target y
-			tileSizeWidth, // target width
-			tileSizeHeight // target height
+			width, // target width
+			height // target height
 		);
+
+		return this.canvas;
 	},
 
 	/**
@@ -134,6 +156,10 @@ Lucid.Entity = BaseComponent.extend({
 		// TODO: enable / disable controls.
 
 		this._super(value);
+	},
+
+	getCanvas: function() {
+		return this.canvas;
 	}
 });
 
