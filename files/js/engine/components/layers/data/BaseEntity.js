@@ -21,6 +21,9 @@ Lucid.BaseEntity = BaseComponent.extend({
     width: 0,
     height: 0,
 
+    sourceX: 0, // tileSet position X
+    sourceY: 0, // tileSet position Y
+
 	name: "Unknown", // name
 	speed: 1, // speed
 	vulnerable: 1,
@@ -131,8 +134,8 @@ Lucid.BaseEntity = BaseComponent.extend({
 
 		canvasContext.drawImage(
 			this.tileSet,
-			0, // source x
-			0, // source y
+			this.sourceX, // source x
+			this.sourceY, // source y
 			this.width, // source width
 			this.height, // source height
 			this.positionX,  // target x
@@ -142,6 +145,10 @@ Lucid.BaseEntity = BaseComponent.extend({
 		);
 
 		return this.canvas;
+	},
+
+	destroy: function() {
+
 	},
 
 	/**
