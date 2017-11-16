@@ -17,9 +17,9 @@ var EntityFighter = Lucid.BaseEntity.extend({
 	keyUpHandler: null,
 
 	init: function(config) {
-		this.componentName = "EntityFighter";
-
 		this._super(config);
+		this.componentName = "EntityFighter";
+		this.componentNamespace = ".EntityFighter";
 
 		this.width = 32;
 		this.height = 48;

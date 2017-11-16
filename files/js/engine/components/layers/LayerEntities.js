@@ -78,9 +78,33 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 
 		var canvas;
 		var entity;
-		for (var i = 0; i < this.entities.length; ++i) {
+		var i;
+
+		var collisionEntities = [];
+		for (i = 0; i < this.entities.length; ++i) {
+			entity = this.entities[i];
+			if (
+				entity.colliding &&
+				entity.render &&
+				entity.positionX >= camera.positionX &&
+				entity.positionX <= camera.positionX + camera.width &&
+				entity.positionY >= camera.positionY &&
+				entity.positionY <= camera.positionY + camera.height
+				) {
+				collisionEntities.push(entity);
+			}
+		}
+		var j = 0;
+		for (i = 0; i < this.entities.length; ++i) {
 			entity = this.entities[i];
 			if (entity.render) {
+
+				if (entity.colliding) {
+					for (j = 0; j < collisionEntities.length; ++j) {
+						this.collide(entity, collisionEntities[j]);
+					}
+				}
+
 				entity.draw(delta, config);
 				canvas = entity.getCanvas();
 				if (canvas != null) {
@@ -90,6 +114,52 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 		}
 
 		return this.canvas;
+	},
+
+
+	collide: function(e1, e2) {
+		
+		if (!e1.moved || e1 === e2) {
+			return;
+		}
+
+		// using https://en.wikipedia.org/wiki/Minkowski_addition
+		// this should be super fast!
+
+		var w = 0.5 * (e1.width + e2.width);
+		var h = 0.5 * (e1.height + e2.height);
+		var dx = e1.positionX - e2.positionX;
+		var dy = e1.positionY - e2.positionY;
+
+		if (Math.abs(dx) <= w && Math.abs(dy) <= h) {
+			
+			var wy = w * dy;
+			var hx = h * dx;
+
+			if (wy > hx) {
+				if (wy > -hx) {
+					// top
+					// console.log("top" + e1.componentName);
+					e1.positionY = e2.positionY + e2.height;
+				}
+				else {
+					// right
+					// console.log("right" + e1.componentName);
+					e1.positionX = e2.positionX - e1.width;
+				}
+			} else {
+				if (wy > -hx) {
+					// left
+					// console.log("left" + e1.componentName);
+					e1.positionX = e2.positionX + e2.width;
+				}
+				else {
+					// bottom
+					// console.log("bottom" + e1.componentName);
+					e1.positionY = e2.positionY - e1.height;
+				}
+			}
+		}
 	},
 
 	/**

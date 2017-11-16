@@ -68,6 +68,14 @@ Lucid.data.maps.map1 = {
 							colliding: 1,
 							render: 1
 							// we could go crazy here with a lot of editor config fields... but we dont :D
+						},
+						{
+							name: "EntityPassant",
+							positionX: 300,
+							positionY: 300,
+							colliding: 1,
+							render: 1
+							// we could go crazy here with a lot of editor config fields... but we dont :D
 						}
 					]
 				}

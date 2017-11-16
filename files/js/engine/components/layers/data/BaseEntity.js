@@ -8,7 +8,6 @@ Lucid.BaseEntity = BaseComponent.extend({
 	// config variables and their default values
     positionX: 0,
     positionY: 0,
-    positionZ: 0,
 
     offsetX: 0,
     offsetY: 0,
@@ -39,6 +38,10 @@ Lucid.BaseEntity = BaseComponent.extend({
 	canvas: null,
 	canvasContext: null,
 
+	moved: false, // required for collision detection
+	lastPositionX: 0,
+	lastPositionY: 0,
+
 	/**
 	  * Automatically called when instantiated.
 	  *
@@ -53,6 +56,9 @@ Lucid.BaseEntity = BaseComponent.extend({
 		this.canvas = document.createElement("canvas");
 		this.canvasContext = this.canvas.getContext("2d");
 
+		this.lastPositionX = this.positionX;
+		this.lastPositionY = this.positionY;
+
 		return true;
 	},
 
@@ -64,20 +70,20 @@ Lucid.BaseEntity = BaseComponent.extend({
 		this._tileSetLoaded = false;
 
 		var loaderItem = new Lucid.LoaderItem({
-	        id: "tiles",
+	        id: this.componentName,
 	        dataType: Lucid.Loader.TYPE.IMAGE,
 	        filePath: filePath,
-	        eventSuccessName: Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_SUCCESS,
-	        eventErrorName: Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_ERROR
+	        eventSuccessName: Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace,
+	        eventErrorName: Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_ERROR + this.componentNamespace
 	    });
 
-	    Lucid.Loader.add(loaderItem);
-
 	    $(document).on(Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace, this.tileSetLoaded.bind(this));
+
+	    Lucid.Loader.add(loaderItem);
 	},
 
 	tileSetLoaded: function(event, loaderItem) {
-		Lucid.Utils.log("BaseEntity @ loadTileset: loaded tileset");
+		Lucid.Utils.log("BaseEntity @ loadTileset: loaded tileset " + loaderItem.id);
     	$(document).off(Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
         this._tileSetLoaded = true;
         this.tileSet = loaderItem.getData();
@@ -143,6 +149,15 @@ Lucid.BaseEntity = BaseComponent.extend({
 			this.width, // target width
 			this.height // target height
 		);
+
+		if (this.lastPositionX == this.positionX &&
+			this.lastPositionY == this.positionY) {
+			this.moved = false;
+		} else {
+			this.moved = true;
+			this.lastPositionX = this.positionX;
+			this.lastPositionY = this.positionY;
+		}
 
 		return this.canvas;
 	},
