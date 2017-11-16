@@ -2,23 +2,23 @@
 * Game custom ui Layer - extends Layer.
 */
 var LayerUI = Lucid.BaseLayer.extend({
-    // config variables and their default values
-    // ...
+	// config variables and their default values
+	// ...
 
-    // local variables
-    // ...
-    
-    /**
-      * Automatically called when instantiated.
-      *
-      * @param      {Object}   config  The configuration.
-      * @return     {boolean}  Returns true on success.
-      */
-    init: function(config) {
-        this.componentName = "LayerMenu";
+	// local variables
+	// ...
 
-        this._super(config);
+	/**
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {boolean}  Returns true on success.
+	 */
+	init: function(config) {
+		this.componentName = "LayerMenu";
 
-        return true;
-    }
+		this._super(config);
+
+		return true;
+	}
 });

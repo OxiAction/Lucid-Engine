@@ -132,14 +132,17 @@ Lucid.BaseEntity = BaseComponent.extend({
 		canvasContext.height = cameraHeight;
 		canvasContext.clearRect(0, 0, cameraWidth, cameraHeight);
 
+		var offsetX = 0;//-camera.positionX;// = -camera.positionX;// + startCol * tileSize;
+		var offsetY = 0;//-camera.positiony;// -camera.positionY;// + startRow * tileSize;
+
 		canvasContext.drawImage(
 			this.tileSet,
 			this.sourceX, // source x
 			this.sourceY, // source y
 			this.width, // source width
 			this.height, // source height
-			this.positionX,  // target x
-			this.positionY, // target y
+			this.positionX - camera.positionX,  // target x
+			this.positionY - camera.positionY, // target y
 			this.width, // target width
 			this.height // target height
 		);

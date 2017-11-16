@@ -20,6 +20,8 @@ Lucid.Camera = BaseComponent.extend({
 	keyDownHandler: null,
 	keyUpHandler: null,
 
+	followObject: null,
+
 	/**
 	  * Automatically called when instantiated.
 	  *
@@ -31,10 +33,13 @@ Lucid.Camera = BaseComponent.extend({
 		
 		this._super(config);
 
-		this.keyDownHandler = this.onKeyDown.bind(this);
-		window.addEventListener("keydown", this.keyDownHandler);
-    	this.keyUpHandler = this.onKeyUp.bind(this);
-    	window.addEventListener("keyup", this.keyUpHandler);
+		// TODO: remove this
+		// this is just quick & dirty controls implementation
+		// usually this should be done using a Control component and accessing the Camera.x / Camera.y
+		// this.keyDownHandler = this.onKeyDown.bind(this);
+		// window.addEventListener("keydown", this.keyDownHandler);
+		// this.keyUpHandler = this.onKeyUp.bind(this);
+		// window.addEventListener("keyup", this.keyUpHandler);
 
 		return true;
 	},
@@ -83,6 +88,25 @@ Lucid.Camera = BaseComponent.extend({
 					this.positionX -= 1;
 				}
 			}
+		}
+
+		if (this.followObject != null) {
+  			// set new camera position and ease it a bit
+  			this.positionX += (this.followObject.positionX - this.positionX - (this.width / 2) + (this.followObject.width / 2)) * 0.01;
+  			this.positionY += (this.followObject.positionY - this.positionY - (this.height / 2) + (this.followObject.height / 2)) * 0.01;
+		}
+	},
+
+	/**
+	 * Tells the Camera to follow a certain object.
+	 * Important: The object must have positionX / positionY / width / height properties.
+	 *
+	 * @param      {Object}  object  The object
+	 */
+	setFollowObject: function(object) {
+		if ("positionX" in object && "positionY" in object && "width" in object && "height" in object) {
+			this.followObject = object;
+			// TODO: remove possible controls from Camera when setting to follow mode
 		}
 	},
 

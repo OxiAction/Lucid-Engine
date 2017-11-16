@@ -43,7 +43,7 @@ function Game() {
         name: "Player 1"
     });
 
-    var playerCharacter = new EntityFighter();
+    // var playerCharacter = new EntityFighter();
     
     // custom layer for menu - persistent
     var layerMenu = engine.createAddLayer({

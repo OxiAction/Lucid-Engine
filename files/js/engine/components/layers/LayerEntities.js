@@ -104,7 +104,7 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 			entity = this.entities[i];
 			entity.resize(config);
 		}
-		
+
 		this._super(config);
 	},
 

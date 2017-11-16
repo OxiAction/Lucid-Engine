@@ -42,10 +42,60 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 
 		var map = this.map;
 		var tileSet = map.getTileSet();
-		
+
 		if (!tileSet) {
 			return this.canvas;
 		}
+
+		var camera = this.camera;
+		var cameraWidth = camera.width;
+		var cameraHeight = camera.height;
+
+		// if we dont parseInt we could have floating numbers for pixel positions - which is not good :D
+		var cameraPositionX = parseInt(camera.positionX);
+		var cameraPositionY = parseInt(camera.positionY);
+
+		var canvasContext = this.canvasContext;
+		canvasContext.width = cameraWidth;
+		canvasContext.height = cameraHeight;
+		canvasContext.clearRect(0, 0, cameraWidth, cameraHeight);
+		
+		var cols = map.cols;
+		var rows = map.rows;
+		var tileSize = map.tileSize;
+
+		var deltaX = Math.floor(cameraPositionX / tileSize);
+		var startCol = Math.max(0, deltaX);
+		var endCol = Math.min(cols - 1, (cameraWidth / tileSize) + (deltaX + 1));
+
+		var deltaY = Math.floor(cameraPositionY / tileSize);
+		var startRow = Math.max(0, deltaY);
+		var endRow = Math.min(rows - 1, (cameraHeight / tileSize) + (deltaY + 1)); // + 1 is need because we used Math.floor for delta!
+
+		for (var column = startCol; column <= endCol; ++column) {
+			for (var row = startRow; row <= endRow; ++row) {
+
+				var tileNumber = this.data[row][column];
+
+				// zero => empty tile
+				if (tileNumber !== 0) {
+					canvasContext.drawImage(
+						tileSet, // the tileSet image
+						(tileNumber - 1) * tileSize, // source x
+						0, // source y
+						tileSize, // source width
+						tileSize, // source height
+						column * tileSize - cameraPositionX,  // target x
+						row * tileSize - cameraPositionY, // target y
+						tileSize, // target width
+						tileSize // target height
+					);
+				}
+			}
+		}
+		
+		/*
+		// legacy algorithm:
 
 		var camera = this.camera;
 		var cameraWidth = camera.width;
@@ -96,8 +146,7 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 				}
 			}
 		}
-
-		// ...
+		*/
 
 		return this.canvas;
 	},
