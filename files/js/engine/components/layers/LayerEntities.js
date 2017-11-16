@@ -35,7 +35,6 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 
 					// instanciate entity! Apply the data object as config parameter
 					var entity = new window[data.name](data);
-					console.log(entity);
 					// start loading its assets
 					entity.loadTileSet();
 					// add to our entities render list

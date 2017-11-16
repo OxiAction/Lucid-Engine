@@ -1,6 +1,9 @@
 /**
-* Engine default Control.
-*/
+ * Engine default Control.
+ * How it SHOULD work:
+ * - can be attached to any Object
+ * - Object requires positionX / positionY properties
+ */
 Lucid.Control = BaseComponent.extend({
 	// config variables and their default values
 	key: null, // keycode

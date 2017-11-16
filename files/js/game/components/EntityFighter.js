@@ -84,17 +84,22 @@ var EntityFighter = Lucid.BaseEntity.extend({
 	draw: function(delta, config) {
 		for (var key in this.pressedKeys) {
 			if (this.pressedKeys[key] == true) {
-				if (key == 38) {
-					this.positionY -= 1;
-				}
-				if (key == 39) {
+				if (key == 39) { // right
 					this.positionX += 1;
+					this.sourceY = 96;
 				}
-				if (key == 40) {
-					this.positionY += 1;
-				}
-				if (key == 37) {
+				if (key == 37) { // left
 					this.positionX -= 1;
+					this.sourceY = 48;
+				}
+
+				if (key == 40) { // down
+					this.positionY += 1;
+					this.sourceY = 0;
+				}
+				if (key == 38) { // up
+					this.positionY -= 1;
+					this.sourceY = 144;
 				}
 			}
 		}
