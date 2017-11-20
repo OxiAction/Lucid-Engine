@@ -18,14 +18,15 @@ The following covers the structured project tasks. Every task is followed by the
 
 * graphics (layer) implementation - **medium**
 * entity implmementation - **easy**
+* controls implementation - **easy**
+* collision implementation - **medium**
+* A* implementation (pathfinding) - **medium**
 
 ### Open tasks (critical):
 
 * basic editor and its forms (**in progress**) - **hard**
 * final data structures for entities, maps, tilesets (**in progress** due to editor being in progress) - **easy**
-* collision implementation - **medium**
-* ai implementation which also includes some form of Dijkstra algorithm - **medium**
-* controls implementation - **easy**
+* ai implementation - **medium** (this and A* are now two seperate tasks! A* is done already)
 
 ### Optional tasks (nice to have):
 
