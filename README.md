@@ -17,6 +17,7 @@ The following covers the structured project tasks. Every task is followed by the
 #### Milestones 2
 
 * graphics (layer) implementation - **medium**
+* entity implmementation - **easy**
 
 ### Open tasks (critical):
 
@@ -24,7 +25,6 @@ The following covers the structured project tasks. Every task is followed by the
 * final data structures for entities, maps, tilesets (**in progress** due to editor being in progress) - **easy**
 * collision implementation - **medium**
 * ai implementation which also includes some form of Dijkstra algorithm - **medium**
-* entity implmementation - **easy**
 * controls implementation - **easy**
 
 ### Optional tasks (nice to have):
@@ -96,6 +96,6 @@ You may encounter some warnings in the console when loading files, but those are
 
 ### Dependencies (third party libraries)
 
-* John Resigs [[Class / Inheritance]](https://johnresig.com/blog/simple-javascript-inheritance/) code - which is really awesome! - required by **Engine** and **Editor**
-* [[jQuery]](https://jquery.com/) version 3.2.1+ - required by **Engine** and **Editor**
-* [[jQueryUI]](https://jqueryui.com/) version 1.12.1+ - required by **Editor**
+* John Resigs [[Inheritance Code]](https://johnresig.com/blog/simple-javascript-inheritance/)
+* [[jQuery]](https://jquery.com/) version 3.2.1+
+* [[jQueryUI]](https://jqueryui.com/) version 1.12.1+

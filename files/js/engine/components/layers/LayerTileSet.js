@@ -17,60 +17,62 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 	  * Automatically called when instantiated.
 	  *
 	  * @param      {Object}   config  The configuration.
-	  * @return     {boolean}  Returns true on success.
+	  * @return     {Boolean}  Returns true on success.
 	  */
 	init: function(config) {
 		this.componentName = "LayerTileSet";
 		
 		this._super(config);
 
+		this.checkSetMap();
+		this.checkSetCamera();
+
 		return true;
 	},
 
 	/**
-	 * Draws a Canvas.
+	 * The renderUpdate() function should simulate anything that is affected by time.
+	 * It can be called zero or more times per frame depending on the frame
+	 * rate.
 	 *
-	 * @param      {number}  delta   The delta.
-	 * @param      {Object}  config  The configuration.
-	 * @return     {Canvas}  Returns the drawn Canvas.
+	 * @param      {Number}  delta   The amount of time in milliseconds to
+	 *                               simulate in the update.
 	 */
-	draw: function(delta, config) {
+	renderUpdate: function(delta) {
 		
-		if (!this.isValid()) {
-			return this.canvas; // TODO: shouldnt this be null? Because we are not clearRect-ing.
-		}
+	},
 
-		var map = this.map;
-		var tileSet = map.getTileSet();
-
+	/**
+	 * Draw things.
+	 *
+	 * @param      {Number}  interpolationPercentage  The cumulative amount of
+	 *                                                time that hasn't been
+	 *                                                simulated yet, divided by
+	 *                                                the amount of time that
+	 *                                                will be simulated the next
+	 *                                                time renderUpdate() runs.
+	 *                                                Useful for interpolating
+	 *                                                frames.
+	 */
+	renderDraw: function(interpolationPercentage) {
+		var tileSet = this.map.getTileSet();
 		if (!tileSet) {
-			return this.canvas;
+			return;
 		}
 
-		var camera = this.camera;
-		var cameraWidth = camera.width;
-		var cameraHeight = camera.height;
-
-		// if we dont parseInt we could have floating numbers for pixel positions - which is not good :D
-		var cameraPositionX = parseInt(camera.positionX);
-		var cameraPositionY = parseInt(camera.positionY);
-
-		var canvasContext = this.canvasContext;
-		canvasContext.width = cameraWidth;
-		canvasContext.height = cameraHeight;
-		canvasContext.clearRect(0, 0, cameraWidth, cameraHeight);
+		this.canvasContext.width = this.camera.width;
+		this.canvasContext.height = this.camera.height;
+		this.canvasContext.clearRect(0, 0, this.camera.width, this.camera.height);
 		
-		var cols = map.cols;
-		var rows = map.rows;
-		var tileSize = map.tileSize;
+		var tileSize = this.map.tileSize;
 
-		var deltaX = Math.floor(cameraPositionX / tileSize);
+		var deltaX = Math.floor(this.camera.x / tileSize);
 		var startCol = Math.max(0, deltaX);
-		var endCol = Math.min(cols - 1, (cameraWidth / tileSize) + (deltaX + 1));
+		var endCol = Math.min(this.map.cols - 1, Math.floor(this.camera.width / tileSize) + (deltaX + 1));
 
-		var deltaY = Math.floor(cameraPositionY / tileSize);
+		var deltaY = Math.floor(this.camera.y / tileSize);
 		var startRow = Math.max(0, deltaY);
-		var endRow = Math.min(rows - 1, (cameraHeight / tileSize) + (deltaY + 1)); // + 1 is need because we used Math.floor for delta!
+		var endRow = Math.min(this.map.rows - 1, Math.floor(this.camera.height / tileSize) + (deltaY + 1));
 
 		for (var column = startCol; column <= endCol; ++column) {
 			for (var row = startRow; row <= endRow; ++row) {
@@ -79,82 +81,26 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 
 				// zero => empty tile
 				if (tileNumber !== 0) {
-					canvasContext.drawImage(
+					this.canvasContext.drawImage(
 						tileSet, // the tileSet image
 						(tileNumber - 1) * tileSize, // source x
 						0, // source y
 						tileSize, // source width
 						tileSize, // source height
-						column * tileSize - cameraPositionX,  // target x
-						row * tileSize - cameraPositionY, // target y
+						column * tileSize - this.camera.x,  // target x
+						row * tileSize - this.camera.y, // target y
 						tileSize, // target width
 						tileSize // target height
 					);
 				}
 			}
 		}
-		
-		/*
-		// legacy algorithm:
-
-		var camera = this.camera;
-		var cameraWidth = camera.width;
-		var cameraHeight = camera.height;
-
-		var canvasContext = this.canvasContext;
-		canvasContext.width = cameraWidth;
-		canvasContext.height = cameraHeight;
-		canvasContext.clearRect(0, 0, cameraWidth, cameraHeight);
-		
-		var cols = map.cols;
-		var rows = map.rows;
-		var tileSize = map.tileSize;
-
-		var startCol = Math.floor(camera.positionX / tileSize);
-		var endCol = Math.min(cols - 1, (startCol + cameraWidth / tileSize) + 1);
-
-		var startRow = Math.floor(camera.positionY / tileSize);
-		var endRow = Math.min(rows - 1, (startRow + cameraHeight / tileSize) + 1);
-
-		var offsetX = -camera.positionX + startCol * tileSize;
-		var offsetY = -camera.positionY + startRow * tileSize;
-
-		for (var col = startCol; col <= endCol; ++col) {
-			for (var row = startRow; row <= endRow; ++row) {
-
-				
-				var x = Math.round((col - startCol) * tileSize + offsetX);// 100;
-				var y = Math.round((row - startRow) * tileSize + offsetY);
-
-				if (x >= -camera.positionX && y >= -camera.positionY) {
-					var tileIndex = row * cols + col;
-					var tileType = this.getTile(tileIndex);
-
-					if (tileType !== 0) { // 0 => empty tile
-						canvasContext.drawImage(
-							tileSet, // the tileSet image
-							(tileType - 1) * tileSize, // source x
-							0, // source y
-							tileSize, // source width
-							tileSize, // source height
-							x,  // target x
-							y, // target y
-							tileSize, // target width
-							tileSize // target height
-						);
-					}
-				}
-			}
-		}
-		*/
-
-		return this.canvas;
 	},
 
 	/**
 	 * Resize.
 	 *
-	 * @param      {object}  config  The configuration.
+	 * @param      {Object}  config  The configuration.
 	 */
 	resize: function(config) {
 		this._super(config);
@@ -163,7 +109,7 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 	/**
 	 * Destroys the Layer and all its corresponding objects.
 	 *
-	 * @return     {boolean}  Returns true on success.
+	 * @return     {Boolean}  Returns true on success.
 	 */
 	destroy: function() {
 		return this._super();

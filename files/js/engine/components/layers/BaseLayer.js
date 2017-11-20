@@ -6,10 +6,8 @@ Lucid.BaseLayer = BaseComponent.extend({
 	// config variables and their default values
 	z: 0, // z-index!
 	id: null,
-	map: null,
-	camera: null,
-	image: null,
 	type: null,
+	image: null,
 	data: null,
 	effects: null, // effects
 	render: true, // determines if the content is rendered
@@ -19,6 +17,7 @@ Lucid.BaseLayer = BaseComponent.extend({
 	// local variables
 	canvas: null,
 	canvasContext: null,
+	collisionData: null,
 
 /**
  * Core
@@ -28,16 +27,20 @@ Lucid.BaseLayer = BaseComponent.extend({
 	  * Automatically called when instantiated.
 	  *
 	  * @param      {Object}   config  The configuration.
-	  * @return     {boolean}  Returns true on success.
+	  * @return     {Boolean}  Returns true on success.
 	  */
 	init: function(config) {
 		
-		
 		this._super(config);
 
-		if (this.id == null, this.type == null) {
-			Lucid.Utils.error("Layer @ init: id or type is null - please asign an id and Layer.TYPE.XXX!");
-			return;
+		if (!this.id) {
+			Lucid.Utils.error("Layer @ init: id is null!");
+			return false;
+		}
+
+		if (!this.type) {
+			Lucid.Utils.error("Layer @ init: type is null!");
+			return false;
 		}
 
 		this.canvas = document.createElement("canvas");
@@ -49,7 +52,7 @@ Lucid.BaseLayer = BaseComponent.extend({
 	/**
 	 * Determines if valid.
 	 *
-	 * @return     {boolean}  True if valid, False otherwise.
+	 * @return     {Boolean}  True if valid, False otherwise.
 	 */
 	isValid: function() {
 		if (
@@ -65,31 +68,51 @@ Lucid.BaseLayer = BaseComponent.extend({
 	},
 
 	/**
-	 * Draws a Canvas.
+	 * The renderUpdate() function should simulate anything that is affected by time.
+	 * It can be called zero or more times per frame depending on the frame
+	 * rate.
 	 *
-	 * @param      {number}  delta   The delta.
-	 * @param      {Object}  config  The configuration
-	 * @return     {Canvas}  Returns the drawn Canvas.
+	 * @param      {Number}  delta   The amount of time in milliseconds to
+	 *                               simulate in the update.
 	 */
-	draw: function(delta, config) {
-		return this.canvas;
+	renderUpdate: function(delta) {
+		// ...
+	},
+
+	/**
+	 * Draw things.
+	 *
+	 * @param      {Number}  interpolationPercentage  The cumulative amount of
+	 *                                                time that hasn't been
+	 *                                                simulated yet, divided by
+	 *                                                the amount of time that
+	 *                                                will be simulated the next
+	 *                                                time renderUpdate() runs.
+	 *                                                Useful for interpolating
+	 *                                                frames.
+	 */
+	renderDraw: function(interpolationPercentage) {
+		// ...
 	},
 
 	resize: function(config) {
-		this.canvas.width = config.wWidth;
-		this.canvas.height = config.wHeight;
+		if (this.canvas) {
+			this.canvas.width = config.wWidth;
+			this.canvas.height = config.wHeight;
+		}
 	},
 
 	/**
 	 * Destroys the Layer and all its corresponding objects.
 	 *
-	 * @return     {boolean}  Returns true on success.
+	 * @return     {Boolean}  Returns true on success.
 	 */
 	destroy: function() {
 		Lucid.Utils.log("Layer @ destory: destroying Layer with id: " + this.id);
 
 		this.image = null;
 		this.map = null;
+		this.camera = null;
 		this.canvas = null;
 		this.canvasContext = null;
 
@@ -112,12 +135,12 @@ Lucid.BaseLayer = BaseComponent.extend({
 		return this.canvas;
 	},
 
-	getCollisionData: function(config) {
-		if (this.collision) {
-			return null;
-		}
-
-		return null;
+	getData: function() {
+		return this.data;
+	},
+	
+	setCollisionData: function(collisionData) {
+		this.collisionData = collisionData;
 	}
 });
 
@@ -125,7 +148,7 @@ Lucid.BaseLayer = BaseComponent.extend({
 Lucid.BaseLayer.TYPE = {
 	UI: "ui", // ui (e.g. menu, inventory)
 	TILESET: "tileSet", // tileSet grid with cols / rows
-	COLLISION: "collision", // tileSet grid with cols / rows
+	COLLISION: "collision", // collision grid with cols / rows - there can only be ONE of this type
 	ITEMS: "items", // objects (e.g. a ball or some animated thing)
 	ENTITIES: "entities", // entities - there can only be ONE of this type
 	EVENTS: "events" // event triggers

@@ -20,6 +20,7 @@ var EntityPassant = Lucid.BaseEntity.extend({
 
 		this.width = 32;
 		this.height = 48;
+		this.speed = 8;
 
 		this.animInterval = setInterval(this.updateAnim.bind(this), 500);
 
@@ -40,20 +41,6 @@ var EntityPassant = Lucid.BaseEntity.extend({
 			this.sourceX = this.width * 2;
 		}
 
-		if (this.counter == 20) {
-			this.dir = 0;
-		} else if (this.counter == 0) {
-			this.dir = 1;
-		}
-
-		if (this.dir == 0) {
-			this.counter--;
-			this.positionX -= 2;
-		} else {
-			this.counter++;
-			this.positionX += 2;
-		}
-
 		this.animCounter++;
 	},
 
@@ -65,11 +52,24 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		this._super(filePath);
 	},
 
-	draw: function(delta, config) {
-		return this._super(delta, config);
+	/**
+	 * The renderUpdate() function should simulate anything that is affected by time.
+	 * It can be called zero or more times per frame depending on the frame
+	 * rate.
+	 *
+	 * @param      {Number}  delta   The amount of time in milliseconds to
+	 *                               simulate in the update.
+	 */
+	renderUpdate: function(delta) {
+		this._super(delta);
 	},
 
 	tileSetLoaded: function(event, loaderItem) {
+		var camera = Lucid.data.engine.getCamera();
+		if (camera) {
+			camera.setFollowObject(this);
+		}
+
 		this._super(event, loaderItem);
 	},
 

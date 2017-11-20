@@ -8,8 +8,6 @@ Lucid.Map = BaseComponent.extend({
 	rows: 16,
 	tileSize: 64,
 	layers: null,
-	engine: null,
-	camera: null, // reference to camera
 
 	// local variables
 	loading: false,
@@ -25,18 +23,16 @@ Lucid.Map = BaseComponent.extend({
 	  * Automatically called when instantiated.
 	  *
 	  * @param      {Object}   config  The configuration.
-	  * @return     {boolean}  Returns true on success.
+	  * @return     {Boolean}  Returns true on success.
 	  */
 	init: function(config) {
 		this.componentName = "Map";
 		
 		this._super(config);
 
+		this.checkSetEngine();
+
 		return true;
-	},
-
-	draw: function(delta, camera, config) {
-
 	},
 
 	loadAssets: function() {
@@ -131,14 +127,10 @@ Lucid.Map = BaseComponent.extend({
 		return true;
 	},
 
-	resize: function(config) {
-		
-	},
-
 	/**
 	 * Destroys the Map and all its corresponding objects.
 	 *
-	 * @return     {boolean}  Returns true on success.
+	 * @return     {Boolean}  Returns true on success.
 	 */
 	destroy: function() {
 		$(document).off(Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
@@ -157,28 +149,11 @@ Lucid.Map = BaseComponent.extend({
 		}
 
 		this.layers = null;
-		this.engine = null;
-		this.camera = null;
-
 		this.build = false;
 
+		this._super();
+
 		return true;
-	},
-
-	getCamera: function() {
-		return this.camera;
-	},
-
-	setCamera: function(value) {
-		this.camera = value;
-	},
-
-	getEngine: function() {
-		return this.engine;
-	},
-
-	setEngine: function(value) {
-		this.engine = value;
 	},
 
 	getTileSet: function() {

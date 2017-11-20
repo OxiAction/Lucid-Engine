@@ -14,7 +14,7 @@ Lucid.AI = BaseComponent.extend({
 	  * Automatically called when instantiated.
 	  *
 	  * @param      {Object}   config  The configuration.
-	  * @return     {boolean}  Returns true on success.
+	  * @return     {Boolean}  Returns true on success.
 	  */
 	init: function(config) {
 		this.componentName = "AI";
@@ -28,7 +28,7 @@ Lucid.AI = BaseComponent.extend({
 	 * Change behavior by setting a new AI.BEHAVIOR.XXX (some TYPES require
 	 * additional data)
 	 *
-	 * @param      {string}  type    The new AI.BEHAVIOR.XXX.
+	 * @param      {String}  type    The new AI.BEHAVIOR.XXX.
 	 * @param      {Object}  data    The data. See comments about
 	 *                               AI.BEHAVIOR.XXX constants for further data
 	 *                               Object explanations.
@@ -40,7 +40,7 @@ Lucid.AI = BaseComponent.extend({
 	/**
 	 * Sets the active state.
 	 *
-	 * @param      {boolean}  value   The value.
+	 * @param      {Boolean}  value   The value.
 	 */
 	setActive: function(value) {
 		// TODO: enable / disable.

@@ -22,7 +22,7 @@ Lucid.Loader = function() {
          * loading the queue.
          *
          * @param      {LoaderItem}  item    The LoaderItem.
-         * @return     {boolean}           Returns true on success.
+         * @return     {Boolean}           Returns true on success.
          */
         add: function(item) {
             if (!item.isValid()) {
@@ -105,7 +105,7 @@ Lucid.Loader = function() {
         /**
          * Get already loaded LoaderItem by id.
          *
-         * @param      {string}           id      The identifier.
+         * @param      {String}           id      The identifier.
          * @return     {LoaderItem|null}  Returns LoaderItem if found -
          *                                otherwise null.
          */
@@ -120,7 +120,7 @@ Lucid.Loader = function() {
         /**
          * Determines if loading.
          *
-         * @return     {boolean}  True if loading, False otherwise.
+         * @return     {Boolean}  True if loading, False otherwise.
          */
         isLoading: function() {
             return loading;
@@ -164,7 +164,7 @@ Lucid.LoaderItem = BaseComponent.extend({
       * Automatically called when instantiated.
       *
       * @param      {Object}   config  The configuration.
-      * @return     {boolean}  Returns true on success.
+      * @return     {Boolean}  Returns true on success.
       */
     init: function(config) {
         this.componentName = "LoaderItem";
@@ -206,7 +206,7 @@ Lucid.LoaderItem = BaseComponent.extend({
     /**
      * Determines if valid.
      *
-     * @return     {boolean}  True if valid, False otherwise.
+     * @return     {Boolean}  True if valid, False otherwise.
      */
     isValid: function() {
         return this.id != null && this.filePath != null && this.eventSuccessName != null && this.eventErrorName != null;

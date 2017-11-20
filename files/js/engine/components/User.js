@@ -13,7 +13,7 @@ Lucid.User = BaseComponent.extend({
 	  * Automatically called when instantiated.
 	  *
 	  * @param      {Object}   config  The configuration.
-	  * @return     {boolean}  Returns true on success.
+	  * @return     {Boolean}  Returns true on success.
 	  */
 	init: function(config) {
 		this.componentName = "User";
@@ -44,7 +44,7 @@ Lucid.User = BaseComponent.extend({
 	/**
 	 * Sets the active state.
 	 *
-	 * @param      {boolean}  value  The value.
+	 * @param      {Boolean}  value  The value.
 	 */
 	setActive: function(value) {
 		// TODO: enable / disable.

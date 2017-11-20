@@ -17,25 +17,17 @@ Lucid.LayerItems = Lucid.BaseLayer.extend({
 	  * Automatically called when instantiated.
 	  *
 	  * @param      {Object}   config  The configuration.
-	  * @return     {boolean}  Returns true on success.
+	  * @return     {Boolean}  Returns true on success.
 	  */
 	init: function(config) {
 		this.componentName = "LayerItems";
 		
 		this._super(config);
 
-		return true;
-	},
+		this.checkSetMap();
+		this.checkSetCamera();
 
-	/**
-	 * Draws a Canvas.
-	 *
-	 * @param      {number}  delta   The delta.
-	 * @param      {Object}  config  The configuration.
-	 * @return     {Canvas}  Returns the drawn Canvas.
-	 */
-	draw: function(delta, config) {
-		return this._super(delta, config);
+		return true;
 	},
 
 	resize: function(config) {
@@ -45,7 +37,7 @@ Lucid.LayerItems = Lucid.BaseLayer.extend({
 	/**
 	 * Destroys the Layer and all its corresponding objects.
 	 *
-	 * @return     {boolean}  Returns true on success.
+	 * @return     {Boolean}  Returns true on success.
 	 */
 	destroy: function() {
 		return this._super();

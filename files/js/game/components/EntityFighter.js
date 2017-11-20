@@ -28,10 +28,10 @@ var EntityFighter = Lucid.BaseEntity.extend({
 
 		this.updateAnim();
 
-		this.keyDownHandler = this.onKeyDown.bind(this);
-		window.addEventListener("keydown", this.keyDownHandler);
-		this.keyUpHandler = this.onKeyUp.bind(this);
-		window.addEventListener("keyup", this.keyUpHandler);
+		// this.keyDownHandler = this.onKeyDown.bind(this);
+		// window.addEventListener("keydown", this.keyDownHandler);
+		// this.keyUpHandler = this.onKeyUp.bind(this);
+		// window.addEventListener("keyup", this.keyUpHandler);
 
 		return true;
 	},
@@ -81,36 +81,44 @@ var EntityFighter = Lucid.BaseEntity.extend({
 		this._super(filePath);
 	},
 
-	draw: function(delta, config) {
+	/**
+	 * The renderUpdate() function should simulate anything that is affected by time.
+	 * It can be called zero or more times per frame depending on the frame
+	 * rate.
+	 *
+	 * @param      {Number}  delta   The amount of time in milliseconds to
+	 *                               simulate in the update.
+	 */
+	renderUpdate: function(delta) {
 		for (var key in this.pressedKeys) {
 			if (this.pressedKeys[key] == true) {
 				if (key == 39) { // right
-					this.positionX += 1;
+					this.x += 1;
 					this.sourceY = 96;
 				}
 				if (key == 37) { // left
-					this.positionX -= 1;
+					this.x -= 1;
 					this.sourceY = 48;
 				}
 
 				if (key == 40) { // down
-					this.positionY += 1;
+					this.y += 1;
 					this.sourceY = 0;
 				}
 				if (key == 38) { // up
-					this.positionY -= 1;
+					this.y -= 1;
 					this.sourceY = 144;
 				}
 			}
 		}
 
-		return this._super(delta, config);
+		this._super(delta);
 	},
 
 	tileSetLoaded: function(event, loaderItem) {
 		var camera = Lucid.data.engine.getCamera();
 		if (camera) {
-			camera.setFollowObject(this);
+			// camera.setFollowObject(this);
 		}
 
 		this._super(event, loaderItem);

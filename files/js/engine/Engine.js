@@ -1,10 +1,9 @@
 // namespace
-// TODO: namespace all the Engine parts
 var Lucid = Lucid || {};
 
 Lucid.data = {
-	maps: {},
-	engine: null
+	maps: {}, // namespace for maps
+	engine: null // engine reference
 }
 
 /**
@@ -32,35 +31,67 @@ Lucid.Engine = BaseComponent.extend({
 	},
 	containerID: "engine-container", // wrapper / container ID
 	canvasID: "engine-canvas", // cavas ID
-	showFPS: true, // display Frames Per Second
+
+	// debug stuff
+	debugFPS: false, // display frames per second
+	debugGrid: false, // display a map.tileSize based grid
 
 	// local variables
-	animationFrameID: null, // the RAF ID
-	prevElapsed: 0, // required for calc the RAF delta
+	
 	container: null, // the wrapper / container
-	canvas: null, // EVERYTHING will be rendered into this canvas yo
+	canvas: null, // EVERYTHING will be rendered into this canvas
 	canvasContext: null,
-	camera: null,
-	map: null,
 
-	collisionLayers: [], // layers which have collision set to true only
-	layers: [], // collection of all layers (including collisionLayers)
-	entitiesLayer: null, // this is the entity layer. There can only be one entity layer. 
-	                     // It is defined by setting the Layer.entitiesTarget to true
+	controlGroups: [], // added ControlGroup(s)
 
-	entities: [], // collection of all entities
+	layerCollision: null, // LayerCollision instance. UNIQUE
+	layerEntities: null, // LayerEntities instance. UNIQUE
+	layers: [], // collection of all layers
+
+	
+	// rendering frame related stuff
+
+	renderFrameID: null, // the request animation frame ID
 
 	started: false,
+
+	simulationTimestep: 1000 / 60, // the amount of time (in milliseconds) to simulate each time
+								   // update() runs
+
+	frameDelta: 0, // the cumulative amount of in-app time that hasn't been simulated yet
+
+	lastFrameTimeMs: 0, // the last time the loop was run
+
+	fps: 10, // an exponential moving average of the frames per second
+
+	fpsAlpha: 0.9, // a factor that affects how heavily to weight more recent seconds
+				   // performance when calculating the average frames per second
+
+	fpsUpdateInterval: 1000, // the minimum duration between updates to the frames-per-second
+							 // estimate - higher values means more accuray
+
+	lastFpsUpdate: 0, // the timestamp (in milliseconds) of the last time the "fps" moving
+					  // average was updated.
+
+	framesSinceLastFpsUpdate: 0, // The number of frames delivered since the last time the "fps"
+								 // moving average was updated (i.e. since "lastFpsUpdate").
+
+	numUpdateSteps: 0, // the number of times update() is called in a given frame
+
+	minFrameDelay: 0, // the minimum amount of time in milliseconds that must pass since
+					  // the last frame was executed before another frame can be executed
+
+	panic: false, // whether the simulation has fallen too far behind real time
 
 /**
  * Core
  */
 
-	/**
+ 	/**
 	  * Automatically called when instantiated.
 	  *
 	  * @param      {Object}   config  The configuration.
-	  * @return     {boolean}  Returns true on success.
+	  * @return     {Boolean}  Returns true on success.
 	  */
 	init: function(config) {
 		if (Lucid.data.engine != null) {
@@ -77,13 +108,15 @@ Lucid.Engine = BaseComponent.extend({
 		// get wrapper / container from HTML
 		this.container = document.getElementById(this.containerID);
 		if (!this.container) {
+			Lucid.Utils.error("Engine @ init: could not find container with id: " + this.containerID);
 			return;
 		}
 
 		// get canvas from HTML
 		this.canvas = document.getElementById(this.canvasID);
 		if (!this.canvas) {
-			return;
+			Lucid.Utils.error("Engine @ init: there is no DOM canvas with id: " + this.canvasID);
+			return false;
 		}
 
 		// assign context
@@ -93,139 +126,243 @@ Lucid.Engine = BaseComponent.extend({
 	},
 
 	/**
-	 * Start RAF
-	 */
-	start: function() {
-		this.started = true;
-		this.animationFrameID = window.requestAnimationFrame(this.tick.bind(this));
-		Lucid.Utils.log("Engine @ start: animationFrameID: " + this.animationFrameID);
-	},
-
-	/**
-	 * Stop RAF
-	 */
-	stop: function() {
-		this.started = false;
-		Lucid.Utils.log("Engine @ stop: animationFrameID: " + this.animationFrameID);
-		if (this.animationFrameID != null) {
-			window.cancelAnimationFrame(this.animationFrameID);
-			this.animationFrameID = null;
-		}
-	},
-
-	/**
-	 * RAF tick
+	 * Main render method for request animation frame loop.
 	 *
-	 * @param      {number}  elapsed  The elapsed RAF time.
+	 * @param      {Number}  timestamp  The timestamp.
 	 */
-	tick: function(elapsed) {
-		var elapsedSeconds = elapsed / 1000.0; // convert in seconds
-		var delta = (elapsed - this.prevElapsed) / 1000.0; // delta in seconds
-    	// delta = Math.min(delta, 0.06); // cap delta @ 60ms
+	renderFrame: function(timestamp) {
+		// run this.renderFrame() again the next time the browser is ready to render
+		this.renderFrameID = window.requestAnimationFrame(this.renderFrame.bind(this));
 
-    	// draw
-		this.draw(delta);
-
-		// set prevElapsed
-		this.prevElapsed = elapsed;
-
-		// check if we should keep on shaking!
-		// TLD: https://www.youtube.com/watch?v=mhzc5ZeAXYY
-		// \o/
-		if (this.animationFrameID) {
-			// recursive call
-			window.requestAnimationFrame(this.tick.bind(this));
-		}
-	},
-
-	/**
-	 * Draw stuff on this.canvasContext.
-	 *
-	 * @param      {number}  delta   The delta.
-	 * @param      {Object}  config  The configuration.
-	 */
-	draw: function(delta, config) {
-		if (!this.canvasContext) {
+		// throttle the frame rate (if minFrameDelay is set to a non-zero value)
+		if (timestamp < this.lastFrameTimeMs + this.minFrameDelay) {
 			return;
 		}
 
-		this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		// frameDelta is the cumulative amount of in-app time that hasn't been simulated yet.
+		this.frameDelta += timestamp - this.lastFrameTimeMs;
+		this.lastFrameTimeMs = timestamp;
 
-		if (!this.started) {
-			return;
+		this.renderBegin(timestamp, this.frameDelta);
+
+		// calculate frames per second
+		 if (timestamp > this.lastFpsUpdate + this.fpsUpdateInterval) {
+			// Compute the new exponential moving average.
+			this.fps =
+				// Divide the number of frames since the last FPS update by the
+				// amount of time that has passed to get the mean frames per second
+				// over that period. This is necessary because slightly more than a
+				// second has likely passed since the last update.
+				this.fpsAlpha * this.framesSinceLastFpsUpdate * 1000 / (timestamp - this.lastFpsUpdate) +
+				(1 - this.fpsAlpha) * this.fps;
+
+			// Reset the frame counter and last-updated timestamp since their
+			// latest values have now been incorporated into the FPS estimate.
+			this.lastFpsUpdate = timestamp;
+			this.framesSinceLastFpsUpdate = 0;
 		}
+		this.framesSinceLastFpsUpdate++;
 
-		if (config === undefined) {
-			config = {};
-		}
+		this.numUpdateSteps = 0;
+		while (this.frameDelta >= this.simulationTimestep) {
+			// update stuff - e.g. positions x/y etc...
+			this.renderUpdate(this.simulationTimestep / 100);
+			this.frameDelta -= this.simulationTimestep;
 
-		var i;
-		var canvas;
-
-		/**
-		 * Collision Layers
-		 */
-
-		var layer;
-		var collisionData = [];
-		for (i = 0; i < this.collisionLayers.length; ++i) {
-			layer = this.collisionLayers[i];
-
-			var currCollisionData = layer.getCollisionData(config);
-
-			if (currCollisionData) {
-				collisionData.push(currCollisionData);
+			// sanity check: bail if we run the loop too many times. Triggers
+			// after 4 seconds because most browsers will alert after 5 seconds
+			if (++this.numUpdateSteps >= 240) {
+				this.panic = true;
+				break;
 			}
 		}
 
-		// set collision data
-		config.collisionData = collisionData;
+		// draw!
+		this.renderDraw(this.frameDelta / this.simulationTimestep);
+
+		this.renderEnd(this.fps, this.panic);
+
+		this.panic = false;
+	},
+
+	/**
+	 * The renderBegin() function is typically used to process input before the
+	 * updates run.
+	 *
+	 * @param      {Number}  timestamp   The current timestamp (when the frame
+	 *                                   started), in milliseconds.
+	 * @param      {Number}  frameDelta  The total elapsed time that has not yet
+	 *                                   been simulated, in milliseconds.
+	 */
+	renderBegin: function(timestamp, frameDelta) {
+		
+	},
+
+	/**
+	 * The renderUpdate() function should simulate anything that is affected by time.
+	 * It can be called zero or more times per frame depending on the frame
+	 * rate.
+	 *
+	 * @param      {Number}  delta   The amount of time in milliseconds to
+	 *                               simulate in the update.
+	 */
+	renderUpdate: function(delta) {
+		var i;
+
+		/**
+		 * ControlGroup(s)
+		 */
+
+		for (var i = 0; i < this.controlGroups.length; ++i) {
+			var controlGroup = this.controlGroups[i];
+			controlGroup.renderUpdate(delta);
+		}
 
 		/**
 		 * Camera
 		 */
 
 		if (this.camera) {
-			this.camera.draw(delta, config);
+			this.camera.renderUpdate(delta);
 		}
+
+		/**
+		 * Collision Data
+		 */
+		var collisionData = [];
+		if (this.layerCollision) {
+			collisionData = this.layerCollision.getData();
+		}
+
+		/**
+		 * Layer(s)
+		 */
+		
+		for (i = 0; i < this.layers.length; ++i) {
+			var layer = this.layers[i];
+			layer.setCollisionData(collisionData);
+			layer.renderUpdate(delta);
+		}
+	},
+
+	/**
+	 * Draw things.
+	 *
+	 * @param      {Number}  interpolationPercentage  The cumulative amount of
+	 *                                                time that hasn't been
+	 *                                                simulated yet, divided by
+	 *                                                the amount of time that
+	 *                                                will be simulated the next
+	 *                                                time renderUpdate() runs. Useful
+	 *                                                for interpolating frames.
+	 */
+	renderDraw: function(interpolationPercentage) {
+		var engineCanvasContext = this.canvasContext;
+		var engineCanvas = this.canvas;
+
+		var i;
+
+		/**
+		 * CanvasContext
+		 */
+
+		engineCanvasContext.clearRect(0, 0, engineCanvas.width, engineCanvas.height);
 
 		/**
 		 * Layers
 		 */
 		
 		for (i = 0; i < this.layers.length; ++i) {
-			layer = this.layers[i];
-			layer.draw(delta, this.camera, config);
-
-			canvas = layer.getCanvas();
-			if (canvas != null) {
-				this.canvasContext.drawImage(canvas, 0, 0);
+			var layer = this.layers[i];
+			layer.renderDraw(interpolationPercentage);
+			var layerCanvas = layer.getCanvas();
+			if (layerCanvas) {
+				engineCanvasContext.drawImage(layerCanvas, 0, 0);
 			}
 		}
+	},
 
-		/**
-		 * Entities
-		 */
+	/**
+	 * renderEnd() always runs exactly once per frame. This makes it useful
+	 * for any updates that are not dependent on time in the simulation.
+	 *
+	 * @param      {Number}   fps     The exponential moving average of the
+	 *                                frames per second.
+	 * @param      {Boolean}  panic   Indicates whether the simulation has
+	 *                                fallen too far behind real time.
+	 */
+	renderEnd: function(fps, panic) {
+		// cache variable
+		var canvasContext = this.canvasContext;
 
-		var entity;
-		for (i = 0; i < this.entities.length; ++i) {
-			entity = this.entities[i];
-			entity.draw(delta, config);
-
-			canvas = entity.getCanvas();
-			if (canvas != null) {
-				this.canvasContext.drawImage(canvas, 0, 0);
-			}
+		// draw frames per second as text
+		if (this.debugFPS) {
+			canvasContext.fillStyle = "Red";
+			canvasContext.font = "normal 12px Arial, Helvetica Neue, Helvetica, sans-serif";
+			canvasContext.fillText("FPS: " + Math.round(fps), 10, 20);
 		}
 
-		/**
-		 * FPS
-		 */
+		// draw a grid (depending on the map.tileSize)
+		if (this.debugGrid && this.map && this.camera) {
+			var tileSize = this.map.tileSize;
 
-		if (this.showFPS) {
-			this.canvasContext.fillStyle = "Red";
-			this.canvasContext.font = "normal 12px Arial, Helvetica Neue, Helvetica, sans-serif";
-			this.canvasContext.fillText("FPS: " + Math.ceil((1 / delta)), 10, 20);
+			canvasContext.beginPath();
+
+			var i;
+			var numColsScreen = Math.floor(this.camera.width / tileSize) + 2;
+			for (i = 0; i < numColsScreen; ++i) {
+				var posX = i * tileSize - this.camera.x % tileSize + 0.5; // + 0.5 fixes lines pixel snapping
+				canvasContext.moveTo(posX, 0);
+				canvasContext.lineTo(posX, this.camera.height);
+			}
+			var numRowsScreen = Math.floor(this.camera.height / tileSize) + 2;
+			for (i = 0; i < numRowsScreen; ++i) {
+				var posY = i * tileSize - this.camera.y % tileSize + 0.5;
+				canvasContext.moveTo(0, posY);
+				canvasContext.lineTo(this.camera.width, posY);
+			}
+
+			canvasContext.stroke();
+		}
+	},
+
+	/**
+	 * Start rendering.
+	 */
+	start: function() {
+		if (this.started) {
+			return;
+		}
+
+		this.started = true;
+
+		// this.setMaxAllowedFPS(50);
+
+		this.renderFrameID = window.requestAnimationFrame(function(timestamp) {
+			Lucid.Utils.log("Engine @ start: renderFrameID: " + this.renderFrameID);
+			// Render the initial state before any updates occur.
+			this.renderFrame(1);
+
+			// Reset variables that are used for tracking time so that we
+			// don't simulate time passed while the application was paused.
+			this.lastFrameTimeMs = timestamp;
+			this.lastFpsUpdate = timestamp;
+			this.framesSinceLastFpsUpdate = 0;
+
+			// Start the main loop.
+			this.renderFrameID = window.requestAnimationFrame(this.renderFrame.bind(this));
+		}.bind(this));
+	},
+
+	/**
+	 * Stop rendering.
+	 */
+	stop: function() {
+		this.started = false;
+		Lucid.Utils.log("Engine @ stop: renderFrameID: " + this.renderFrameID);
+		if (this.renderFrameID != null) {
+			window.cancelAnimationFrame(this.renderFrameID);
+			this.renderFrameID = null;
 		}
 	},
 
@@ -256,11 +393,6 @@ Lucid.Engine = BaseComponent.extend({
 			this.camera.resize(config);
 		}
 
-		// update map
-		if (this.map) {
-			this.map.resize(config);
-		}
-
 		// update layers
 		for (var i = 0; i < this.layers.length; ++i) {
 			var layer = this.layers[i];
@@ -271,7 +403,7 @@ Lucid.Engine = BaseComponent.extend({
 	/**
 	 * Destroy & remove all events, intervals, timeouts
 	 *
-	 * @return     {boolean}  Returns true on success.
+	 * @return     {Boolean}  Returns true on success.
 	 */
 	destroy: function() {
 		this.stop();
@@ -285,21 +417,44 @@ Lucid.Engine = BaseComponent.extend({
 		return true;
 	},
 
+	/**
+	 * Sets the maximum allowed fps.
+	 *
+	 * @param      {number}  fps     The fps limit.
+	 */
+	setMaxAllowedFPS: function(fps) {
+		if (typeof fps === 'undefined') {
+			fps = Infinity;
+		}
+		if (fps === 0) {
+			this.stop();
+		}
+		else {
+			// dividing by infinity returns zero
+			this.minFrameDelay = 1000 / fps;
+		}
+	},
+
 /**
- * Camera
+ * ControlGroup
  */
 
  	/**
- 	 * Sets the camera.
+ 	 * Adds a control group.
  	 *
- 	 * @param      {Camera}  value   The Camera.
+ 	 * @param      {ControlGroup}  controlGroup  The control group.
  	 */
- 	setCamera: function(value) {
- 		this.camera = value;
+ 	addControlGroup: function(controlGroup) {
+ 		this.controlGroups.push(controlGroup);
  	},
 
- 	getCamera: function() {
- 		return this.camera;
+ 	/**
+ 	 * Removes a control group.
+ 	 *
+ 	 * @param      {ControlGroup}  controlGroup  The control group.
+ 	 */
+ 	removeControlGroup: function(controlGroup) {
+ 		this.controlGroups.erase(controlGroup);
  	},
 
 /**
@@ -309,7 +464,7 @@ Lucid.Engine = BaseComponent.extend({
 	/**
 	 * Loads a map file into the DOM.
 	 *
-	 * @param      {string}  fileName  The map file name.
+	 * @param      {String}  fileName  The map file name.
 	 */
 	loadMapFile: function(fileName) {
 		Lucid.Utils.log("Engine @ loadMapFile: load map with fileName: " + fileName);
@@ -317,20 +472,20 @@ Lucid.Engine = BaseComponent.extend({
 		var filePath = this.folderPaths.maps + fileName + this.extensions.maps;
 
 		var loaderItem = new Lucid.LoaderItem({
-	        id: fileName,
-	        dataType: Lucid.Loader.TYPE.SCRIPT,
-	        filePath: filePath,
-	        eventSuccessName: Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS,
-	        eventErrorName: Lucid.Engine.EVENT.LOADED_MAP_FILE_ERROR
-	    });
+			id: fileName,
+			dataType: Lucid.Loader.TYPE.SCRIPT,
+			filePath: filePath,
+			eventSuccessName: Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS,
+			eventErrorName: Lucid.Engine.EVENT.LOADED_MAP_FILE_ERROR
+		});
 
-	    Lucid.Loader.add(loaderItem);
+		Lucid.Loader.add(loaderItem);
 	},
 
 	/**
 	 * Build a Map by fileName.
 	 *
-	 * @param      {string}  fileName  The Map file name.
+	 * @param      {String}  fileName  The Map file name.
 	 * @return     {Map}     The build Map.
 	 */
 	buildMapByFileName: function(fileName) {
@@ -361,26 +516,17 @@ Lucid.Engine = BaseComponent.extend({
 	 * Sets the map and loads its assets.
 	 *
 	 * @param      {Map}  map     The map.
+	 * @override
 	 */
 	setMap: function(map) {
 		this.map = map;
 		this.map.loadAssets();
 	},
-
-	/**
-	 * Gets the map.
-	 *
-	 * @return     {Map}  The map.
-	 */
-	getMap: function() {
-		return this.map;
-	},
-
 	/**
 	 * Destroy the current Engine.map.
 	 *
-	 * @param      {string}   fileName  The map file name.
-	 * @return     {boolean}  Returns true on success.
+	 * @param      {String}   fileName  The map file name.
+	 * @return     {Boolean}  Returns true on success.
 	 */
 	destoryMap: function() {
 		if (this.map == null) {
@@ -397,7 +543,8 @@ Lucid.Engine = BaseComponent.extend({
 /**
  * Layer
  */
- 	/**
+
+	/**
 	 * Creates and adds a Layer based on the config.
 	 *
 	 * @param      {Object}  config  The Layer configuration.
@@ -468,16 +615,26 @@ Lucid.Engine = BaseComponent.extend({
 	 * Adds a Layer.
 	 *
 	 * @param      {Layer}    layer   The Layer.
-	 * @return     {boolean}  Returns true on success.
+	 * @return     {Boolean}  Returns true on success.
 	 */
 	addLayer: function(layer) {
-		var id = layer.id;
-		var type = layer.type;
-		Lucid.Utils.log("Engine @ addLayer: add layer id: " + id + " type: " + type);
+		Lucid.Utils.log("Engine @ addLayer: add layer id: " + layer.id + " type: " + layer.type);
 		
-		// check for collision layers
+		// check for LayerCollision
 		if (layer.type == Lucid.BaseLayer.TYPE.COLLISION) {
-			this.collisionLayers.push(layer);
+			if (this.layerCollision != null) {
+				EngineUtils.error("Engine @ addLayer: you can only have one Layer with type Lucid.BaseLayer.TYPE.COLLISION!");
+				return false;
+			}
+			this.layerCollision = layer;
+		}
+		// check for LayerEntities
+		else if (layer.type == Lucid.BaseLayer.TYPE.ENTITIES) {
+			if (this.layerEntities != null) {
+				EngineUtils.error("Engine @ addLayer: you can only have one Layer with type Lucid.BaseLayer.TYPE.ENTITIES!");
+				return false;
+			}
+			this.layerEntities = layer;
 		}
 		
 		// add to general layers array
@@ -490,40 +647,67 @@ Lucid.Engine = BaseComponent.extend({
 	},
 
 	/**
+	 * Gets the layer.
+	 *
+	 * @param      {String}  id      The identifier
+	 * @return     {Layer}  The layer.
+	 */
+	getLayer: function(id) {
+		for (var i = 0; i < this.layers.length; ++i) {
+			var layer = this.layers[i];
+			if (layer.id == id) {
+				return layer;
+			}
+		}
+	},
+
+	/**
+	 * Gets the layer collision.
+	 *
+	 * @return     {LayerCollision}  The layer collision.
+	 */
+	getLayerCollision: function() {
+		return this.layerCollision;
+	},
+
+	/**
+	 * Gets the layer entities.
+	 *
+	 * @return     {LayerEntities}  The layer entities.
+	 */
+	getLayerEntities: function() {
+		return this.layerEntities;
+	},
+
+	/**
 	 * Removes a Layer.
 	 *
-	 * @param      {string}   layerID  The Layer id.
-	 * @return     {boolean}  Returns true if Layer was removed successfully.
+	 * @param      {String}   layerID  The Layer id.
+	 * @return     {Boolean}  Returns true if Layer was removed successfully.
 	 */
 	removeLayer: function(layerID) {
-		var i;
 		var layer;
-		var id;
-
-		for (i = 0; i < this.layers.length; ++i) {
+		for (var i = 0; i < this.layers.length; ++i) {
 			layer = this.layers[i];
-			id = layer.id;
-			if (id == layerID) {
-				break;
+			if (layer.id == layerID) {
+				// check for LayerCollision
+				if (layer.type == Lucid.BaseLayer.TYPE.COLLISION) {
+					this.layerCollision = null;
+				}
+				// check for LayerEntities
+				else if (layer.type == Lucid.BaseLayer.TYPE.ENTITIES) {
+					this.layerEntities = null;
+				}
+
+				this.layers.erase(layer);
+				layer.destroy();
+				layer = null;
+
+				return true;
 			}
 		}
 
-		// check if we found the layer with layerID
-		if (id == layerID) {
-			var type = layer.type;
-			layer.destroy();
-
-			if (layer.type == Lucid.BaseLayer.TYPE.COLLISION) {
-				this.collisionLayers.erase(layer);
-			}
-
-			this.layers.erase(layer);
-			layer = null;
-
-			return true;
-		} else {
-			return false;
-		}
+		return false;
 	}
 });
 
