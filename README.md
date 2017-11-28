@@ -32,7 +32,7 @@ The following covers the structured project tasks. Every task is followed by the
 ### Optional tasks (nice to have):
 
 * extended configuration options for the editor - **medium**
-* as we said: This is a side scroll game, but its not too hard to also render with top down view. Possible scenarios: One map could be side scroll and another map could be top down - which sounds cool :) - **medium**
+* top down AND side scroll rendering **medium**
 * extended JSDoc - **easy**
 * sounds / music - **hard**
 
