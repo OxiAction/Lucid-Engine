@@ -5,7 +5,7 @@
 
 The following covers the structured project tasks. Every task is followed by the difficulty (easy, medium, hard, very hard).
 
-### Finished tasks:
+### \xF0\x9F\x98\x83 Finished tasks:
 
 #### Milestones Meeting 1 (09.11.2017)
 
