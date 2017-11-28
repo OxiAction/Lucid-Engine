@@ -1,6 +1,5 @@
 /**
- * Engine default LayerEntities.
- * Extends the BaseLayer.
+ * Engine default LayerEntities. Extends the BaseLayer.
  */
 Lucid.LayerEntities = Lucid.BaseLayer.extend({
 	// config variables and their default values
@@ -14,11 +13,11 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
  */
 
 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config) {
 		this.componentName = "LayerEntities";
 		
@@ -34,7 +33,7 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 					// instanciate entity! Apply the data object as config parameter
 					var entity = new window[data.name](data);
 					// start loading its assets
-					entity.loadTileSet();
+					entity.load();
 					// add to our entities render list
 					this.entities.push(entity);
 				}
@@ -89,9 +88,8 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 					for (j = 0; j < collisionEntities.length; ++j) {
 						var collisionEntity = collisionEntities[j];
 
-						// Collision moves objects. But we dont want to "move" an object (by
-						// collision detection), which doesnt move at all! Thats why we
-						// check if entity.moved is false.
+						// only collide moving objects AND
+						// only check collision against other entities
 						if (!entity.moved || entity === collisionEntity) {
 							continue;
 						}
@@ -129,7 +127,11 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 				entity.renderDraw(interpolationPercentage);
 				entityCanvas = entity.getCanvas();
 				if (entityCanvas) {
-					this.canvasContext.drawImage(entityCanvas, 0, 0);
+					this.canvasContext.drawImage(
+						entityCanvas,	// specifies the image, canvas, or video element to use
+						0,				// the x coordinate where to start clipping
+						0				// the y coordinate where to start clipping
+					);
 				}
 			}
 		}
@@ -152,9 +154,11 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 	},
 
 	/**
-	 * Resize.
+	 * Resize method. Usually called when the screen / browser dimensions have
+	 * changed.
 	 *
-	 * @param      {object}  config  The configuration.
+	 * @param      {Object}  config  The configuration which must contain the
+	 *                               properties wWidth and wHeight.
 	 */
 	resize: function(config) {
 		var entity;

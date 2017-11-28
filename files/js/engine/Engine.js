@@ -34,6 +34,7 @@ Lucid.Engine = BaseComponent.extend({
 
 	// debug stuff
 	debugFPS: false, // display frames per second
+	debugPanic: false, // display panic state if panic is true
 	debugGrid: false, // display a map.tileSize based grid
 
 	// local variables
@@ -53,7 +54,7 @@ Lucid.Engine = BaseComponent.extend({
 
 	renderFrameID: null, // the request animation frame ID
 
-	started: false,
+	started: false, // determines if the engine is running its rendering
 
 	simulationTimestep: 1000 / 60, // the amount of time (in milliseconds) to simulate each time
 								   // update() runs
@@ -87,12 +88,12 @@ Lucid.Engine = BaseComponent.extend({
  * Core
  */
 
- 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	/**
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config) {
 		if (Lucid.data.engine != null) {
 			Lucid.Utils.error("Engine @ init: you can not instantiate the Engine more then once!");
@@ -121,7 +122,7 @@ Lucid.Engine = BaseComponent.extend({
 
 		// assign context
 		this.canvasContext = this.canvas.getContext("2d");
-
+		
 		return true;
 	},
 
@@ -181,8 +182,6 @@ Lucid.Engine = BaseComponent.extend({
 		this.renderDraw(this.frameDelta / this.simulationTimestep);
 
 		this.renderEnd(this.fps, this.panic);
-
-		this.panic = false;
 	},
 
 	/**
@@ -277,7 +276,11 @@ Lucid.Engine = BaseComponent.extend({
 			layer.renderDraw(interpolationPercentage);
 			var layerCanvas = layer.getCanvas();
 			if (layerCanvas) {
-				engineCanvasContext.drawImage(layerCanvas, 0, 0);
+				engineCanvasContext.drawImage(
+					layerCanvas,	// specifies the image, canvas, or video element to use
+					0,				// the x coordinate where to start clipping
+					0				// the y coordinate where to start clipping
+				);
 			}
 		}
 	},
@@ -295,12 +298,8 @@ Lucid.Engine = BaseComponent.extend({
 		// cache variable
 		var canvasContext = this.canvasContext;
 
-		// draw frames per second as text
-		if (this.debugFPS) {
-			canvasContext.fillStyle = "Red";
-			canvasContext.font = "normal 12px Arial, Helvetica Neue, Helvetica, sans-serif";
-			canvasContext.fillText("FPS: " + Math.round(fps), 10, 20);
-		}
+		this.canvasContext.fillStyle = "Red";
+		this.canvasContext.font = "normal 12px Arial, Helvetica Neue, Helvetica, sans-serif";
 
 		// draw a grid (depending on the map.tileSize)
 		if (this.debugGrid && this.map && this.camera) {
@@ -323,6 +322,26 @@ Lucid.Engine = BaseComponent.extend({
 			}
 
 			canvasContext.stroke();
+		}
+
+		var debugTextsYOffset = 20;
+
+		// draw frames per second as text
+		if (this.debugFPS) {
+			canvasContext.fillText("FPS: " + Math.round(fps), 10, debugTextsYOffset);
+			debugTextsYOffset += 15;
+		}
+
+		if (this.debugPanic) {
+			canvasContext.fillText("Panic: " + panic, 10, debugTextsYOffset);
+			debugTextsYOffset += 15;
+		}
+
+		if (panic) {
+			// TODO: handle panic!
+			// For now: discard frameDelta
+			this.panic = false;
+			this.resetFrameDelta();
 		}
 	},
 
@@ -434,28 +453,41 @@ Lucid.Engine = BaseComponent.extend({
 			this.minFrameDelay = 1000 / fps;
 		}
 	},
+	
+	/**
+	 * The cumulative amount of elapsed time in milliseconds that has not yet
+	 * been simulated, but is being discarded as a result of calling this
+	 * function.
+	 *
+	 * @return     {Number}  The current frameDelta.
+	 */
+	resetFrameDelta: function() {
+		var oldFrameDelta = this.frameDelta;
+		this.frameDelta = 0;
+		return oldFrameDelta;
+	},
 
 /**
  * ControlGroup
  */
 
- 	/**
- 	 * Adds a control group.
- 	 *
- 	 * @param      {ControlGroup}  controlGroup  The control group.
- 	 */
- 	addControlGroup: function(controlGroup) {
- 		this.controlGroups.push(controlGroup);
- 	},
+	/**
+	 * Adds a control group.
+	 *
+	 * @param      {ControlGroup}  controlGroup  The control group.
+	 */
+	addControlGroup: function(controlGroup) {
+		this.controlGroups.push(controlGroup);
+	},
 
- 	/**
- 	 * Removes a control group.
- 	 *
- 	 * @param      {ControlGroup}  controlGroup  The control group.
- 	 */
- 	removeControlGroup: function(controlGroup) {
- 		this.controlGroups.erase(controlGroup);
- 	},
+	/**
+	 * Removes a control group.
+	 *
+	 * @param      {ControlGroup}  controlGroup  The control group.
+	 */
+	removeControlGroup: function(controlGroup) {
+		this.controlGroups.erase(controlGroup);
+	},
 
 /**
  * Map
@@ -513,14 +545,14 @@ Lucid.Engine = BaseComponent.extend({
 	},
 
 	/**
-	 * Sets the map and loads its assets.
+	 * Sets the map and starts loading the asset.
 	 *
 	 * @param      {Map}  map     The map.
 	 * @override
 	 */
 	setMap: function(map) {
 		this.map = map;
-		this.map.loadAssets();
+		this.map.load();
 	},
 	/**
 	 * Destroy the current Engine.map.
@@ -662,7 +694,7 @@ Lucid.Engine = BaseComponent.extend({
 	},
 
 	/**
-	 * Gets the layer collision.
+	 * Gets the collision layer.
 	 *
 	 * @return     {LayerCollision}  The layer collision.
 	 */
@@ -671,7 +703,7 @@ Lucid.Engine = BaseComponent.extend({
 	},
 
 	/**
-	 * Gets the layer entities.
+	 * Gets the entities layer.
 	 *
 	 * @return     {LayerEntities}  The layer entities.
 	 */
@@ -711,19 +743,11 @@ Lucid.Engine = BaseComponent.extend({
 	}
 });
 
-// type constants
-Lucid.Engine.TYPE = {
-	SIDE_SCROLL: "sideScroll", // side scroll game type
-	TOP_DOWN: "topDown" // top down game type
-};
-
 // event constants
 Lucid.Engine.EVENT = {
 	TOGGLE_LAYER: "toggleLayer",
 	PAUSE: "pause",
 	PLAY: "play",
 	LOADED_MAP_FILE_SUCCESS: "loadedMapFileSuccess",
-	LOADED_MAP_FILE_ERROR: "loadedMapFileError",
-	LOADED_TILESET_FILE_SUCCESS: "loadedTilesetFileSuccess",
-	LOADED_TILESET_FILE_ERROR: "loadedTilesetFileError"
+	LOADED_MAP_FILE_ERROR: "loadedMapFileError"
 };

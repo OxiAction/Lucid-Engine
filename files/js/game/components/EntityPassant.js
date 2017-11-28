@@ -1,5 +1,5 @@
 /**
-* Game custom EntityFighter - extends BaseEntity.
+* Game custom EntityPassant - extends BaseEntity.
 */
 var EntityPassant = Lucid.BaseEntity.extend({
 	// config variables and their default values
@@ -9,21 +9,16 @@ var EntityPassant = Lucid.BaseEntity.extend({
 	animInterval: null,
 	animCounter: 0,
 
-	counter: 0,
-	dir: 1,
-
 	init: function(config) {
-		this._super(config);
-
 		this.componentName = "EntityPassant";
-		this.componentNamespace = ".EntityPassant";
-
 		this.width = 32;
 		this.height = 48;
 		this.speed = 8;
-
+		this.assetFilePath = "playground/entity_passant.png";
+		
+		this._super(config);
+		
 		this.animInterval = setInterval(this.updateAnim.bind(this), 500);
-
 		this.updateAnim();
 
 		return true;
@@ -36,41 +31,37 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		}
 
 		if (this.animCounter == 0) {
-			this.sourceX = 0;
+			this.assetX = 0;
 		} else if (this.animCounter == 1) {
-			this.sourceX = this.width * 2;
+			this.assetX = this.width * 2;
 		}
 
 		this.animCounter++;
 	},
 
-	loadTileSet: function(filePath) {
-		if (filePath == undefined) {
-			filePath = "playground/entity_passant.png";
-		}
-
-		this._super(filePath);
-	},
-
-	/**
-	 * The renderUpdate() function should simulate anything that is affected by time.
-	 * It can be called zero or more times per frame depending on the frame
-	 * rate.
-	 *
-	 * @param      {Number}  delta   The amount of time in milliseconds to
-	 *                               simulate in the update.
-	 */
 	renderUpdate: function(delta) {
 		this._super(delta);
 	},
 
-	tileSetLoaded: function(event, loaderItem) {
-		var camera = Lucid.data.engine.getCamera();
-		if (camera) {
-			camera.setFollowObject(this);
+	renderDraw: function(interpolationPercentage) {
+		switch (this.dir) {
+			case Lucid.BaseEntity.DIR.RIGHT:
+				this.assetY = 96;
+			break;
+
+			case Lucid.BaseEntity.DIR.LEFT:
+				this.assetY = 48;
+			break;
+
+			case Lucid.BaseEntity.DIR.UP:
+				this.assetY = 144;
+			break;
+
+			default:
+				this.assetY = 0;
 		}
 
-		this._super(event, loaderItem);
+		this._super(interpolationPercentage);
 	},
 
 	destroy: function() {

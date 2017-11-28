@@ -5,12 +5,14 @@
 Lucid.data.maps.map1 = {
 	config: {
 		id: "map1",
-		type: Lucid.Engine.TYPE.SIDE_SCROLL,
+		type: Lucid.Map.TYPE.TOP_DOWN,
 		name: "Map 1",
 		cols: 12,
 		rows: 12,
 		tileSize: 64,
+		assetFilePath: "playground/map_tiles.png",
 
+		// layers
 		layers: [
 			{
 				config: {
@@ -52,8 +54,8 @@ Lucid.data.maps.map1 = {
 							x: 100,
 							y: 100,
 							colliding: 1,
-							render: 1
-							// we could go crazy here with a lot of editor config fields... but we dont :D
+							render: 1,
+							snapToGrid: 1
 						},
 						
 						{
@@ -62,8 +64,8 @@ Lucid.data.maps.map1 = {
 							x: 300,
 							y: 300,
 							colliding: 1,
-							render: 1
-							// we could go crazy here with a lot of editor config fields... but we dont :D
+							render: 1,
+							snapToGrid: 1
 						}
 					]
 				}

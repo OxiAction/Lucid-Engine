@@ -1,6 +1,5 @@
 /**
- * Engine default LayerTileSet.
- * Extends the BaseLayer.
+ * Engine default LayerTileSet. Extends the BaseLayer.
  */
 Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 	// config variables and their default values
@@ -14,11 +13,11 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
  */
 
 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config) {
 		this.componentName = "LayerTileSet";
 		
@@ -28,18 +27,6 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 		this.checkSetCamera();
 
 		return true;
-	},
-
-	/**
-	 * The renderUpdate() function should simulate anything that is affected by time.
-	 * It can be called zero or more times per frame depending on the frame
-	 * rate.
-	 *
-	 * @param      {Number}  delta   The amount of time in milliseconds to
-	 *                               simulate in the update.
-	 */
-	renderUpdate: function(delta) {
-		
 	},
 
 	/**
@@ -55,8 +42,8 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 	 *                                                frames.
 	 */
 	renderDraw: function(interpolationPercentage) {
-		var tileSet = this.map.getTileSet();
-		if (!tileSet) {
+		var asset = this.map.getAsset();
+		if (!asset) {
 			return;
 		}
 
@@ -82,15 +69,15 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 				// zero => empty tile
 				if (tileNumber !== 0) {
 					this.canvasContext.drawImage(
-						tileSet, // the tileSet image
-						(tileNumber - 1) * tileSize, // source x
-						0, // source y
-						tileSize, // source width
-						tileSize, // source height
-						column * tileSize - this.camera.x,  // target x
-						row * tileSize - this.camera.y, // target y
-						tileSize, // target width
-						tileSize // target height
+						asset,								// specifies the image, canvas, or video element to use
+						(tileNumber - 1) * tileSize,		// the x coordinate where to start clipping
+						0,									// the y coordinate where to start clipping
+						tileSize,							// the width of the clipped image
+						tileSize,							// the height of the clipped image
+						column * tileSize - this.camera.x,	// the x coordinate where to place the image on the canvas
+						row * tileSize - this.camera.y,		// the y coordinate where to place the image on the canvas
+						tileSize,							// the width of the image to use (stretch or reduce the image)
+						tileSize							// the height of the image to use (stretch or reduce the image)
 					);
 				}
 			}
@@ -98,9 +85,11 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 	},
 
 	/**
-	 * Resize.
+	 * Resize method. Usually called when the screen / browser dimensions have
+	 * changed.
 	 *
-	 * @param      {Object}  config  The configuration.
+	 * @param      {Object}  config  The configuration which must contain the
+	 *                               properties wWidth and wHeight.
 	 */
 	resize: function(config) {
 		this._super(config);

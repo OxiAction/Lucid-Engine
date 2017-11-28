@@ -7,26 +7,27 @@ The following covers the structured project tasks. Every task is followed by the
 
 ### Finished tasks:
 
-#### Milestones 1
+#### Milestones Meeting 1 (09.11.2017)
 
 * engine base layout. This also includes stuff like the plugin system (inheritance), general structure and many mandatory functions required by the engine - **very hard**
 * loader - **medium**
 * utils - **medium**
-* map (currently done, but there is still some stuff to-do later on) - **easy**
+* map - **easy**
 
-#### Milestones 2
+#### Milestones Metting 2 (30.11.2017)
 
-* graphics (layer) implementation - **medium**
-* entity implmementation - **easy**
+* graphics/rendering implementation - **medium**
+* entities implmementation - **easy**
 * controls implementation - **easy**
 * collision implementation - **medium**
-* A* implementation (pathfinding) - **medium**
+* A* pathfinding implementation - **medium**
 
-### Open tasks (critical):
+### Open tasks (**critical**):
 
-* basic editor and its forms (**in progress**) - **hard**
-* final data structures for entities, maps, tilesets (**in progress** due to editor being in progress) - **easy**
-* ai implementation - **medium** (this and A* are now two seperate tasks! A* is done already)
+* AI implementation (new since Milestone 1 - this and A* pathfinding are now two seperate tasks! A* pathfinding is done already) - **in progress** - **medium**
+* items implementation (new since Milestone 1) - **easy**
+* a final (basic) game based on the engine - **medium**
+* basic editor and its forms - **hard**
 
 ### Optional tasks (nice to have):
 
@@ -35,14 +36,8 @@ The following covers the structured project tasks. Every task is followed by the
 * extended JSDoc - **easy**
 * sounds / music - **hard**
 
-### Further thoughts:
-
-* we should switch to SVG for smooth graphics when dynamically scaling - e.g. using [[this]](https://opengameart.org/content/free-platformer-game-tileset) as a base tileset
-
 ## Code Details & Coding Conventions
 This project is being developed with Sublime Text 3, a powerful editor.
-
-### Tips (in case you want to work on the project)
 
 * getter and setters are **only** used for complex data types (e.g. Objects like Camera, Map etc.) but **not** for primitive data types (e.g. string, number) **unless** there is some good reason for it (e.g. you need to manipulate something when setting / getting)
 * for notifications / messaging we use the [[Publish–subscribe pattern]](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern)
@@ -53,29 +48,27 @@ This project is being developed with Sublime Text 3, a powerful editor.
 <snippet>
     <content><![CDATA[/**
  * TODO: description.
- *
- * @type       {TODO_NAME}
  */
 var TODO_NAME = BaseComponent.extend({
-    // config variables and their default values
-    var1: false,
+  // config variables and their default values
+  var1: false,
 
-    // local variables
-    var2: false,
-    
-    /**
-      * Automatically called when instantiated.
-      *
-      * @param      {Object}   config  The configuration.
-      * @return     {boolean}  Returns true on success.
-      */
-    init: function(config) {
-        this.componentName = "TODO_NAME";
+  // local variables
+  var2: false,
+  
+  /**
+   * Automatically called when instantiated.
+   *
+   * @param      {Object}   config  The configuration.
+   * @return     {Boolean}  Returns true on success.
+   */
+  init: function(config) {
+    this.componentName = "TODO_NAME";
 
-        this._super(config);
+    this._super(config);
 
-        return true;
-    }
+    return true;
+  }
 });]]></content>
     <tabTrigger>etemp</tabTrigger>
     <scope>source.js</scope>
@@ -100,3 +93,4 @@ You may encounter some warnings in the console when loading files, but those are
 * John Resigs [[Inheritance Code]](https://johnresig.com/blog/simple-javascript-inheritance/)
 * [[jQuery]](https://jquery.com/) version 3.2.1+
 * [[jQueryUI]](https://jqueryui.com/) version 1.12.1+
+* [[EasyStar.js]](http://easystarjs.com/) version 0.4.1+

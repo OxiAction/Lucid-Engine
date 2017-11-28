@@ -1,63 +1,58 @@
 /**
  * Engine default BaseEntity. This Component is Layer related and represented by
  * the Layer.data value(s).
- *
- * @type       {BaseEntity}
  */
 Lucid.BaseEntity = BaseComponent.extend({
 	// config variables and their default values
-    x: 0,
-    y: 0,
-    z: 0,
+	x: 0, // current x position
+	y: 0, // current y position
 
-    lastX: 0,
-	lastY: 0,
-	lastZ: 0,
+	lastX: 0, // the last x position, before the current render tick
+	lastY: 0, // the last y position, before the current render tick
 
-    offsetX: 0,
-    offsetY: 0,
-    offsetZ: 0,
+	healthCurrent: 100, // current health
+	healthMin: 0, // minimum health - curent < minimum -> Lucid.Entity.STATE.DEAD
+	healthMax: 100, // maximum health
 
-    healthCurrent: 100, // current health
-    healthMin: 0, // minimum health - curent < minimum -> Lucid.Entity.STATE.DEAD
-    healthMax: 100, // maximum health
+	width: 0,
+	height: 0,
 
-    width: 0,
-    height: 0,
+	assetFilePath: null,
 
-    sourceX: 0, // tileSet position X
-    sourceY: 0, // tileSet position Y
+	assetX: 0, // asset position X
+	assetY: 0, // asset position Y
 
 	name: "Unknown", // name
-	speed: 1, // speed
-	vulnerable: 1,
+	speed: 1, // movement speed of the entity
+	vulnerable: true, // if set to false entity is immortal (cant loose any health / die)
 	weight: 80, // weight in kilograms
 	render: true, // determines if the content is rendered
 	colliding: true, // does it collide with collisionData?
+	skipFirstPathSegment: true, // splices first path segment -> smoother animations
+	snapToGrid: true, // snaps the entity to the center of the nearest grid tile
 
 	// local variables
-	controls: {}, // registered controls
-	_tileSetLoaded: false,
-	tileSet: null,
+	asset: null, // the loaded image for layers
+	loaded: false, // determines if map has loaded everything
+
 	canvas: null,
 	canvasContext: null,
 
 	moved: false, // required for collision detection
 
-	path: null,
-	currPathIndex: 0,
-	pathDestX: null,
-	pathDestY: null,
+	path: null, // if theres a path array defined the entity will walk node by node
+				// until it reaches the end node of the path
+
+	dir: null, // the direction of the entity - e.g. Lucid.BaseEntity.DIR.TOP means
+			   // entity is heading towards top
 
 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config) {
-		this.componentName = "BaseEntity";
-		
 		this._super(config);
 
 		this.checkSetMap();
@@ -66,56 +61,109 @@ Lucid.BaseEntity = BaseComponent.extend({
 		this.canvas = document.createElement("canvas");
 		this.canvasContext = this.canvas.getContext("2d");
 
+		if (!this.dir) {
+			this.dir = Lucid.BaseEntity.DIR.DOWN;
+		}
+
+		if (this.snapToGrid) {
+			var indices = this.getGridIndices();
+			this.x = Math.round(indices[0] * this.map.tileSize + (this.map.tileSize / 2) - (this.width / 2));
+			this.y = Math.round(indices[1] * this.map.tileSize + (this.map.tileSize / 2) - (this.height / 2));
+		}
+
 		this.lastX = this.x;
 		this.lastY = this.y;
-		this.lastZ = this.z;
+
+		// events for loading the asset
+		$(document).on(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace, this.assetLoadingSuccess.bind(this));
+		$(document).on(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_ERROR + this.componentNamespace, this.assetLoadingError.bind(this));
 
 		return true;
 	},
 
-	loadTileSet: function(filePath) {
-		if (filePath == undefined) {
-			return;
-		}
-
-		this._tileSetLoaded = false;
-
-		var loaderItem = new Lucid.LoaderItem({
-	        id: this.componentName,
-	        dataType: Lucid.Loader.TYPE.IMAGE,
-	        filePath: filePath,
-	        eventSuccessName: Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace,
-	        eventErrorName: Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_ERROR + this.componentNamespace
-	    });
-
-	    $(document).on(Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace, this.tileSetLoaded.bind(this));
-
-	    Lucid.Loader.add(loaderItem);
-	},
-
-	tileSetLoaded: function(event, loaderItem) {
-		Lucid.Utils.log("BaseEntity @ loadTileset: loaded tileset " + loaderItem.id);
-    	$(document).off(Lucid.BaseEntity.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
-        this._tileSetLoaded = true;
-        this.tileSet = loaderItem.getData();
-        // this.checkLoadingState();
+	/**
+	 * Start loading.
+	 */
+	load: function() {
+		Lucid.Utils.log("BaseEntity @ load: starting to load in BaseEntity with name: " + this.name);
+		this.loadAsset();
 	},
 
 	/**
-	 * Determines if valid.
-	 *
-	 * @return     {Boolean}  True if valid, False otherwise.
+	 * General loading success.
 	 */
-	isValid: function() {
-		if (
-			!this.camera ||
-			!this.map ||
-			!this.tileSet
-			) {
-			return false;
-		} else {
-			return true;
-		}
+	loadingSuccess: function() {
+		Lucid.Utils.log("BaseEntity @ loadingSuccess: loaded everything in BaseEntity with name: " + this.name);
+		this.loaded = true;
+		$(document).trigger(Lucid.BaseEntity.EVENT.LOADING_SUCCESS, [this]);
+	},
+
+	/**
+	 * General loading error.
+	 */
+	loadingError: function() {
+		Lucid.Utils.log("BaseEntity @ loadingError: ERROR occurred while loading in BaseEntity with name: " + this.name);
+		this.loaded = false;
+		$(document).trigger(Lucid.BaseEntity.EVENT.LOADING_ERROR, [this]);
+	},
+
+	/**
+	 * Loads the asset.
+	 */
+	loadAsset: function() {
+		Lucid.Utils.log("BaseEntity @ loadAsset: " + this.name + " - loading asset");
+
+		var loaderItem = new Lucid.LoaderItem({
+			id: this.assetFilePath,
+			dataType: Lucid.Loader.TYPE.IMAGE,
+			filePath: this.assetFilePath,
+			eventSuccessName: Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace,
+			eventErrorName: Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_ERROR + this.componentNamespace
+		});
+		
+		Lucid.Loader.add(loaderItem);
+	},
+
+	/**
+	 * Asset loading success.
+	 *
+	 * @param      {String}      event       The event.
+	 * @param      {LoaderItem}  loaderItem  The loader item.
+	 */
+	assetLoadingSuccess: function(event, loaderItem) {
+		this.asset = loaderItem.getData();
+
+		this.loadingSuccess();
+	},
+
+	/**
+	 * Asset loading error.
+	 *
+	 * @param      {String}      event       The event.
+	 * @param      {LoaderItem}  loaderItem  The loader item.
+	 */
+	assetLoadingError: function(event, loaderItem) {
+		this.asset = null;
+
+		this.loadingError();
+	},
+
+	/**
+	 * Gets the asset.
+	 *
+	 * @return     {Object}  The asset.
+	 */
+	getAsset: function() {
+		return this.asset;
+	},
+
+	/**
+	 * Sets the asset.
+	 *
+	 * @param      {Object}  asset   The asset.
+	 */
+	setAsset: function(asset) {
+		this.asset = asset;
 	},
 
 	/**
@@ -127,6 +175,22 @@ Lucid.BaseEntity = BaseComponent.extend({
 	 *                               simulate in the update.
 	 */
 	renderUpdate: function(delta) {
+		if (this.lastX < this.x) {
+			// moved right
+			this.dir = Lucid.BaseEntity.DIR.RIGHT;
+		} else if (this.lastX > this.x) {
+			// moved left
+			this.dir = Lucid.BaseEntity.DIR.LEFT;
+		}
+
+		if (this.lastY < this.y) {
+			// moved down
+			this.dir = Lucid.BaseEntity.DIR.DOWN;
+		} else if (this.lastY > this.y) {
+			// moved up
+			this.dir = Lucid.BaseEntity.DIR.UP;
+		}
+
 		var tileSize = this.map.tileSize;
 		if (this.path) {
 			this.lastX = this.x;
@@ -175,8 +239,7 @@ Lucid.BaseEntity = BaseComponent.extend({
 				}
 			}
 		} else {
-			if (this.lastX == this.x &&
-				this.lastY == this.y) {
+			if (this.lastX == this.x && this.lastY == this.y) {
 				this.moved = false;
 			} else {
 				this.moved = true;
@@ -194,65 +257,30 @@ Lucid.BaseEntity = BaseComponent.extend({
 	 *                                                simulated yet, divided by
 	 *                                                the amount of time that
 	 *                                                will be simulated the next
-	 *                                                time renderUpdate() runs. Useful
-	 *                                                for interpolating frames.
+	 *                                                time renderUpdate() runs.
+	 *                                                Useful for interpolating
+	 *                                                frames.
 	 */
 	renderDraw: function(interpolationPercentage) {
 		this.canvasContext.width = this.camera.width;
 		this.canvasContext.height = this.camera.height;
 		this.canvasContext.clearRect(0, 0, this.camera.width, this.camera.height);
 
-		if (!this.tileSet) {
-			return this.canvas;
+		if (!this.loaded) {
+			return;
 		}
 		
 		this.canvasContext.drawImage(
-			this.tileSet,
-			this.sourceX, // source x
-			this.sourceY, // source y
-			this.width, // source width
-			this.height, // source height
-			Math.floor((this.lastX + (this.x - this.lastX) * interpolationPercentage) - this.camera.x),  // target x
-			Math.floor((this.lastY + (this.y - this.lastY) * interpolationPercentage) - this.camera.y), // target y
-			this.width, // target width
-			this.height // target height
+			this.asset,		// specifies the image, canvas, or video element to use
+			this.assetX,	// the x coordinate where to start clipping
+			this.assetY,	// the y coordinate where to start clipping
+			this.width,		// the width of the clipped image
+			this.height,	// the height of the clipped image
+			Math.floor((this.lastX + (this.x - this.lastX) * interpolationPercentage) - this.camera.x),	// the x coordinate where to place the image on the canvas
+			Math.floor((this.lastY + (this.y - this.lastY) * interpolationPercentage) - this.camera.y),	// the y coordinate where to place the image on the canvas
+			this.width,		// the width of the image to use (stretch or reduce the image)
+			this.height		// the height of the image to use (stretch or reduce the image)
 		);
-
-		return this.canvas;
-	},
-
-	/**
-	 * Resize.
-	 *
-	 * @param      {Object}  config  The configuration.
-	 */
-	resize: function(config) {
-		this.canvas.width = config.wWidth;
-		this.canvas.height = config.wHeight;
-	},
-
-	destroy: function() {
-
-	},
-
-	/**
-	 * Adds a control.
-	 *
-	 * @param      {Control}  control  The control.
-	 */
-	addControl: function(control) {
-		this.controls[control.getType()] = control;
-	},
-
-	/**
-	 * Sets the active state.
-	 *
-	 * @param      {Boolean}  value  The value.
-	 */
-	setActive: function(active) {
-		// TODO: enable / disable controls.
-
-		this._super(active);
 	},
 
 	/**
@@ -264,9 +292,15 @@ Lucid.BaseEntity = BaseComponent.extend({
 		return this.canvas;
 	},
 
+	/**
+	 * Sets the path. If theres a path array defined the entity will walk node
+	 * by node until it reaches the end node of the path.
+	 *
+	 * @param      {<type>}  path    The path
+	 */
 	setPath: function(path) {
-		if (path !== null && path.length > 1) {
-			path.splice(0,1);
+		if (this.skipFirstPathSegment && path !== null && path.length > 1) {
+			path.splice(0, 1);
 		}
 
 		this.path = path;
@@ -313,7 +347,7 @@ Lucid.BaseEntity = BaseComponent.extend({
 	},
 
 	/**
-	 * Gets the grid indices.
+	 * Translates x/y Numbers to grid (tileSize) array based indices.
 	 *
 	 * @return     {Array}  The grid indices.
 	 */
@@ -322,25 +356,49 @@ Lucid.BaseEntity = BaseComponent.extend({
 		var y = Math.floor((this.y + (this.height / 2)) / this.map.tileSize);
 
 		return [x, y];
+	},
+
+	/**
+	 * Resize method. Usually called when the screen / browser dimensions have
+	 * changed.
+	 *
+	 * @param      {Object}  config  The configuration which must contain the
+	 *                               properties wWidth and wHeight.
+	 */
+	resize: function(config) {
+		this.canvas.width = config.wWidth;
+		this.canvas.height = config.wHeight;
+	},
+
+	/**
+	 * Destroys the BaseEntity and all its corresponding objects.
+	 *
+	 * @return     {Boolean}  Returns true on success.
+	 */
+	destroy: function() {
+		$(document).off(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace);
+		$(document).off(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_ERROR + this.componentNamespace);
+
+		this.loaded = false;
 	}
 });
 
 // forms setup for the editor
 Lucid.BaseEntity.FORMS = {
+	name: "string",
 	x: "integer",
 	y: "integer",
-	z: "integer",
-	name: "string",
 	colliding: "boolean",
-	render: "boolean"
+	render: "boolean",
+	snapToGrid: "boolean"
 };
 
 // event constants
 Lucid.BaseEntity.EVENT = {
-	LOADED_TILESET_FILE_SUCCESS: "BaseEntityLoadedTileSetFileSuccess",
-	LOADED_TILESET_FILE_ERROR: "BaseEntityLoadedTileSetFileError",
-	LOADED_ASSETS_SUCCESS: "BaseEntityLoadedAssetsSuccess",
-	LOADED_ASSETS_ERROR: "BaseEntityLoadedAssetsError"
+	LOADED_ASSET_FILE_SUCCESS: "BaseEntityLoadedAssetFileSuccess",
+	LOADED_ASSET_FILE_ERROR: "BaseEntityLoadedAssetFileError",
+	LOADING_SUCCESS: "BaseEntityLoadingSuccess",
+	LOADING_ERROR: "BaseEntityLoadingError"
 };
 
 // some states for entities
@@ -355,4 +413,11 @@ Lucid.BaseEntity.STATE = {
 	ATTACK: "attack",
 	DEFEND: "defend",
 	EMOTE: "emote"
-}
+};
+
+Lucid.BaseEntity.DIR = {
+	RIGHT: "right",
+	LEFT: "left",
+	UP: "up",
+	DOWN: "down"
+};

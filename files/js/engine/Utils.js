@@ -1,6 +1,6 @@
 /**
- * Utils is a utils collection for the Engine. It also extends some
- * JavaScript data types with new features.
+ * Utils is a utils collection for the Engine. It also extends some JavaScript
+ * data types with new features.
  *
  * @class      Utils (name)
  * @return     {Object}  Returns public methods.
@@ -139,7 +139,7 @@ Lucid.Utils = function() {
 				return false;
 			}
 
-			// TODO: this needs more checks - I guess
+			// TODO: this needs more checks - I guess...
 
 			return true;
 		},

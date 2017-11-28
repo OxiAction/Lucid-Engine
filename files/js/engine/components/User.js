@@ -1,7 +1,5 @@
 /**
  * Engine default User.
- *
- * @type       {User}
  */
 Lucid.User = BaseComponent.extend({
 	name: "Unknown User", // name
@@ -10,11 +8,11 @@ Lucid.User = BaseComponent.extend({
 	// local variables
 
 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config) {
 		this.componentName = "User";
 		

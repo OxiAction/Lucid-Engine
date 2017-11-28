@@ -1,8 +1,5 @@
 /**
  * Engine default Control.
- * How it SHOULD work:
- * - can be attached to any Object
- * - Object requires x / y properties
  */
 Lucid.Control = BaseComponent.extend({
 	// config variables and their default values
@@ -13,11 +10,11 @@ Lucid.Control = BaseComponent.extend({
 	target: null,
 	
 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config) {
 		this.componentName = "Control";
 
@@ -35,19 +32,35 @@ Lucid.Control = BaseComponent.extend({
 		return true;
 	},
 
+	/**
+	 * Trigger this Control.
+	 */
 	trigger: function() {
 		this.callback(this.target, this.key);
 	},
 
+	/**
+	 * Sets the target.
+	 *
+	 * @param      {Object}  target  The target.
+	 */
 	setTarget: function(target) {
 		this.target = target;
 	},
 
+	/**
+	 * Gets the current target or null.
+	 *
+	 * @return     {Object}  The target.
+	 */
 	getTarget: function() {
 		return this.target;
 	}
 });
 
+/**
+ * Engine default ControlGroup.
+ */
 Lucid.ControlGroup = BaseComponent.extend({
 	// config variables and their default values
 	controls: [],
@@ -60,11 +73,11 @@ Lucid.ControlGroup = BaseComponent.extend({
 	numPressedKeys: 0,
 	
 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config) {
 		this.componentName = "ControlGroup";
 
@@ -78,7 +91,6 @@ Lucid.ControlGroup = BaseComponent.extend({
 		e.preventDefault();
 		this.pressedKeys[keyCode] = true;
 		this.numPressedKeys++;
-		console.log(keyCode);
 	},
 
 	onKeyUp: function(e) {

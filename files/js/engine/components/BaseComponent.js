@@ -1,6 +1,8 @@
 /**
-* Engine BaseComponent
-*/
+ * Engine BaseComponent
+ *
+ * @type       {BaseComponent}
+ */
 var BaseComponent = Class.extend({
 	// config variables and their default values
 	// @type       {String}
@@ -18,23 +20,28 @@ var BaseComponent = Class.extend({
 
 	// local variables
 	// component name
-	componentName: "UndefinedComponentName",
+	componentName: null,
 	// namespace - e.g. required event publishing
-	componentNamespace: ".UndefinedComponentName",
+	componentNamespace: null,
 
 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config){
-		Lucid.Utils.log("Component " + this.componentName);
-
-		this.componentNamespace = "." + this.componentName;
-
 		// write target, default values target, new values (overrides default values)
 		$.extend(this, this, config);
+
+		if (!this.componentName) {
+			Lucid.Utils.error("BaseComponent @ init: error - you have not defined a componentName!");
+			return false;
+		}
+
+		Lucid.Utils.log("BaseComponent @ init: " + this.componentName);
+
+		this.componentNamespace = "." + this.componentName;
 
 		return true;
 	},
@@ -100,7 +107,8 @@ var BaseComponent = Class.extend({
 	},
 
 	/**
-	 * Destroy.
+	 * Destroys the component. You should remove/clear all dependencies,
+	 * intervals etc. from this object so it can be garbage collected.
 	 */
 	destroy: function() {
 		this.map = null;

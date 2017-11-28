@@ -1,6 +1,5 @@
 /**
- * Engine default LayerItems.
- * Extends the BaseLayer.
+ * Engine default LayerItems. Extends the BaseLayer.
  */
 Lucid.LayerItems = Lucid.BaseLayer.extend({
 	// config variables and their default values
@@ -14,11 +13,11 @@ Lucid.LayerItems = Lucid.BaseLayer.extend({
  */
 
 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config) {
 		this.componentName = "LayerItems";
 		
@@ -30,6 +29,13 @@ Lucid.LayerItems = Lucid.BaseLayer.extend({
 		return true;
 	},
 
+	/**
+	 * Resize method. Usually called when the screen / browser dimensions have
+	 * changed.
+	 *
+	 * @param      {Object}  config  The configuration which must contain the
+	 *                               properties wWidth and wHeight.
+	 */
 	resize: function(config) {
 		this._super(config);
 	},

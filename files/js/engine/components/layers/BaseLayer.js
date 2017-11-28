@@ -1,6 +1,5 @@
 /**
- * Engine default BaseLayer.
- * Use this as base for new Layers.
+ * Engine default BaseLayer. Use this as base for new Layers.
  */
 Lucid.BaseLayer = BaseComponent.extend({
 	// config variables and their default values
@@ -24,13 +23,12 @@ Lucid.BaseLayer = BaseComponent.extend({
  */
 
 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config) {
-		
 		this._super(config);
 
 		if (!this.id) {
@@ -95,6 +93,13 @@ Lucid.BaseLayer = BaseComponent.extend({
 		// ...
 	},
 
+	/**
+	 * Resize method. Usually called when the screen / browser dimensions have
+	 * changed.
+	 *
+	 * @param      {Object}  config  The configuration which must contain the
+	 *                               properties wWidth and wHeight.
+	 */
 	resize: function(config) {
 		if (this.canvas) {
 			this.canvas.width = config.wWidth;
@@ -123,7 +128,7 @@ Lucid.BaseLayer = BaseComponent.extend({
  * Getter & Setter
  */
 
-	getTile: function (index) {
+	getTile: function(index) {
 		if (index < this.data.length) {
 			return this.data[index];
 		} else {

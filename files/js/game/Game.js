@@ -39,6 +39,7 @@ function Game() {
 	// init engine
 	engine = new Lucid.Engine({
 		debugFPS: true,
+		debugPanic: true,
 		debugGrid: true
 	});
 
@@ -54,7 +55,8 @@ function Game() {
 	var mapName = "map1";
 	
 	// setup Camera
-	engine.setCamera(new Lucid.Camera());
+	var camera = new Lucid.Camera();
+	engine.setCamera(camera);
 
 	// load the file into DOM
 	engine.loadMapFile(mapName);
@@ -88,16 +90,16 @@ function Game() {
 			})
 		]
 	});
-	// add to engine
+	// control groups need to be added to the engine for update purpose
 	engine.addControlGroup(controlGroup);
-	// and set target to camera
-	controlGroup.setTarget(Lucid.data.engine.getCamera());
+	// and set target to camera so we can now control the camera
+	controlGroup.setTarget(camera);
 
-	// easystar
+	// initialize and config EasyStar.js
 	var easystar = new EasyStar.js();
-	easystar.enableDiagonals();
-	easystar.disableCornerCutting();
-	easystar.setAcceptableTiles([0]);
+	easystar.enableDiagonals();			// this should be fine and makes animation a bit smoother
+	easystar.disableCornerCutting(); 	// we dont want to bug through objects!
+	easystar.setAcceptableTiles([0]); 	// use zero values in the array as valid (walkable) tiles
 
 	// event is triggered if Engine has loaded the map file
 	$(document).on(Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS + namespace, function(event, loaderItem) {
@@ -107,13 +109,32 @@ function Game() {
 		// set the map - this will also start loading the map assets
 		engine.setMap(map);
 
-		// event is triggered if Map has loaded all the required assets
-		$(document).on(Lucid.Map.EVENT.LOADED_ASSETS_SUCCESS + namespace, function(event, map) {
+		// event is triggered if Map has loaded everything
+		$(document).on(Lucid.Map.EVENT.LOADING_SUCCESS + namespace, function(event, map) {
 			// build the map
 			map.build();
 
 			// TODO: if we dont call this NOW its all messed up... needs to be fixed!
 			engine.resize();
+
+// START of pathfinding testing stuff ...
+			
+			// get the layer which is responsible for entities
+			//
+			// we could just get it by id: var layerEntities =
+			// engine.getLayer("layer-entities");
+			//
+			// but as there can only be ONE layer which is responsible for
+			// entities, we can simply use:
+			var layerEntities = engine.getLayerEntities();
+
+			// get entity with id "passant1" from entities layer
+			var entityPassant = layerEntities.getEntity("passant1");
+
+			// check if entityPassant is present
+			if (layerEntities && entityPassant) {
+				camera.setFollowTarget(entityPassant);
+			}
 
 			// add click event
 			window.addEventListener("click", function(e) {
@@ -124,43 +145,45 @@ function Game() {
 				// set the collision grid data
 				easystar.setGrid(collisionData);
 
-				// layer for the entities
-				var layerEntities = engine.getLayer("layer-entities");
-				// if valid
-				if (layerEntities) {
+				if (layerEntities && entityPassant) {
+					var clickedGridIndices = engine.getLayerCollision().getGridIndicesByMouse(e.clientX, e.clientY);
+					var entityPassantGridIndices = entityPassant.getGridIndices();
+					
+					// check if both "vectors" are valid
+					if (clickedGridIndices && entityPassantGridIndices) {
+						Lucid.Utils.log("Game: clicked on tile @ " + clickedGridIndices[0] + "/" + clickedGridIndices[1]);
 
-					// get entity with id passant1
-					var entity = layerEntities.getEntity("passant1");
-					// if valid
-					if (entity) {
+						// set new path indices
+						// params: startX, startY, endX, endY, callback
+						easystar.findPath(entityPassantGridIndices[0], entityPassantGridIndices[1], clickedGridIndices[0], clickedGridIndices[1], function(path) {
+							if (path === null) {
+								Lucid.Utils.log("Game: path was not found");
+							} else if (path.length) {
+								Lucid.Utils.log("Game: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
+							} 
+							// case: entityGridIndices are the same as clickedGridIndices
+							// this means there is no easystar path.
+							else {
+								path.push({
+									x: entityPassantGridIndices[0],
+									y: entityPassantGridIndices[1]
+								});
 
-						var clickedGridIndices = engine.getLayerCollision().getGridIndicesByMouse(e.clientX, e.clientY);
-						var entityGridIndices = entity.getGridIndices();
-						
-						// check if both "vectors" are valid
-						if (clickedGridIndices && entityGridIndices) {
-							Lucid.Utils.log("Game: clicked on tile @ " + clickedGridIndices[0] + "/" + clickedGridIndices[1]);
+								Lucid.Utils.log("Game: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
+							}
+							
+							// set path for entityPassant!
+							entityPassant.setPath(path);
+						});
 
-							// set new path indices
-							// params: startX, startY, endX, endY, callback
-							easystar.findPath(entityGridIndices[0], entityGridIndices[1], clickedGridIndices[0], clickedGridIndices[1], function(path) {
-								if (path === null) {
-									Lucid.Utils.log("Game: path was not found");
-								} else if (path.length > 1) {
-									Lucid.Utils.log("Game: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
-								}
-
-								// set path for entity!
-								entity.setPath(path);
-							});
-
-							// after setting a path, we need to run calculate()
-							easystar.calculate();
-						}
+						// after setting a path, we need to run calculate()
+						easystar.calculate();
 					}
 				}
-				
 			});
+
+// ... END of pathfinding testing stuff
+			
 		});
 	});
 	

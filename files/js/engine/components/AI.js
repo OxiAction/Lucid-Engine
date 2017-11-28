@@ -1,8 +1,5 @@
 /**
- * Engine default AI.
- * This component also handles pathfinding.
- *
- * @type       {AI}
+ * Engine default AI. This component also handles pathfinding.
  */
 Lucid.AI = BaseComponent.extend({
 	// config variables and their default values
@@ -11,11 +8,11 @@ Lucid.AI = BaseComponent.extend({
 	// local variables
 
 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config) {
 		this.componentName = "AI";
 		
@@ -55,8 +52,8 @@ Lucid.AI.BEHAVIOR = {
 	 * follow another Entity
 	 * 
 	 * data = {
-	 * 	target: Entity, // the target Entity to follow
-	 * 	keepDistance: number // the distance kept between target and this
+	 * 	target: Entity,			// the target Entity to follow
+	 * 	keepDistance: number	// the distance kept between target and this
 	 * }
 	 */
 	FOLLOW: "follow",
@@ -65,8 +62,8 @@ Lucid.AI.BEHAVIOR = {
 	 * randomly patrol a certrain radius using the origin position as center
 	 * 
 	 * data = {
-	 * 	radius: number, // radius to patrol
-	 * 	useYAxis: boolean // stay on the ground currently attached on or jump on higher / lower grounds too
+	 * 	radius: number,		// radius to patrol
+	 * 	allowJump: boolean	// stay on the ground currently attached on or jump on higher / lower grounds too
 	 * }
 	 */
 	PATROL: "patrol",
@@ -75,7 +72,7 @@ Lucid.AI.BEHAVIOR = {
 	 * hold origin position
 	 * 
 	 * data = {
-	 * 	moveOnTrigger: boolean // move when triggered - e.g. when engaging a fight with another Entity - after the fight returns to origin position
+	 * 	moveOnTrigger: boolean	// move when triggered - e.g. when engaging a fight with another Entity - after the fight returns to origin position
 	 * }
 	 */
 	HOLD: "holdPosition"

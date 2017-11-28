@@ -1,6 +1,5 @@
 /**
- * Engine default LayerCollision.
- * Extends the LayerTileSet.
+ * Engine default LayerCollision. Extends the LayerTileSet.
  */
 Lucid.LayerCollision = Lucid.LayerTileSet.extend({
 	// config variables and their default values
@@ -14,11 +13,11 @@ Lucid.LayerCollision = Lucid.LayerTileSet.extend({
  */
 
 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config) {
 		this.componentName = "LayerCollision";
 		
@@ -51,6 +50,13 @@ Lucid.LayerCollision = Lucid.LayerTileSet.extend({
 		return [x, y]
 	},
 
+	/**
+	 * Resize method. Usually called when the screen / browser dimensions have
+	 * changed.
+	 *
+	 * @param      {Object}  config  The configuration which must contain the
+	 *                               properties wWidth and wHeight.
+	 */
 	resize: function(config) {
 		this._super(config);
 	},

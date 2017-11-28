@@ -1,30 +1,27 @@
 /**
-* Engine default Map.
-*/
+ * Engine default Map.
+ */
 Lucid.Map = BaseComponent.extend({
 	// config variables and their default values
-	name: "Untiteled Map",
-	cols: 16,
-	rows: 16,
-	tileSize: 64,
-	layers: null,
+	type: null,
+	name: "Untiteled Map", // the display name of the map
+	cols: 16, // num of tile columns
+	rows: 16, // num of tile rows
+	tileSize: 64, // size of layer tiles
+	assetFilePath: null, // image path for layers
+	layers: null, // layers array
 
 	// local variables
-	loading: false,
-	_tileSetLoaded: false,
-	_entitySetLoaded: false,
-
-	tileSet: null,
-	entitySet: null,
-
+	asset: null, // the loaded image for layers
+	loaded: false, // determines if map has loaded everything
 	build: false, // determines if map is build
 
 	/**
-	  * Automatically called when instantiated.
-	  *
-	  * @param      {Object}   config  The configuration.
-	  * @return     {Boolean}  Returns true on success.
-	  */
+	 * Automatically called when instantiated.
+	 *
+	 * @param      {Object}   config  The configuration.
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	init: function(config) {
 		this.componentName = "Map";
 		
@@ -32,93 +29,125 @@ Lucid.Map = BaseComponent.extend({
 
 		this.checkSetEngine();
 
+		// events for loading the asset
+		$(document).on(Lucid.Map.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace, this.assetLoadingSuccess.bind(this));
+		$(document).on(Lucid.Map.EVENT.LOADED_ASSET_FILE_ERROR + this.componentNamespace, this.assetLoadingError.bind(this));
+
 		return true;
 	},
 
-	loadAssets: function() {
-		if (this.assetsLoaded()) {
-			Lucid.Utils.log("Map @ loadAssets: assets are already loaded");
-			return;
-		}
-
-		Lucid.Utils.log("Map @ loadAssets: " + this.name + " - loading assets");
-
-		this.loading = true;
-		
-		this.loadTileSet();
-		this.loadEntitySet();
+	/**
+	 * Start loading.
+	 */
+	load: function() {
+		Lucid.Utils.log("Map @ load: starting to load in Map with name: " + this.name);
+		this.loadAsset();
 	},
 
-	loadTileSet: function() {
-		this._tileSetLoaded = false;
+	/**
+	 * General loading success.
+	 */
+	loadingSuccess: function() {
+		Lucid.Utils.log("Map @ loadingSuccess: loaded everything in Map with name: " + this.name);
+		this.loaded = true;
+		$(document).trigger(Lucid.Map.EVENT.LOADING_SUCCESS, [this]);
+	},
+
+	/**
+	 * General loading error.
+	 */
+	loadingError: function() {
+		Lucid.Utils.log("Map @ loadingError: ERROR occurred while loading in Map with name: " + this.name);
+		this.loaded = false;
+		$(document).trigger(Lucid.Map.EVENT.LOADING_ERROR, [this]);
+	},
+
+	/**
+	 * Loads the asset.
+	 */
+	loadAsset: function() {
+		Lucid.Utils.log("Map @ loadAsset: " + this.name + " - loading asset");
 
 		var loaderItem = new Lucid.LoaderItem({
-	        id: "tiles",
-	        dataType: Lucid.Loader.TYPE.IMAGE,
-	        filePath: "playground/map_tiles.png",
-	        eventSuccessName: Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS,
-	        eventErrorName: Lucid.Map.EVENT.LOADED_TILESET_FILE_ERROR
-	    });
-
-	    Lucid.Loader.add(loaderItem);
-
-	    $(document).on(Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace, this.tileSetLoaded.bind(this));
+			id: this.assetFilePath,
+			dataType: Lucid.Loader.TYPE.IMAGE,
+			filePath: this.assetFilePath,
+			eventSuccessName: Lucid.Map.EVENT.LOADED_ASSET_FILE_SUCCESS,
+			eventErrorName: Lucid.Map.EVENT.LOADED_ASSET_FILE_ERROR
+		});
+		
+		Lucid.Loader.add(loaderItem);
 	},
 
-	tileSetLoaded: function(event, loaderItem) {
-		Lucid.Utils.log("Map @ loadTileset: loaded tileset");
-    	$(document).off(Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
-        this._tileSetLoaded = true;
-        this.tileSet = loaderItem.getData();
-        this.checkLoadingState();
+	/**
+	 * Asset loading success.
+	 *
+	 * @param      {String}      event       The event.
+	 * @param      {LoaderItem}  loaderItem  The loader item.
+	 */
+	assetLoadingSuccess: function(event, loaderItem) {
+		this.asset = loaderItem.getData();
+
+		this.loadingSuccess();
 	},
 
-	loadEntitySet: function() {
-		// TODO...
-		this._entitySetLoaded = true;
-		this.checkLoadingState();
+	/**
+	 * Asset loading error.
+	 *
+	 * @param      {String}      event       The event.
+	 * @param      {LoaderItem}  loaderItem  The loader item.
+	 */
+	assetLoadingError: function(event, loaderItem) {
+		this.asset = null;
+
+		this.loadingError();
 	},
 
-	checkLoadingState: function() {
-		if (this.assetsLoaded()) {
-			Lucid.Utils.log("Map @ checkLoadingState: assets are loaded! Much appreciated...");
-			this.loading = false;
-			$(document).trigger(Lucid.Map.EVENT.LOADED_ASSETS_SUCCESS, [this]);
-		}
+	/**
+	 * Gets the asset.
+	 *
+	 * @return     {Object}  The asset.
+	 */
+	getAsset: function() {
+		return this.asset;
 	},
 
-	assetsLoaded: function() {
-		if (this._tileSetLoaded && this._entitySetLoaded) {
-			return true;
-		}
-		return false;
+	/**
+	 * Sets the asset.
+	 *
+	 * @param      {Object}  asset   The asset.
+	 */
+	setAsset: function(asset) {
+		this.asset = asset;
 	},
 
+	/**
+	 * Builds the map.
+	 *
+	 * @return     {boolean}  Returns true on success.
+	 */
 	build: function() {
-		if (!this.assetsLoaded()) {
-			Lucid.Utils.log("Map @ build: assets are NOT loaded yet");
+		if (!this.build) {
+			Lucid.Utils.log("Map @ build: already build!");
+			return false;
+		}
+
+		if (!this.asset) {
+			Lucid.Utils.log("Map @ build: asset is NOT loaded yet - call loadAsset() first");
 			return false;
 		}
 
 		if (!this.layers || this.layers.length < 1) {
 			Lucid.Utils.error("Map @ build: " + this.name + " - layers are not defined!");
 			return false;
-		} else if (!this.engine) {
-			Lucid.Utils.error("Map @ build: " + this.name + " - Engine reference not defined!");
-			return false;
 		}
 
 		Lucid.Utils.log("Map @ build: createAddLayers in Engine");
 		for (var i = 0; i < this.layers.length; ++i) {
 			if (this.layers[i].config !== undefined && this.layers[i].config.id !== undefined) {
-				// map reference
-				this.layers[i].config.map = this;
-				// TODO - tileSets, entitySet... seems a bit too static - maybe we have other types?
-				// tileset reference
-				// this.layers[i].config.image = this.tileSet;
 				this.engine.createAddLayer(this.layers[i].config);
 			} else {
-				Lucid.Utils.error("Map @ build: tried to createAddLayer in Engine but Layer.config or Layer.id is not set!");
+				Lucid.Utils.log("Map @ build: tried to createAddLayer in Engine but Layer.config or Layer.id is not set! Index in layers Array: " + i);
 			}
 		}
 
@@ -133,7 +162,8 @@ Lucid.Map = BaseComponent.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	destroy: function() {
-		$(document).off(Lucid.Map.EVENT.LOADED_TILESET_FILE_SUCCESS + this.componentNamespace);
+		$(document).off(Lucid.Map.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace);
+		$(document).off(Lucid.Map.EVENT.LOADED_ASSET_FILE_ERROR + this.componentNamespace);
 
 		// only if build we need to remove layers
 		if (this.build) {
@@ -149,31 +179,35 @@ Lucid.Map = BaseComponent.extend({
 		}
 
 		this.layers = null;
+		this.loaded = false;
 		this.build = false;
 
 		this._super();
 
 		return true;
-	},
-
-	getTileSet: function() {
-		return this.tileSet;
-	},
-
-	setTileSet: function(value) {
-		this.tileSet = value;
 	}
 });
 
 // forms setup for the editor
 Lucid.Map.FORMS = {
-	name: "string"
+	id: "string",
+	type: "_mapType",
+	name: "string",
+	cols: "integer",
+	rows: "integer",
+	tileSize: "_mapTileSize",
+	assetFilePath: "_mapAssetFilePath"
+};
+
+Lucid.Map.TYPE = {
+	SIDE_SCROLL: "MapTypeSideScroll",
+	TOP_DOWN: "MapTypeTopDown"
 };
 
 // event constants
 Lucid.Map.EVENT = {
-	LOADED_TILESET_FILE_SUCCESS: "MapLoadedTileSetFileSuccess",
-	LOADED_TILESET_FILE_ERROR: "MapLoadedTileSetFileError",
-	LOADED_ASSETS_SUCCESS: "MapLoadedAssetsSuccess",
-	LOADED_ASSETS_ERROR: "MapLoadedAssetsError"
+	LOADED_ASSET_FILE_SUCCESS: "MapLoadedAssetFileSuccess",
+	LOADED_ASSET_FILE_ERROR: "MapLoadedAssetFileError",
+	LOADING_SUCCESS: "MapLoadingComplete",
+	LOADING_ERROR: "MapLoadingError"
 };
