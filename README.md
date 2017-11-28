@@ -17,7 +17,7 @@ The following covers the structured project tasks. Every task is followed by the
 #### Milestones Metting 2 (30.11.2017)
 
 * graphics/rendering implementation - **medium**
-* entities implmementation - **easy**
+* entities implementation - **easy**
 * controls implementation - **easy**
 * collision implementation - **medium**
 * A* pathfinding implementation - **medium**
