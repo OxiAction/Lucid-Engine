@@ -10,6 +10,11 @@ Lucid.BaseEntity = BaseComponent.extend({
 	lastX: 0, // the last x position, before the current render tick
 	lastY: 0, // the last y position, before the current render tick
 
+	relativeX: 0,
+	relativeY: 0,
+
+	sightRadius: 300, // sight radius in pixels
+
 	healthCurrent: 100, // current health
 	healthMin: 0, // minimum health - curent < minimum -> Lucid.Entity.STATE.DEAD
 	healthMax: 100, // maximum health
@@ -269,6 +274,9 @@ Lucid.BaseEntity = BaseComponent.extend({
 		if (!this.loaded) {
 			return;
 		}
+
+		this.relativeX = Math.floor((this.lastX + (this.x - this.lastX) * interpolationPercentage) - this.camera.x);
+		this.relativeY = Math.floor((this.lastY + (this.y - this.lastY) * interpolationPercentage) - this.camera.y);
 		
 		this.canvasContext.drawImage(
 			this.asset,		// specifies the image, canvas, or video element to use
@@ -276,8 +284,8 @@ Lucid.BaseEntity = BaseComponent.extend({
 			this.assetY,	// the y coordinate where to start clipping
 			this.width,		// the width of the clipped image
 			this.height,	// the height of the clipped image
-			Math.floor((this.lastX + (this.x - this.lastX) * interpolationPercentage) - this.camera.x),	// the x coordinate where to place the image on the canvas
-			Math.floor((this.lastY + (this.y - this.lastY) * interpolationPercentage) - this.camera.y),	// the y coordinate where to place the image on the canvas
+			this.relativeX,	// the x coordinate where to place the image on the canvas
+			this.relativeY,	// the y coordinate where to place the image on the canvas
 			this.width,		// the width of the image to use (stretch or reduce the image)
 			this.height		// the height of the image to use (stretch or reduce the image)
 		);

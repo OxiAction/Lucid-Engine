@@ -146,6 +146,14 @@ Lucid.data.maps.map1 = {
 						[1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1]
 					]
 				}
+			},
+			{
+				config: {
+					z: 15,
+					id: "layer-ai-debug",
+					render: 1,
+					type: Lucid.BaseLayer.TYPE.UI
+				}
 			}
 		]
 	}

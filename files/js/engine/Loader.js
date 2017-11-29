@@ -3,7 +3,7 @@
  * subscribers on success / error).
  *
  * @class      Loader (name)
- * @return     {Object}  Reutns public methods.
+ * @return     {Object}  Returns object with public methods.
  */
 Lucid.Loader = function() {
 	// private variables

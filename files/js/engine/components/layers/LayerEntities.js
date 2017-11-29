@@ -138,7 +138,14 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 	},
 
 	/**
-	 * Gets the entity.
+	 * Gets the entities.
+	 */
+	getEntities: function() {
+		return this.entities;
+	},
+
+	/**
+	 * Gets a entity by id.
 	 *
 	 * @param      {String}  id      The identifier
 	 * @return     {Entity}  The entity.

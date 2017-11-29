@@ -140,6 +140,10 @@ Lucid.BaseLayer = BaseComponent.extend({
 		return this.canvas;
 	},
 
+	getCanvasContext: function() {
+		return this.canvasContext;
+	},
+
 	getData: function() {
 		return this.data;
 	},

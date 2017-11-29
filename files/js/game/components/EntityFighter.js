@@ -9,6 +9,8 @@ var EntityFighter = Lucid.BaseEntity.extend({
 	animInterval: null,
 	animCounter: 0,
 
+	ais: [],
+
 	init: function(config) {
 		this.componentName = "EntityFighter";
 		this.width = 32;
@@ -20,7 +22,30 @@ var EntityFighter = Lucid.BaseEntity.extend({
 		this.animInterval = setInterval(this.updateAnim.bind(this), 500);
 		this.updateAnim();
 
+
+		var ai = new Lucid.AI({
+			target: this,
+			behavior: {
+				type: Lucid.AI.BEHAVIOR.TYPE.HOLD,
+				data: {
+					moveOnTrigger: true
+				}
+			}
+		});
+
+		this.addAI(ai);
+
 		return true;
+	},
+
+	addAI: function(ai) {
+		this.ais.push(ai);
+	},
+
+	removeAI: function(ai) {
+		ai.destroy();
+		this.ais.erase(ai);
+		ai = null;
 	},
 
 	updateAnim: function() {
@@ -39,6 +64,11 @@ var EntityFighter = Lucid.BaseEntity.extend({
 	},
 
 	renderUpdate: function(delta) {
+		for (var i = 0; i < this.ais.length; ++i) {
+			var ai = this.ais[i];
+			ai.renderUpdate(delta);
+		}
+
 		this._super(delta);
 	},
 
