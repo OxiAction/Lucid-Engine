@@ -61,6 +61,7 @@ Lucid.BaseEntity = BaseComponent.extend({
 		this._super(config);
 
 		this.checkSetMap();
+		this.checkSetEngine();
 		this.checkSetCamera();
 
 		this.canvas = document.createElement("canvas");
@@ -248,6 +249,20 @@ Lucid.BaseEntity = BaseComponent.extend({
 				this.moved = false;
 			} else {
 				this.moved = true;
+
+				// TODO collision
+				/*
+				var layerCollision = this.engine.getLayerCollision();
+				var data = layerCollision.getData();
+				for (var i = 0; i < data.length; ++i) {
+					for (var j = 0; j < data[i].length; ++j) {
+						var tile = data[i][j];
+
+						
+					}
+				}
+				*/
+
 				this.lastX = this.x;
 				this.lastY = this.y;
 			}

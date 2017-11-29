@@ -156,7 +156,7 @@ function Game() {
 						// set new path indices
 						// params: startX, startY, endX, endY, callback
 						easystar.findPath(entityPassantGridIndices[0], entityPassantGridIndices[1], clickedGridIndices[0], clickedGridIndices[1], function(path) {
-							if (path === null) {
+							if (!path) {
 								Lucid.Utils.log("Game: path was not found");
 							} else if (path.length) {
 								Lucid.Utils.log("Game: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
@@ -172,8 +172,10 @@ function Game() {
 								Lucid.Utils.log("Game: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
 							}
 							
-							// set path for entityPassant!
-							entityPassant.setPath(path);
+							// set path for entityPassant if not null
+							if (path) {
+								entityPassant.setPath(path);
+							}
 						});
 
 						// after setting a path, we need to run calculate()
