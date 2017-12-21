@@ -1,7 +1,7 @@
 /**
  * Engine default Control.
  */
-Lucid.Control = BaseComponent.extend({
+Lucid.Control = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	key: null, // keycode
 	callback: null,
@@ -61,7 +61,7 @@ Lucid.Control = BaseComponent.extend({
 /**
  * Engine default ControlGroup.
  */
-Lucid.ControlGroup = BaseComponent.extend({
+Lucid.ControlGroup = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	controls: [],
 

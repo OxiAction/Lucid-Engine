@@ -4,13 +4,12 @@ $(document).ready(function() {
 
 	// check support
 	if (!Lucid.Utils.engineSupported()) {
-		Lucid.Utils.error("Sorry - your browser does NOT support Engine - please update your browser")
+		Lucid.Utils.error("Sorry - your browser does NOT support Lucid Engine - please update your browser.")
 		return;
 	}
 	
 	var game = new Game();
 });
-
 
 /**
  * This is the Game class. It uses custom plugins and the Engine API to build
@@ -42,7 +41,7 @@ function Game() {
 		debugPanic: true,
 		debugGrid: true
 	});
-
+	
 	// start engine
 	engine.start();
 
@@ -65,35 +64,44 @@ function Game() {
 	var controlGroup = new Lucid.ControlGroup({
 		controls: [
 			new Lucid.Control({
-				key: Lucid.Control.KEY.UP,
-				callback: function(target, key) {
-					target.y -= 5;
-				}
-			}),
-			new Lucid.Control({
-				key: Lucid.Control.KEY.DOWN,
-				callback: function(target, key) {
-					target.y += 5;
-				}
-			}),
-			new Lucid.Control({
 				key: Lucid.Control.KEY.RIGHT,
 				callback: function(target, key) {
-					target.x += 5;
+					target.move(Lucid.BaseEntity.DIR.RIGHT);
+					// target.x += 5;
+					// target.moveX(5);
 				}
 			}),
 			new Lucid.Control({
 				key: Lucid.Control.KEY.LEFT,
 				callback: function(target, key) {
-					target.x -= 5;
+					target.move(Lucid.BaseEntity.DIR.LEFT);
+					// target.x -= 5;
+					// target.moveX(-5);
+				}
+			}),
+			new Lucid.Control({
+				key: Lucid.Control.KEY.DOWN,
+				callback: function(target, key) {
+					target.move(Lucid.BaseEntity.DIR.DOWN);
+					// target.y += 5;
+					// target.moveY(5);
+				}
+			}),
+			new Lucid.Control({
+				key: Lucid.Control.KEY.UP,
+				callback: function(target, key) {
+					target.move(Lucid.BaseEntity.DIR.UP);
+					// target.y -= 5;
+					// target.moveY(-5);
 				}
 			})
 		]
 	});
 	// control groups need to be added to the engine for update purpose
-	engine.addControlGroup(controlGroup);
+	// engine.addControlGroup(controlGroup);
+
 	// and set target to camera so we can now control the camera
-	controlGroup.setTarget(camera);
+	// controlGroup.setTarget(camera);
 
 	// initialize and config EasyStar.js
 	var easystar = new EasyStar.js();
@@ -130,10 +138,36 @@ function Game() {
 
 			// get entity with id "passant1" from entities layer
 			var entityPassant = layerEntities.getEntity("passant1");
+			var entityFighter = layerEntities.getEntity("fighter1");
 
 			// check if entityPassant is present
 			if (layerEntities && entityPassant) {
 				camera.setFollowTarget(entityPassant);
+				// controlGroup.setTarget(entityPassant);
+
+
+				window.addEventListener("keydown", function(e) {
+					if (e.keyCode == 37) {
+						entityPassant.move(Lucid.BaseEntity.DIR.LEFT, true);
+					} else if (e.keyCode == 39) {
+						entityPassant.move(Lucid.BaseEntity.DIR.RIGHT, true);
+					} else if (e.keyCode == 40) {
+						entityPassant.move(Lucid.BaseEntity.DIR.DOWN, true);
+					} else if (e.keyCode == 38) {
+						entityPassant.move(Lucid.BaseEntity.DIR.UP, true);
+					}
+				});
+				window.addEventListener("keyup", function(e) {
+					if (e.keyCode == 37) {
+						entityPassant.move(Lucid.BaseEntity.DIR.LEFT, false);
+					} else if (e.keyCode == 39) {
+						entityPassant.move(Lucid.BaseEntity.DIR.RIGHT, false);
+					} else if (e.keyCode == 40) {
+						entityPassant.move(Lucid.BaseEntity.DIR.DOWN, false);
+					} else if (e.keyCode == 38) {
+						entityPassant.move(Lucid.BaseEntity.DIR.UP, false);
+					}
+				});
 			}
 
 			// add click event

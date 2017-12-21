@@ -1,9 +1,10 @@
+// namespace
+var Lucid = Lucid || {};
+
 /**
  * Engine BaseComponent
- *
- * @type       {BaseComponent}
  */
-var BaseComponent = Class.extend({
+Lucid.BaseComponent = Class.extend({
 	// config variables and their default values
 	// @type       {String}
 	id: null,
@@ -32,7 +33,7 @@ var BaseComponent = Class.extend({
 	 */
 	init: function(config){
 		// write target, default values target, new values (overrides default values)
-		$.extend(this, this, config);
+		Lucid.Utils.extend(this, this, config);
 
 		if (!this.componentName) {
 			Lucid.Utils.error("BaseComponent @ init: error - you have not defined a componentName!");

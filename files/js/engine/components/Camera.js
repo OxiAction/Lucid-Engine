@@ -1,7 +1,7 @@
 /**
  * Engine default Camera.
  */
-Lucid.Camera = BaseComponent.extend({
+Lucid.Camera = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	x: 0,
 	y: 0,

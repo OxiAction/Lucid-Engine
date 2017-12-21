@@ -1,7 +1,7 @@
 /**
  * Engine default User.
  */
-Lucid.User = BaseComponent.extend({
+Lucid.User = Lucid.BaseComponent.extend({
 	name: "Unknown User", // name
 	entity: null, // associated entity
 

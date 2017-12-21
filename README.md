@@ -90,7 +90,6 @@ You may encounter some warnings in the console when loading files, but those are
 
 ### Dependencies (third party libraries)
 
-* John Resigs [[Inheritance Code]](https://johnresig.com/blog/simple-javascript-inheritance/)
 * [[jQuery]](https://jquery.com/) version 3.2.1+
 * [[jQueryUI]](https://jqueryui.com/) version 1.12.1+
 * [[EasyStar.js]](http://easystarjs.com/) version 0.4.1+

@@ -1,7 +1,7 @@
 /**
  * Engine default AI. This component also handles pathfinding.
  */
-Lucid.AI = BaseComponent.extend({
+Lucid.AI = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	behavior: null,
 	target: null,
@@ -20,6 +20,7 @@ Lucid.AI = BaseComponent.extend({
 		
 		this._super(config);
 
+		this.checkSetMap();
 		this.checkSetEngine();
 		this.checkSetCamera();
 
@@ -64,8 +65,8 @@ Lucid.AI = BaseComponent.extend({
 
 		var entities = layerEntities.getEntities();
 
-		var targetRelativeX = target.relativeX + target.width / 2;
-		var targetRelativeY = target.relativeY + target.height / 2;
+		var targetRelativeX = Math.floor(target.x - this.camera.x) + target.width / 2;
+		var targetRelativeY = Math.floor(target.y - this.camera.y) + target.height / 2;
 		var entityRelativeX;
 		var entityRelativeY;
 		var angle;
@@ -74,24 +75,32 @@ Lucid.AI = BaseComponent.extend({
 		canvasContext.strokeStyle = "black";
 		canvasContext.arc(targetRelativeX, targetRelativeY, target.sightRadius, 0, 2 * Math.PI, false);
 		canvasContext.fillStyle = "rgba(255, 255, 255, 0.1)";
-      	canvasContext.fill();
+		canvasContext.fill();
 
 		for (var i = 0; i < entities.length; ++i) {
 			var entity = entities[i];
 
 			if (target != entity) {
-				entityRelativeX = entity.relativeX + entity.width / 2;
-				entityRelativeY = entity.relativeY + entity.height / 2;
+				entityRelativeX = Math.floor(entity.x - this.camera.x) + entity.width / 2;
+				entityRelativeY = Math.floor(entity.y - this.camera.y) + entity.height / 2;
 
 				var entityInTargetSightRadius = this.pointInCircle(entityRelativeX, entityRelativeY, targetRelativeX, targetRelativeY, target.sightRadius);
 				
 				if (entityInTargetSightRadius) {
+					
+
 					angle = Math.atan2(entityRelativeY - targetRelativeY, entityRelativeX - targetRelativeX);
 
 					canvasContext.strokeStyle = "red";
 					canvasContext.moveTo(targetRelativeX, targetRelativeY);
-					canvasContext.lineTo(entityRelativeX, entityRelativeY);
 
+					var collisionPoint = this.getCollisionPoint(target.x + (target.width / 2), target.y + (target.height / 2), target.sightRadius, {x: targetRelativeX, y: targetRelativeY}, {x: entityRelativeX, y: entityRelativeY});
+					if (collisionPoint) {
+						entityRelativeX = collisionPoint.x;
+						entityRelativeY = collisionPoint.y;
+					}
+
+					canvasContext.lineTo(entityRelativeX, entityRelativeY);
 					canvasContext.lineTo(entityRelativeX - headlen * Math.cos(angle - Math.PI/6), entityRelativeY - headlen * Math.sin(angle - Math.PI/6));
 					canvasContext.moveTo(entityRelativeX, entityRelativeY);
 					canvasContext.lineTo(entityRelativeX - headlen * Math.cos(angle + Math.PI/6), entityRelativeY - headlen * Math.sin(angle + Math.PI/6));
@@ -113,41 +122,137 @@ Lucid.AI = BaseComponent.extend({
 	 * @return     {number}  Returns true if point is in circle.
 	 */
 	pointInCircle: function(x, y, cx, cy, radius) {
-		// var r = (x - cx) * (x - cx) + (y - cy) * (y - cy) <= radius * radius;
 		return Math.sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy)) <= radius;
 	},
 
-	supercover_line: function(p0, p1) {
-		var dx = p1.x-p0.x, dy = p1.y-p0.y;
-		var nx = Math.abs(dx), ny = Math.abs(dy);
-		var sign_x = dx > 0? 1 : -1, sign_y = dy > 0? 1 : -1;
+	/**
+	 * http://paulbourke.net/geometry/pointlineplane/
+	 *
+	 * @param      {number}  x1      The start x of line 1.
+	 * @param      {number}  y1      The start y of line 1.
+	 * @param      {number}  x2      The end x of line 1.
+	 * @param      {number}  y2      The end y of line 1.
+	 * @param      {number}  x3      The start x of line 2.
+	 * @param      {number}  y3      The start y of line 2.
+	 * @param      {number}  x4      The end x of line 2.
+	 * @param      {number}  y4      The end y of line 2.
+	 * @return     {Object}  An Object which contains information about the
+	 *                       intersection or null if nothing intersects. If
+	 *                       Object.seg1 and Object.seg2 both are true, the
+	 *                       lines actually collide.
+	 */
+	twoLinesIntersect: function(x1, y1, x2, y2, x3, y3, x4, y4) {
+	    var denom = (y4 - y3)*(x2 - x1) - (x4 - x3)*(y2 - y1);
 
-		var p = new Point(p0.x, p0.y);
-		var points = [new Point(p.x, p.y)];
-		for (var ix = 0, iy = 0; ix < nx || iy < ny;) {
-			if ((0.5+ix) / nx == (0.5+iy) / ny) {
-				// next step is diagonal
-				p.x += sign_x;
-				p.y += sign_y;
-				ix++;
-				iy++;
-			} else if ((0.5+ix) / nx < (0.5+iy) / ny) {
-				// next step is horizontal
-				p.x += sign_x;
-				ix++;
-			} else {
-				// next step is vertical
-				p.y += sign_y;
-				iy++;
+	    if (denom == 0) {
+	        return null;
+	    }
+	    var ua = ((x4 - x3)*(y1 - y3) - (y4 - y3)*(x1 - x3)) / denom;
+	    var ub = ((x2 - x1)*(y1 - y3) - (y2 - y1)*(x1 - x3)) / denom;
+
+	    return {
+	        x: x1 + ua*(x2 - x1),
+	        y: y1 + ua*(y2 - y1),
+	        seg1: ua >= 0 && ua <= 1,
+	        seg2: ub >= 0 && ub <= 1
+	    };
+	},
+
+	getCollisionPoint: function(x, y, radius, targetVector, entityVector) {
+		var tileSize = this.map.tileSize;
+
+		var originCellX = Math.floor(x / tileSize);
+		var originCellY = Math.floor(y / tileSize);
+		var radiusInCells = Math.round(radius / tileSize);
+
+		var data = this.engine.getLayerCollision().getData();
+
+		for (var i = originCellY - radiusInCells; i < originCellY + radiusInCells; ++i) {
+			if (data[i]) {
+				for (var j = originCellX - radiusInCells; j < originCellX + radiusInCells; ++j) {
+					var cell = data[i][j];
+					if (cell && cell == 1) {
+						var offsetX = j * tileSize - this.camera.x;
+						var offsetY = i * tileSize - this.camera.y;
+
+						var cellSides = [];
+
+						if (targetVector.x < entityVector.x) {
+							// left side of the cell
+							cellSides.push({
+								start: {
+									x: offsetX,
+									y: offsetY
+								},
+								end: {
+									x: offsetX,
+									y: offsetY + tileSize
+								}
+							});
+						} else {
+							// right side of the cell
+							cellSides.push({
+								start: {
+									x: offsetX + tileSize,
+									y: offsetY
+								},
+								end: {
+									x: offsetX + tileSize,
+									y: offsetY + tileSize
+								}
+							});
+						}
+
+						if (targetVector.y < entityVector.y) {
+							// top side of the cell
+							cellSides.push({
+								start: {
+									x: offsetX,
+									y: offsetY
+								},
+								end: {
+									x: offsetX + tileSize,
+									y: offsetY
+								}
+							});
+						} else {
+							// bottom side of the cell
+							cellSides.push({
+								start: {
+									x: offsetX,
+									y: offsetY + tileSize
+								},
+								end: {
+									x: offsetX + tileSize,
+									y: offsetY + tileSize
+								}
+							});
+						}
+
+						for (var k = 0; k < cellSides.length; ++k) {
+							var cellSide = cellSides[k];
+							var intersection = this.twoLinesIntersect(targetVector.x, targetVector.y, entityVector.x, entityVector.y, cellSide.start.x, cellSide.start.y, cellSide.end.x, cellSide.end.y);
+
+							if (intersection && intersection.seg1 && intersection.seg2) {
+								return {
+									x: intersection.x,
+									y: intersection.y
+								}
+							}
+						}
+					}
+				}
 			}
-			points.push(new Point(p.x, p.y));
 		}
-		return points;
+
+		return null;
 	},
 
 	destroy: function() {
 		this._super();
 	}
+
+	
 });
 
 // behavior constants

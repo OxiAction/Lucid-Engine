@@ -15,13 +15,13 @@ var EntityFighter = Lucid.BaseEntity.extend({
 		this.componentName = "EntityFighter";
 		this.width = 32;
 		this.height = 48;
+		this.sightRadius = 400;
 		this.assetFilePath = "playground/entity_fighter.png";
 		
 		this._super(config);
 		
 		this.animInterval = setInterval(this.updateAnim.bind(this), 500);
 		this.updateAnim();
-
 
 		var ai = new Lucid.AI({
 			target: this,

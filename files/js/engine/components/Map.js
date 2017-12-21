@@ -1,7 +1,7 @@
 /**
  * Engine default Map.
  */
-Lucid.Map = BaseComponent.extend({
+Lucid.Map = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	type: null,
 	name: "Untiteled Map", // the display name of the map

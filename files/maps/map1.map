@@ -59,22 +59,21 @@ Lucid.data.maps.map1 = {
 					type: Lucid.BaseLayer.TYPE.ENTITIES,
 					effects: [],
 					data: [
-						
-						{
-							id: "fighter1",
-							name: "EntityFighter",
-							x: 100,
-							y: 100,
-							colliding: 1,
-							render: 1,
-							snapToGrid: 1
-						},
-						
 						{
 							id: "passant1",
 							name: "EntityPassant",
 							x: 300,
 							y: 300,
+							colliding: 1,
+							render: 1,
+							snapToGrid: 1
+						},
+
+						{
+							id: "fighter1",
+							name: "EntityFighter",
+							x: 400,
+							y: 400,
 							colliding: 1,
 							render: 1,
 							snapToGrid: 1

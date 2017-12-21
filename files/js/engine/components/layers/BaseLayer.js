@@ -1,7 +1,7 @@
 /**
  * Engine default BaseLayer. Use this as base for new Layers.
  */
-Lucid.BaseLayer = BaseComponent.extend({
+Lucid.BaseLayer = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	z: 0, // z-index!
 	id: null,

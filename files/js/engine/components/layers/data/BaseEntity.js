@@ -2,16 +2,10 @@
  * Engine default BaseEntity. This Component is Layer related and represented by
  * the Layer.data value(s).
  */
-Lucid.BaseEntity = BaseComponent.extend({
+Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	x: 0, // current x position
 	y: 0, // current y position
-
-	lastX: 0, // the last x position, before the current render tick
-	lastY: 0, // the last y position, before the current render tick
-
-	relativeX: 0,
-	relativeY: 0,
 
 	sightRadius: 300, // sight radius in pixels
 
@@ -30,7 +24,6 @@ Lucid.BaseEntity = BaseComponent.extend({
 	name: "Unknown", // name
 	speed: 1, // movement speed of the entity
 	vulnerable: true, // if set to false entity is immortal (cant loose any health / die)
-	weight: 80, // weight in kilograms
 	render: true, // determines if the content is rendered
 	colliding: true, // does it collide with collisionData?
 	skipFirstPathSegment: true, // splices first path segment -> smoother animations
@@ -50,6 +43,18 @@ Lucid.BaseEntity = BaseComponent.extend({
 
 	dir: null, // the direction of the entity - e.g. Lucid.BaseEntity.DIR.TOP means
 			   // entity is heading towards top
+
+	moveDirections: {},
+
+	accelerationUpStep: 0.1, // for speed-up
+	accelerationDownStep: 0.2, // for breaking
+	accelerationMax: 1, // maximum for acceleration
+	accelerationX: 0, // current acceleration on x-axis
+	accelerationY: 0, // current acceleration on y-axis
+
+	pathDirectionX:  null, // the current path direction on x-axis
+	pathDirectionY: null, // the current path direction on y-axis
+
 
 	/**
 	 * Automatically called when instantiated.
@@ -76,9 +81,6 @@ Lucid.BaseEntity = BaseComponent.extend({
 			this.x = Math.round(indices[0] * this.map.tileSize + (this.map.tileSize / 2) - (this.width / 2));
 			this.y = Math.round(indices[1] * this.map.tileSize + (this.map.tileSize / 2) - (this.height / 2));
 		}
-
-		this.lastX = this.x;
-		this.lastY = this.y;
 
 		// events for loading the asset
 		$(document).on(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace, this.assetLoadingSuccess.bind(this));
@@ -173,100 +175,316 @@ Lucid.BaseEntity = BaseComponent.extend({
 	},
 
 	/**
-	 * The renderUpdate() function should simulate anything that is affected by time.
-	 * It can be called zero or more times per frame depending on the frame
-	 * rate.
+	 * Sets the path directions.
 	 *
-	 * @param      {Number}  delta   The amount of time in milliseconds to
-	 *                               simulate in the update.
+	 * @param      {Array}  path    The path
+	 */
+	setPathDirections: function(path) {
+		var currNode = path[0];
+
+		if (currNode) {
+			var targetX = Math.round(currNode.x * this.map.tileSize + (this.map.tileSize / 2) - (this.width / 2));
+			var targetY = Math.round(currNode.y * this.map.tileSize + (this.map.tileSize / 2) - (this.height / 2));
+
+			if (targetX < this.x) {
+				this.pathDirectionX = Lucid.BaseEntity.DIR.LEFT;
+			} else if (targetX > this.x) {
+				this.pathDirectionX = Lucid.BaseEntity.DIR.RIGHT;
+			} else {
+				this.pathDirectionX = null;
+			}
+
+			if (targetY < this.y) {
+				this.pathDirectionY = Lucid.BaseEntity.DIR.UP;
+			} else if (targetY > this.y) {
+				this.pathDirectionY = Lucid.BaseEntity.DIR.DOWN;
+			} else {
+				this.pathDirectionY = null;
+			}
+		}
+	},
+
+	/**
+	 * { function_description }
+	 *
+	 * @param      {number}  delta   The delta
 	 */
 	renderUpdate: function(delta) {
-		if (this.lastX < this.x) {
-			// moved right
-			this.dir = Lucid.BaseEntity.DIR.RIGHT;
-		} else if (this.lastX > this.x) {
-			// moved left
-			this.dir = Lucid.BaseEntity.DIR.LEFT;
-		}
 
-		if (this.lastY < this.y) {
-			// moved down
-			this.dir = Lucid.BaseEntity.DIR.DOWN;
-		} else if (this.lastY > this.y) {
-			// moved up
-			this.dir = Lucid.BaseEntity.DIR.UP;
-		}
+		var lastX = this.x;
+		var lastY = this.y;
+
+	// PATH
 
 		var tileSize = this.map.tileSize;
-		if (this.path) {
-			this.lastX = this.x;
-			this.lastY = this.y;
 
+		if (this.path) {
 			if (this.path[0] === undefined) {
-				this.moved = false;
 				this.path = null;
+				
 			} else {
-				this.moved = true;
 				var currNode = this.path[0];
+
 				var targetX = Math.round(currNode.x * tileSize + (tileSize / 2) - (this.width / 2));
 				var targetY = Math.round(currNode.y * tileSize + (tileSize / 2) - (this.height / 2));
 
-				if (Math.round(this.x) == targetX && Math.round(this.y) == targetY) {
+				var targetXReached = this.pathDirectionX == null ||
+							(this.pathDirectionX == Lucid.BaseEntity.DIR.RIGHT && Math.round(this.x) >= targetX) ||
+							(this.pathDirectionX == Lucid.BaseEntity.DIR.LEFT && Math.round(this.x) <= targetX);
+
+				var targetYReached = this.pathDirectionY == null ||
+							(this.pathDirectionY == Lucid.BaseEntity.DIR.DOWN && Math.round(this.y) >= targetY) ||
+							(this.pathDirectionY == Lucid.BaseEntity.DIR.UP && Math.round(this.y) <= targetY);
+
+				if (targetXReached && targetYReached) {
 					this.path.splice(0,1);
+
+					this.setPathDirections(this.path);
+					
+					this.moveDirections = {};
 				} else {
-					var step = delta * this.speed;
-					if (this.x != targetX) {
-						if (targetX > this.x) {
-							this.x += step;
-							if (this.x > targetX) {
-								this.x = targetX;
-							}
-						} else {
-							this.x -= step;
-							if (this.x < targetX) {
-								this.x = targetX;
-							}
+					var currPathOffsetX = this.accelerationX * delta * this.speed / this.accelerationUpStep;
+					var currPathOffsetY = this.accelerationY * delta * this.speed / this.accelerationUpStep;
+
+					var nextNode = this.path[1];
+
+					if (nextNode) {
+						if (this.moveDirections[Lucid.BaseEntity.DIR.RIGHT] && nextNode.x > currNode.x) {
+							currPathOffsetX = 0;
+						} else if (this.moveDirections[Lucid.BaseEntity.DIR.LEFT] && nextNode.x < currNode.x) {
+							currPathOffsetX = 0;
+						}
+
+						if (this.moveDirections[Lucid.BaseEntity.DIR.DOWN] && nextNode.y > currNode.y) {
+							currPathOffsetY = 0;
+						} else if (this.moveDirections[Lucid.BaseEntity.DIR.UP] && nextNode.y < currNode.y) {
+							currPathOffsetY = 0;
 						}
 					}
 
-					if (this.y != targetY) {
-						if (targetY > this.y) {
-							this.y += step;
-							if (this.y > targetY) {
-								this.y = targetY;
-							}
-						} else {
-							this.y -= step;
-							if (this.y < targetY) {
-								this.y = targetY;
-							}
+					this.moveDirections = {};
+
+					if (!targetXReached) {
+						if (this.pathDirectionX == Lucid.BaseEntity.DIR.RIGHT && this.x < targetX - currPathOffsetX) {
+							this.moveDirections[Lucid.BaseEntity.DIR.RIGHT] = true;
+						}
+
+						if (this.pathDirectionX == Lucid.BaseEntity.DIR.LEFT && this.x > targetX - currPathOffsetX) {
+							this.moveDirections[Lucid.BaseEntity.DIR.LEFT] = true;
+						}
+					}
+
+					if (!targetYReached) {
+						if (this.pathDirectionY == Lucid.BaseEntity.DIR.DOWN && this.y < targetY - currPathOffsetY) {
+							this.moveDirections[Lucid.BaseEntity.DIR.DOWN] = true;
+						}
+
+						if (this.pathDirectionY == Lucid.BaseEntity.DIR.UP && this.y > targetY - currPathOffsetY) {
+							this.moveDirections[Lucid.BaseEntity.DIR.UP] = true;
 						}
 					}
 				}
-			}
-		} else {
-			if (this.lastX == this.x && this.lastY == this.y) {
-				this.moved = false;
-			} else {
-				this.moved = true;
-
-				// TODO collision
-				/*
-				var layerCollision = this.engine.getLayerCollision();
-				var data = layerCollision.getData();
-				for (var i = 0; i < data.length; ++i) {
-					for (var j = 0; j < data[i].length; ++j) {
-						var tile = data[i][j];
-
-						
-					}
-				}
-				*/
-
-				this.lastX = this.x;
-				this.lastY = this.y;
 			}
 		}
+
+	// MOVEMENT
+
+		var movementX = false;
+
+		if (this.moveDirections[Lucid.BaseEntity.DIR.RIGHT]) {
+			movementX = true;
+			this.accelerationX = Math.min(this.accelerationMax, this.accelerationX + this.accelerationUpStep);
+		}
+
+
+		if (this.moveDirections[Lucid.BaseEntity.DIR.LEFT]) {
+			movementX = true;
+			this.accelerationX = Math.max(-this.accelerationMax, this.accelerationX - this.accelerationUpStep);
+		}
+
+		if (!movementX && this.accelerationX != 0) {
+			if (this.accelerationX < 0) {
+				this.accelerationX = Math.min(0, this.accelerationX + this.accelerationDownStep);
+			} else {
+				this.accelerationX = Math.max(0, this.accelerationX - this.accelerationDownStep);
+			}
+		}
+
+		var movementY = false;
+
+		if (this.moveDirections[Lucid.BaseEntity.DIR.DOWN]) {
+			movementY = true;
+			this.accelerationY = Math.min(this.accelerationMax, this.accelerationY + this.accelerationUpStep);
+		}
+
+
+		if (this.moveDirections[Lucid.BaseEntity.DIR.UP]) {
+			movementY = true;
+			this.accelerationY = Math.max(-this.accelerationMax, this.accelerationY - this.accelerationUpStep);
+		}
+
+		if (!movementY && this.accelerationY != 0) {
+			if (this.accelerationY < 0) {
+				this.accelerationY = Math.min(0, this.accelerationY + this.accelerationDownStep);
+			} else {
+				this.accelerationY = Math.max(0, this.accelerationY - this.accelerationDownStep);
+			}
+		}
+
+		// the new target x / y
+		var newX = this.x + this.accelerationX * delta * this.speed;
+		var newY = this.y + this.accelerationY * delta * this.speed;
+
+	// COLLISION
+		
+		var layerCollision = this.engine.getLayerCollision();
+		if (layerCollision) {
+			var data = layerCollision.getData();
+
+			if (data) {
+				var gridIndices = this.getGridIndices();
+				var xIndex = gridIndices[0];
+				var yIndex = gridIndices[1];
+
+				var tileUp = data[yIndex - 1][xIndex];
+				var tileDown = data[yIndex + 1][xIndex];
+
+				var tileLeft = data[yIndex][xIndex - 1];
+				var tileRight = data[yIndex][xIndex + 1];
+
+				var tileUpLeft = data[yIndex - 1][xIndex - 1];
+				var tileUpRight = data[yIndex - 1][xIndex + 1];
+
+				var tileDownLeft = data[yIndex + 1][xIndex - 1];
+				var tileDownRight = data[yIndex + 1][xIndex + 1];
+
+			// UP / DOWN / LEFT / RIGHT
+
+				var inUp = newY < (yIndex - 1) * tileSize + tileSize;
+				var inDown = newY + this.height > (yIndex + 1) * tileSize;
+
+				var inLeft = newX < (xIndex - 1) * tileSize + tileSize;
+				var inRight = newX + this.width > (xIndex + 1) * tileSize;
+
+				// 0 X 0
+				// 0 P 0
+				// 0 0 0
+				if (tileUp && tileUp == 1 && inUp) {
+					newY = lastY;
+				}
+
+				// 0 0 0
+				// 0 P 0
+				// 0 X 0
+				if (tileDown && tileDown == 1 && inDown) {
+					newY = lastY;
+				}
+
+				// 0 0 0
+				// X P 0
+				// 0 0 0
+				if (tileLeft && tileLeft == 1 && inLeft) {
+					newX = lastX;
+				}
+
+				// 0 0 0
+				// 0 P X
+				// 0 0 0
+				if (tileRight && tileRight == 1 && inRight) {
+					newX = lastX;
+				}
+
+			// DIAGONALS
+
+				// X 0 0
+				// 0 P 0
+				// 0 0 0
+				if (tileUpLeft && tileUpLeft == 1 && inUp && inLeft) {
+					// make sure we move UP
+					if (newY < lastY) {
+						newY = lastY;
+					}
+
+					// make sure we move LEFT
+					if (newX < lastX) {
+						newX = lastX;
+					}
+				}
+
+				// 0 0 X
+				// 0 P 0
+				// 0 0 0
+				if (tileUpRight && tileUpRight == 1 && inUp && inRight) {
+					// make sure we move UP
+					if (newY < lastY) {
+						newY = lastY;
+					}
+
+					// make sure we move RIGHT
+					if (newX > lastX) {
+						newX = lastX;
+					}
+				}
+
+				// 0 0 0
+				// 0 P 0
+				// X 0 0
+				if (tileDownLeft && tileDownLeft == 1 && inDown && inLeft) {
+					// make sure we move DOWN
+					if (newY > lastY) {
+						newY = lastY;
+					}
+
+					// make sure we move LEFT
+					if (newX < lastX) {
+						newX = lastX;
+					}
+				}
+
+				// 0 0 0
+				// 0 P 0
+				// 0 0 X
+				if (tileDownRight && tileDownRight == 1 && inDown && inRight) {
+					// make sure we move DOWN
+					if (newY > lastY) {
+						newY = lastY;
+					}
+
+					// make sure we move RIGHT
+					if (newX > lastX) {
+						newX = lastX;
+					}
+				}
+			}
+		}
+
+	// UPDATE X / Y
+
+		if (this.x != newX || this.y != newY) {
+			this.moved = true;
+
+			if (this.x < newX) {
+				this.dir = Lucid.BaseEntity.DIR.RIGHT;
+			} else if (this.x > newX) {
+				this.dir = Lucid.BaseEntity.DIR.LEFT;
+			}
+
+			if (this.y < newY) {
+				this.dir = Lucid.BaseEntity.DIR.DOWN;
+			} else if (this.y > newY) {
+				this.dir = Lucid.BaseEntity.DIR.UP;
+			}
+
+			this.x = newX;
+			this.y = newY;
+		} else {
+			this.moved = false;
+		}
+	},
+
+	move: function(dir, move) {
+		this.setPath(null);
+		this.moveDirections[dir] = move;
 	},
 
 	/**
@@ -290,17 +508,14 @@ Lucid.BaseEntity = BaseComponent.extend({
 			return;
 		}
 
-		this.relativeX = Math.floor((this.lastX + (this.x - this.lastX) * interpolationPercentage) - this.camera.x);
-		this.relativeY = Math.floor((this.lastY + (this.y - this.lastY) * interpolationPercentage) - this.camera.y);
-		
 		this.canvasContext.drawImage(
 			this.asset,		// specifies the image, canvas, or video element to use
 			this.assetX,	// the x coordinate where to start clipping
 			this.assetY,	// the y coordinate where to start clipping
 			this.width,		// the width of the clipped image
 			this.height,	// the height of the clipped image
-			this.relativeX,	// the x coordinate where to place the image on the canvas
-			this.relativeY,	// the y coordinate where to place the image on the canvas
+			Math.floor(this.x - this.camera.x),	// the x coordinate where to place the image on the canvas
+			Math.floor(this.y - this.camera.y),	// the y coordinate where to place the image on the canvas
 			this.width,		// the width of the image to use (stretch or reduce the image)
 			this.height		// the height of the image to use (stretch or reduce the image)
 		);
@@ -319,14 +534,22 @@ Lucid.BaseEntity = BaseComponent.extend({
 	 * Sets the path. If theres a path array defined the entity will walk node
 	 * by node until it reaches the end node of the path.
 	 *
-	 * @param      {<type>}  path    The path
+	 * @param      {<type>}  path    The new Path or null if you want to cancel current Path.
 	 */
 	setPath: function(path) {
-		if (this.skipFirstPathSegment && path !== null && path.length > 1) {
-			path.splice(0, 1);
-		}
+		if (path) {
+			if (this.skipFirstPathSegment && path !== null && path.length > 1) {
+				path.splice(0, 1);
+			}
 
-		this.path = path;
+			this.setPathDirections(path);
+			this.path = path;
+		} else if (this.path) {
+			this.path = null;
+			this.moveDirections = {};
+			this.pathDirectionX = null;
+			this.pathDirectionY = null;
+		}
 	},
 
 	/**

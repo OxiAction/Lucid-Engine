@@ -93,6 +93,7 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 						if (!entity.moved || entity === collisionEntity) {
 							continue;
 						}
+						
 						entity.checkHandleCollision(entity, collisionEntity);
 					}
 				}

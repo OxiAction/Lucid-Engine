@@ -13,7 +13,7 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		this.componentName = "EntityPassant";
 		this.width = 32;
 		this.height = 48;
-		this.speed = 8;
+		this.speed = 10;
 		this.assetFilePath = "playground/entity_passant.png";
 		
 		this._super(config);

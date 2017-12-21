@@ -11,7 +11,7 @@ Lucid.data = {
  *
  * @type       {Engine}
  */
-Lucid.Engine = BaseComponent.extend({
+Lucid.Engine = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	// file names of files required by Engine
 	fileNames: {
@@ -212,10 +212,10 @@ Lucid.Engine = BaseComponent.extend({
 		 * ControlGroup(s)
 		 */
 
-		for (var i = 0; i < this.controlGroups.length; ++i) {
-			var controlGroup = this.controlGroups[i];
-			controlGroup.renderUpdate(delta);
-		}
+		// for (var i = 0; i < this.controlGroups.length; ++i) {
+		// 	var controlGroup = this.controlGroups[i];
+		// 	controlGroup.renderUpdate(delta);
+		// }
 
 		/**
 		 * Camera
