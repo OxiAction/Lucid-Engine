@@ -77,55 +77,60 @@ Lucid.Utils = function() {
 		return false;
 	}
 
-	// extending jQuery
-
-	/**
-	 * Loads a file.
-	 *
-	 * @param      {String}            url       The url.
-	 * @param      {String}            dataType  The data type. E.g. "script",
-	 *                                           "xml",
-	 *                                           "application/x-www-form-urlencoded; charset=UTF-8"
-	 * @param      {loadFileCallback}  success   The success callback function.
-	 * @param      {loadFileCallback}  error     The error callback function.
-	 */
-	$.loadFile = function (url, dataType, success, error) {
-		jQuery.ajax({
-			url: url,
-			// fix "XML Parsing Error: not well-formed" warnings when loading stuff locally
-			beforeSend: function(xhr){
-				if (xhr.overrideMimeType && (dataType == "script" || dataType == "application/json")) {
-				  xhr.overrideMimeType("application/json");
-				}
-			},
-			dataType: dataType,
-			success: success,
-			error: error,
-			async: true
-		});
-	}
-
-	/**
-	 * GET parameter value.
-	 *
-	 * @param      {String}  parameter  The parameter.
-	 * @return     {String}  Value of the parameter
-	 */
-	$.urlParam = function(parameter) {
-		var results = new RegExp('[\?&]' + parameter + '=([^&#]*)').exec(window.location.href);
-		if (results == null){
-		   return null;
-		}
-		else{
-		   return decodeURI(results[1]) || 0;
-		}
-	}
-
 /**
  * Public methods
  */
 
 	return {
+		/**
+		 * Loads a file.
+		 *
+		 * @param      {String}            url       The url.
+		 * @param      {String}            dataType  The data type. E.g.
+		 *                                           "script", "xml",
+		 *                                           "application/x-www-form-urlencoded; charset=UTF-8"
+		 * @param      {loadFileCallback}  success   The success callback
+		 *                                           function.
+		 * @param      {loadFileCallback}  error     The error callback
+		 *                                           function.
+		 */
+		loadFile: function(url, dataType, success, error) {
+			var request = new XMLHttpRequest();
+
+			// fix error message when loading on a local machine
+			if (request.overrideMimeType && (dataType == "script" || dataType == "application/json")) {
+			  request.overrideMimeType("application/json");
+			}
+
+			request.open("GET", url + "?" + Date.now(), true);
+
+			request.onload = function() {
+				var responseText = request.responseText;
+
+				if (request.status >= 200 && request.status < 400) {
+					// success!
+					if (dataType == "script") {
+						var script = document.createElement("script");
+						script.type = "text/javascript";
+						script.text = responseText;
+						document.body.appendChild(script);
+					}
+
+					success(responseText);
+				} else {
+					// We reached our target server, but it returned an error
+					error(responseText);
+				}
+			};
+
+			request.onerror = function() {
+				// There was a connection error of some sort
+				error(request.responseText);
+			};
+
+			request.send();
+		},
+
 		/**
 		 * Enable / disable debug mode.
 		 *
@@ -321,6 +326,29 @@ Lucid.Utils = function() {
 
 			// Return the modified object
 			return target;
+		},
+
+		/**
+		 * Formated Array String.
+		 *
+		 * @param      {Array}   array   The Array.
+		 * @return     {String}  Returns formated String.
+		 */
+		formatArray: function(array) {
+			if (Array.isArray(array)) {
+				var str = '[';
+				for (var i = 0; i < array.length; ++i) {
+					if (i > 0) {
+						str += ', ';
+					}
+
+					str += this.formatArray(array[i]);
+				}
+				str += ']';
+				return str;
+			} else {
+				return array;
+			}
 		}
-	};
+	}
 }();

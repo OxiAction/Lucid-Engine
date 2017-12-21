@@ -58,7 +58,7 @@ Lucid.Loader = function() {
 					Lucid.Utils.log("Loader @ loadNext: finished loading. Queue is empty");
 					loading = false;
 					// publish
-					$(document).trigger(Lucid.Loader.EVENT.READY);
+					Lucid.Event.trigger(Lucid.Loader.EVENT.READY);
 
 					// leave this place
 					return;
@@ -68,7 +68,7 @@ Lucid.Loader = function() {
 			loading = true;
 
 			// publish
-			$(document).trigger(Lucid.Loader.EVENT.LOADING, [loadingQueue]);
+			Lucid.Event.trigger(Lucid.Loader.EVENT.LOADING, loadingQueue);
 
 			// get item
 			var item = loadingQueue.pop();
@@ -84,14 +84,14 @@ Lucid.Loader = function() {
 
 					loaded[item.id] = item;
 
-					$(document).trigger(item.eventSuccessName, [item]);
+					Lucid.Event.trigger(item.eventSuccessName, item);
 					this.loadNext();
 			}
 
 			// the error function
 			function error(data) {
 					Lucid.Utils.log("Loader @ loadNext: error loading item - id: " + item.id);
-					$(document).trigger(item.eventErrorName, [item]);
+					Lucid.Event.trigger(item.eventErrorName, item);
 					this.loadNext();
 			}
 
@@ -102,7 +102,8 @@ Lucid.Loader = function() {
 					image.onerror = error.bind(this);
 					image.src = item.filePath;
 			} else {
-					$.loadFile(item.filePath, item.dataType, success.bind(this), error.bind(this));
+					// $.loadFile(item.filePath, item.dataType, success.bind(this), error.bind(this));
+					Lucid.Utils.loadFile(item.filePath, item.dataType, success.bind(this), error.bind(this));
 			}
 		},
 

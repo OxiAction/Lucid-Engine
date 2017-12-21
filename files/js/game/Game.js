@@ -1,5 +1,7 @@
-$(document).ready(function() {
-	// setup
+
+
+document.addEventListener("DOMContentLoaded", function() {
+   // setup
 	Lucid.Utils.setDebug(1);
 
 	// check support
@@ -67,32 +69,24 @@ function Game() {
 				key: Lucid.Control.KEY.RIGHT,
 				callback: function(target, key) {
 					target.move(Lucid.BaseEntity.DIR.RIGHT);
-					// target.x += 5;
-					// target.moveX(5);
 				}
 			}),
 			new Lucid.Control({
 				key: Lucid.Control.KEY.LEFT,
 				callback: function(target, key) {
 					target.move(Lucid.BaseEntity.DIR.LEFT);
-					// target.x -= 5;
-					// target.moveX(-5);
 				}
 			}),
 			new Lucid.Control({
 				key: Lucid.Control.KEY.DOWN,
 				callback: function(target, key) {
 					target.move(Lucid.BaseEntity.DIR.DOWN);
-					// target.y += 5;
-					// target.moveY(5);
 				}
 			}),
 			new Lucid.Control({
 				key: Lucid.Control.KEY.UP,
 				callback: function(target, key) {
 					target.move(Lucid.BaseEntity.DIR.UP);
-					// target.y -= 5;
-					// target.moveY(-5);
 				}
 			})
 		]
@@ -110,7 +104,7 @@ function Game() {
 	easystar.setAcceptableTiles([0]); 	// use zero values in the array as valid (walkable) tiles
 
 	// event is triggered if Engine has loaded the map file
-	$(document).on(Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS + namespace, function(event, loaderItem) {
+	Lucid.Event.bind(Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS + namespace, function(eventName, loaderItem) {
 		var mapFileName = loaderItem.getID();
 		var map = engine.buildMapByFileName(mapFileName);
 		
@@ -118,7 +112,7 @@ function Game() {
 		engine.setMap(map);
 
 		// event is triggered if Map has loaded everything
-		$(document).on(Lucid.Map.EVENT.LOADING_SUCCESS + namespace, function(event, map) {
+		Lucid.Event.bind(Lucid.Map.EVENT.LOADING_SUCCESS + namespace, function(eventName, map) {
 			// build the map
 			map.build();
 

@@ -83,8 +83,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 		}
 
 		// events for loading the asset
-		$(document).on(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace, this.assetLoadingSuccess.bind(this));
-		$(document).on(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_ERROR + this.componentNamespace, this.assetLoadingError.bind(this));
+		Lucid.Event.bind(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace, this.assetLoadingSuccess.bind(this));
+		Lucid.Event.bind(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_ERROR + this.componentNamespace, this.assetLoadingError.bind(this));
 
 		return true;
 	},
@@ -103,7 +103,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	loadingSuccess: function() {
 		Lucid.Utils.log("BaseEntity @ loadingSuccess: loaded everything in BaseEntity with name: " + this.name);
 		this.loaded = true;
-		$(document).trigger(Lucid.BaseEntity.EVENT.LOADING_SUCCESS, [this]);
+		Lucid.Event.trigger(Lucid.BaseEntity.EVENT.LOADING_SUCCESS, this);
 	},
 
 	/**
@@ -112,7 +112,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	loadingError: function() {
 		Lucid.Utils.log("BaseEntity @ loadingError: ERROR occurred while loading in BaseEntity with name: " + this.name);
 		this.loaded = false;
-		$(document).trigger(Lucid.BaseEntity.EVENT.LOADING_ERROR, [this]);
+		Lucid.Event.trigger(Lucid.BaseEntity.EVENT.LOADING_ERROR, this);
 	},
 
 	/**
@@ -135,10 +135,10 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	/**
 	 * Asset loading success.
 	 *
-	 * @param      {String}      event       The event.
+	 * @param      {String}      eventName   The event.
 	 * @param      {LoaderItem}  loaderItem  The loader item.
 	 */
-	assetLoadingSuccess: function(event, loaderItem) {
+	assetLoadingSuccess: function(eventName, loaderItem) {
 		this.asset = loaderItem.getData();
 
 		this.loadingSuccess();
@@ -147,10 +147,10 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	/**
 	 * Asset loading error.
 	 *
-	 * @param      {String}      event       The event.
+	 * @param      {String}      eventName   The event.
 	 * @param      {LoaderItem}  loaderItem  The loader item.
 	 */
-	assetLoadingError: function(event, loaderItem) {
+	assetLoadingError: function(eventName, loaderItem) {
 		this.asset = null;
 
 		this.loadingError();
@@ -622,8 +622,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	destroy: function() {
-		$(document).off(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace);
-		$(document).off(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_ERROR + this.componentNamespace);
+		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace);
+		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_ERROR + this.componentNamespace);
 
 		this.loaded = false;
 	}

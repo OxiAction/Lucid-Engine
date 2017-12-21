@@ -24,7 +24,7 @@ The following covers the structured project tasks. Every task is followed by the
 
 ### Open tasks (**critical**):
 
-* AI implementation (new since Milestone 1 - this and A* pathfinding are now two seperate tasks! A* pathfinding is done already) - **in progress** - **medium**
+* AI implementation (new since Milestone 1 - this and A* pathfinding are now two seperate tasks! A* pathfinding is done already) - **in progress** - **hard**
 * items implementation (new since Milestone 1) - **easy**
 * a final (basic) game based on the engine - **medium**
 * basic editor and its forms - **hard**
@@ -90,6 +90,6 @@ You may encounter some warnings in the console when loading files, but those are
 
 ### Dependencies (third party libraries)
 
-* [[jQuery]](https://jquery.com/) version 3.2.1+
-* [[jQueryUI]](https://jqueryui.com/) version 1.12.1+
+* [[jQuery]](https://jquery.com/) version 3.2.1+ (Editor only)
+* [[jQueryUI]](https://jqueryui.com/) version 1.12.1+ (Editor only)
 * [[EasyStar.js]](http://easystarjs.com/) version 0.4.1+
