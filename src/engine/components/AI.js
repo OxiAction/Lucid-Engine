@@ -88,7 +88,7 @@ Lucid.AI = Lucid.BaseComponent.extend({
 				
 				if (entityInTargetSightRadius) {
 					
-
+					// var offset = Math.max(entity.width / 2, entity.height / 2);
 					angle = Math.atan2(entityRelativeY - targetRelativeY, entityRelativeX - targetRelativeX);
 
 					canvasContext.strokeStyle = "red";
@@ -100,6 +100,9 @@ Lucid.AI = Lucid.BaseComponent.extend({
 						entityRelativeY = collisionPoint.y;
 					}
 
+					
+					// entityRelativeX -= offset;
+					// entityRelativeY -= offset;
 					canvasContext.lineTo(entityRelativeX, entityRelativeY);
 					canvasContext.lineTo(entityRelativeX - headlen * Math.cos(angle - Math.PI/6), entityRelativeY - headlen * Math.sin(angle - Math.PI/6));
 					canvasContext.moveTo(entityRelativeX, entityRelativeY);
@@ -142,20 +145,20 @@ Lucid.AI = Lucid.BaseComponent.extend({
 	 *                       lines actually collide.
 	 */
 	twoLinesIntersect: function(x1, y1, x2, y2, x3, y3, x4, y4) {
-	    var denom = (y4 - y3)*(x2 - x1) - (x4 - x3)*(y2 - y1);
+		var denom = (y4 - y3)*(x2 - x1) - (x4 - x3)*(y2 - y1);
 
-	    if (denom == 0) {
-	        return null;
-	    }
-	    var ua = ((x4 - x3)*(y1 - y3) - (y4 - y3)*(x1 - x3)) / denom;
-	    var ub = ((x2 - x1)*(y1 - y3) - (y2 - y1)*(x1 - x3)) / denom;
+		if (denom == 0) {
+			return null;
+		}
+		var ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
+		var ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
 
-	    return {
-	        x: x1 + ua*(x2 - x1),
-	        y: y1 + ua*(y2 - y1),
-	        seg1: ua >= 0 && ua <= 1,
-	        seg2: ub >= 0 && ub <= 1
-	    };
+		return {
+			x: x1 + ua * (x2 - x1),
+			y: y1 + ua * (y2 - y1),
+			seg1: ua >= 0 && ua <= 1,
+			seg2: ub >= 0 && ub <= 1
+		};
 	},
 
 	getCollisionPoint: function(x, y, radius, targetVector, entityVector) {

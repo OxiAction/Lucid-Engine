@@ -77,6 +77,16 @@ Lucid.data.maps.map1 = {
 							colliding: 1,
 							render: 1,
 							snapToGrid: 1
+						},
+
+						{
+							id: "potion1",
+							name: "EntityPotion",
+							x: 470,
+							y: 570,
+							colliding: 1,
+							render: 1,
+							snapToGrid: 1
 						}
 					]
 				}

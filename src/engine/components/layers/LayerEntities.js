@@ -60,46 +60,8 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 	 *                               simulate in the update.
 	 */
 	renderUpdate: function(delta) {
-		var entity;
-		var i;
-		var collisionEntities = [];
-		for (i = 0; i < this.entities.length; ++i) {
-			entity = this.entities[i];
-			// only check valid entities, which are also inside the viewport
-			if (
-				entity.colliding &&
-				entity.render &&
-				entity.x + entity.width >= this.camera.x &&
-				entity.x <= this.camera.x + this.camera.width &&
-				entity.y + entity.height >= this.camera.y &&
-				entity.y <= this.camera.y + this.camera.height
-				) {
-				collisionEntities.push(entity);
-			}
-		}
-		var j = 0;
-		for (i = 0; i < this.entities.length; ++i) {
-			entity = this.entities[i];
-
-			// rendering enabled?
-			if (entity.render) {
-				// collision enabled?
-				if (entity.colliding) {
-					for (j = 0; j < collisionEntities.length; ++j) {
-						var collisionEntity = collisionEntities[j];
-
-						// only collide moving objects AND
-						// only check collision against other entities
-						if (!entity.moved || entity === collisionEntity) {
-							continue;
-						}
-						
-						entity.checkHandleCollision(entity, collisionEntity);
-					}
-				}
-
-				entity.renderUpdate(delta);
-			}
+		for (var i = 0; i < this.entities.length; ++i) {
+			this.entities[i].renderUpdate(delta);
 		}
 	},
 

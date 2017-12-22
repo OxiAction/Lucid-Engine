@@ -30,15 +30,17 @@ Lucid.Event = function() {
 
 	return {
 		bind: function(eventName, callback) {
-			events[eventName] = events[eventName]	|| [];
+			events[eventName] = events[eventName] || [];
 			events[eventName].push(callback);
 		},
+
 		unbind: function(eventName, callback){
 			if(eventName in events === false  )	return;
 
 			events[eventName].splice(events[eventName].indexOf(callback), 1);
 
 		},
+		
 		trigger: function(eventName /* , args... */){
 			// check all events entries...
 			for (var orgPropertyName in events) {

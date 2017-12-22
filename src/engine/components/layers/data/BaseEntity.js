@@ -336,132 +336,166 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 		var newY = this.y + this.accelerationY * delta * this.speed;
 
 	// COLLISION
-		
-		var layerCollision = this.engine.getLayerCollision();
-		if (layerCollision) {
-			var data = layerCollision.getData();
 
-			if (data) {
-				var gridIndices = this.getGridIndices();
-				var xIndex = gridIndices[0];
-				var yIndex = gridIndices[1];
+		if (this.colliding) {
 
-				var tileUp = data[yIndex - 1][xIndex];
-				var tileDown = data[yIndex + 1][xIndex];
+			// LAYER ENTITIES COLLISION
 
-				var tileLeft = data[yIndex][xIndex - 1];
-				var tileRight = data[yIndex][xIndex + 1];
+			var layerEntities = this.engine.getLayerEntities();
+			if (layerEntities) {
+				var entities = layerEntities.getEntities();
 
-				var tileUpLeft = data[yIndex - 1][xIndex - 1];
-				var tileUpRight = data[yIndex - 1][xIndex + 1];
+				if (entities) {
+					for (var i = 0; i < entities.length; ++i) {
+						var entity = entities[i];
+						if (entity != this && entity.colliding) {
+							var inUp = newY < entity.y + entity.height;
+							var inDown = newY + this.height > entity.y;
 
-				var tileDownLeft = data[yIndex + 1][xIndex - 1];
-				var tileDownRight = data[yIndex + 1][xIndex + 1];
+							var inLeft = newX < entity.x + entity.width;
+							var inRight = newX + this.width > entity.x;
 
-			// UP / DOWN / LEFT / RIGHT
-
-				var inUp = newY < (yIndex - 1) * tileSize + tileSize;
-				var inDown = newY + this.height > (yIndex + 1) * tileSize;
-
-				var inLeft = newX < (xIndex - 1) * tileSize + tileSize;
-				var inRight = newX + this.width > (xIndex + 1) * tileSize;
-
-				// 0 X 0
-				// 0 P 0
-				// 0 0 0
-				if (tileUp && tileUp == 1 && inUp) {
-					newY = lastY;
-				}
-
-				// 0 0 0
-				// 0 P 0
-				// 0 X 0
-				if (tileDown && tileDown == 1 && inDown) {
-					newY = lastY;
-				}
-
-				// 0 0 0
-				// X P 0
-				// 0 0 0
-				if (tileLeft && tileLeft == 1 && inLeft) {
-					newX = lastX;
-				}
-
-				// 0 0 0
-				// 0 P X
-				// 0 0 0
-				if (tileRight && tileRight == 1 && inRight) {
-					newX = lastX;
-				}
-
-			// DIAGONALS
-
-				// X 0 0
-				// 0 P 0
-				// 0 0 0
-				if (tileUpLeft && tileUpLeft == 1 && inUp && inLeft) {
-					// make sure we move UP
-					if (newY < lastY) {
-						newY = lastY;
-					}
-
-					// make sure we move LEFT
-					if (newX < lastX) {
-						newX = lastX;
-					}
-				}
-
-				// 0 0 X
-				// 0 P 0
-				// 0 0 0
-				if (tileUpRight && tileUpRight == 1 && inUp && inRight) {
-					// make sure we move UP
-					if (newY < lastY) {
-						newY = lastY;
-					}
-
-					// make sure we move RIGHT
-					if (newX > lastX) {
-						newX = lastX;
-					}
-				}
-
-				// 0 0 0
-				// 0 P 0
-				// X 0 0
-				if (tileDownLeft && tileDownLeft == 1 && inDown && inLeft) {
-					// make sure we move DOWN
-					if (newY > lastY) {
-						newY = lastY;
-					}
-
-					// make sure we move LEFT
-					if (newX < lastX) {
-						newX = lastX;
-					}
-				}
-
-				// 0 0 0
-				// 0 P 0
-				// 0 0 X
-				if (tileDownRight && tileDownRight == 1 && inDown && inRight) {
-					// make sure we move DOWN
-					if (newY > lastY) {
-						newY = lastY;
-					}
-
-					// make sure we move RIGHT
-					if (newX > lastX) {
-						newX = lastX;
+							// TODO: could be improved by adding entity types
+							// e.g.: some entity is SOLID, some is LIGHT -> only LIGHT moves
+							if (inUp && inDown && inLeft && inRight) {
+								newX = lastX;
+								newY = lastY;
+							}
+						}
 					}
 				}
 			}
-		}
+
+			// LAYER COLLISION COLLISION
+			
+			var layerCollision = this.engine.getLayerCollision();
+			if (layerCollision) {
+				var data = layerCollision.getData();
+
+				if (data) {
+					var gridIndices = this.getGridIndices();
+					var xIndex = gridIndices[0];
+					var yIndex = gridIndices[1];
+
+					var tileUp = data[yIndex - 1][xIndex];
+					var tileDown = data[yIndex + 1][xIndex];
+
+					var tileLeft = data[yIndex][xIndex - 1];
+					var tileRight = data[yIndex][xIndex + 1];
+
+					var tileUpLeft = data[yIndex - 1][xIndex - 1];
+					var tileUpRight = data[yIndex - 1][xIndex + 1];
+
+					var tileDownLeft = data[yIndex + 1][xIndex - 1];
+					var tileDownRight = data[yIndex + 1][xIndex + 1];
+
+				// UP / DOWN / LEFT / RIGHT
+
+					var inUp = newY < (yIndex - 1) * tileSize + tileSize;
+					var inDown = newY + this.height > (yIndex + 1) * tileSize;
+
+					var inLeft = newX < (xIndex - 1) * tileSize + tileSize;
+					var inRight = newX + this.width > (xIndex + 1) * tileSize;
+
+					// 0 X 0
+					// 0 P 0
+					// 0 0 0
+					if (tileUp && tileUp == 1 && inUp) {
+						newY = lastY;
+					}
+
+					// 0 0 0
+					// 0 P 0
+					// 0 X 0
+					if (tileDown && tileDown == 1 && inDown) {
+						newY = lastY;
+					}
+
+					// 0 0 0
+					// X P 0
+					// 0 0 0
+					if (tileLeft && tileLeft == 1 && inLeft) {
+						newX = lastX;
+					}
+
+					// 0 0 0
+					// 0 P X
+					// 0 0 0
+					if (tileRight && tileRight == 1 && inRight) {
+						newX = lastX;
+					}
+
+				// DIAGONALS
+
+					// X 0 0
+					// 0 P 0
+					// 0 0 0
+					if (tileUpLeft && tileUpLeft == 1 && inUp && inLeft) {
+						// make sure we move UP
+						if (newY < lastY) {
+							newY = lastY;
+						}
+
+						// make sure we move LEFT
+						if (newX < lastX) {
+							newX = lastX;
+						}
+					}
+
+					// 0 0 X
+					// 0 P 0
+					// 0 0 0
+					if (tileUpRight && tileUpRight == 1 && inUp && inRight) {
+						// make sure we move UP
+						if (newY < lastY) {
+							newY = lastY;
+						}
+
+						// make sure we move RIGHT
+						if (newX > lastX) {
+							newX = lastX;
+						}
+					}
+
+					// 0 0 0
+					// 0 P 0
+					// X 0 0
+					if (tileDownLeft && tileDownLeft == 1 && inDown && inLeft) {
+						// make sure we move DOWN
+						if (newY > lastY) {
+							newY = lastY;
+						}
+
+						// make sure we move LEFT
+						if (newX < lastX) {
+							newX = lastX;
+						}
+					}
+
+					// 0 0 0
+					// 0 P 0
+					// 0 0 X
+					if (tileDownRight && tileDownRight == 1 && inDown && inRight) {
+						// make sure we move DOWN
+						if (newY > lastY) {
+							newY = lastY;
+						}
+
+						// make sure we move RIGHT
+						if (newX > lastX) {
+							newX = lastX;
+						}
+					}
+				}
+			}
+
+	}
 
 	// UPDATE X / Y
 
 		if (this.x != newX || this.y != newY) {
 			this.moved = true;
+
 
 			if (this.x < newX) {
 				this.dir = Lucid.BaseEntity.DIR.RIGHT;
@@ -553,8 +587,10 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	},
 
 	/**
-	 * Checks and handles the collision between two objects.
-	 * Using https://en.wikipedia.org/wiki/Minkowski_addition
+	 * Checks and handles the collision between two objects. Using
+	 * https://en.wikipedia.org/wiki/Minkowski_addition
+	 *
+	 * @deprecated Deprecated - manipulating x / y outside of the renderUpdate loop is bad!
 	 *
 	 * @param      {Object}  e1      The e 1
 	 * @param      {Object}  e2      The e 2
