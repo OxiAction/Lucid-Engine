@@ -158,7 +158,6 @@ Lucid.BaseLayer.TYPE = {
 	UI: "ui", // ui (e.g. menu, inventory)
 	TILESET: "tileSet", // tileSet grid with cols / rows
 	COLLISION: "collision", // collision grid with cols / rows - there can only be ONE of this type
-	ITEMS: "items", // objects (e.g. a ball or some animated thing)
 	ENTITIES: "entities", // entities - there can only be ONE of this type
 	EVENTS: "events" // event triggers
 };
