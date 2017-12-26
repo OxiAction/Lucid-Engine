@@ -13,13 +13,15 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		this.componentName = "EntityPassant";
 		this.width = 32;
 		this.height = 48;
-		this.speed = 10;
+		this.speed = 20;
 		this.assetFilePath = "assets/entity_passant.png";
 		
 		this._super(config);
 		
 		this.animInterval = setInterval(this.updateAnim.bind(this), 500);
 		this.updateAnim();
+
+		Lucid.Event.bind(Lucid.BaseEntity.EVENT.COLLISION + this.componentNamespace, this.collision.bind(this));
 
 		return true;
 	},
@@ -40,10 +42,6 @@ var EntityPassant = Lucid.BaseEntity.extend({
 	},
 
 	renderUpdate: function(delta) {
-		this._super(delta);
-	},
-
-	renderDraw: function(interpolationPercentage) {
 		switch (this.dir) {
 			case Lucid.BaseEntity.DIR.RIGHT:
 				this.assetY = 96;
@@ -60,11 +58,28 @@ var EntityPassant = Lucid.BaseEntity.extend({
 			default:
 				this.assetY = 0;
 		}
+		
+		this._super(delta);
+	},
+
+	renderDraw: function(interpolationPercentage) {
+		
 
 		this._super(interpolationPercentage);
 	},
 
+	collision(event, item, collisionData) {
+		if (item.componentName == "EntityPotion") {
+			var layerEntities = this.engine.getLayerEntities();
+			if (layerEntities) {
+				layerEntities.removeEntity(item.getID());
+			}
+		}
+	},
+
 	destroy: function() {
+		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.COLLISION + this.componentNamespace, this.collision.bind(this));
+
 		if (this.animInterval) {
 			clearInterval(this.animInterval);
 			this.animInterval = null;

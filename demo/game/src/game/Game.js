@@ -62,41 +62,6 @@ function Game() {
 	// load the file into DOM
 	engine.loadMapFile(mapName);
 
-	// setup control group
-	var controlGroup = new Lucid.ControlGroup({
-		controls: [
-			new Lucid.Control({
-				key: Lucid.Control.KEY.RIGHT,
-				callback: function(target, key) {
-					target.move(Lucid.BaseEntity.DIR.RIGHT);
-				}
-			}),
-			new Lucid.Control({
-				key: Lucid.Control.KEY.LEFT,
-				callback: function(target, key) {
-					target.move(Lucid.BaseEntity.DIR.LEFT);
-				}
-			}),
-			new Lucid.Control({
-				key: Lucid.Control.KEY.DOWN,
-				callback: function(target, key) {
-					target.move(Lucid.BaseEntity.DIR.DOWN);
-				}
-			}),
-			new Lucid.Control({
-				key: Lucid.Control.KEY.UP,
-				callback: function(target, key) {
-					target.move(Lucid.BaseEntity.DIR.UP);
-				}
-			})
-		]
-	});
-	// control groups need to be added to the engine for update purpose
-	// engine.addControlGroup(controlGroup);
-
-	// and set target to camera so we can now control the camera
-	// controlGroup.setTarget(camera);
-
 	// initialize and config EasyStar.js
 	var easystar = new EasyStar.js();
 	easystar.enableDiagonals();			// this should be fine and makes animation a bit smoother

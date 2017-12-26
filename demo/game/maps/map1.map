@@ -61,9 +61,9 @@ Lucid.data.maps.map1 = {
 					data: [
 						{
 							id: "passant1",
-							name: "EntityPassant",
-							x: 300,
-							y: 300,
+							componentName: "EntityPassant",
+							x: 500,
+							y: 100,
 							colliding: 1,
 							render: 1,
 							snapToGrid: 1
@@ -71,8 +71,8 @@ Lucid.data.maps.map1 = {
 
 						{
 							id: "fighter1",
-							name: "EntityFighter",
-							x: 400,
+							componentName: "EntityFighter",
+							x: 500,
 							y: 400,
 							colliding: 1,
 							render: 1,
@@ -81,7 +81,7 @@ Lucid.data.maps.map1 = {
 
 						{
 							id: "potion1",
-							name: "EntityPotion",
+							componentName: "EntityPotion",
 							x: 470,
 							y: 570,
 							colliding: 1,

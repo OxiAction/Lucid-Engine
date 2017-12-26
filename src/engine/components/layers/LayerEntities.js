@@ -28,27 +28,54 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 		if (this.data) {
 			for (var i = 0; i < this.data.length; ++i) {
 				var data = this.data[i];
-				// check if name property is given AND also check if theres a variable / object defined with this name
-				if ("name" in data && window[data.name]) {
-					// instanciate entity! Apply the data object as config parameter
-					var entity = new window[data.name](data);
-					// start loading its assets
-					entity.load();
-					// add to our entities render list
-					this.entities.push(entity);
+				// check if componentName property is given AND also check if theres a variable / object defined with this componentName
+				if ("componentName" in data && window[data.componentName]) {
+					this.addEntity(data);
 				}
 				// error reporting
 				else {
-					if (!("name" in data)) {
-						Lucid.Utils.error("LayerEntities @ init: trying to instanciate a new entity but name property is missing in data[" + i + "]!");
+					if (!("componentName" in data)) {
+						Lucid.Utils.error("LayerEntities @ init: trying to instanciate a new entity but componentName property is missing in data[" + i + "]!");
 					} else {
-						Lucid.Utils.error("LayerEntities @ init: trying to instanciate a new entity but window[" + data.name + "] is not defined!");
+						Lucid.Utils.error("LayerEntities @ init: trying to instanciate a new entity but window[" + data.componentName + "] is not defined!");
 					}
 				}
 			}
 		}
 
 		return true;
+	},
+
+	addEntity: function(data) {
+		var entity;
+		for (var i = 0; i < this.entities.length; ++i) {
+			entity = this.entities[i];
+			if (entity.getID() == data.id) {
+				Lucid.Utils.log("LayerEntities @ addEntity: entity with id " + data.id + " already exists!");
+				return;
+			}
+		}
+
+		// instanciate entity! Apply the data object as config parameter
+		entity = new window[data.componentName](data);
+		// start loading its assets
+		entity.load();
+		// add to our entities render list
+		this.entities.push(entity);
+	},
+
+	removeEntity: function(id) {
+		for (var i = 0; i < this.entities.length; ++i) {
+			var entity = this.entities[i];
+			if (entity.getID() == id) {
+				this.entities.splice(i, 1);
+				entity.destroy();
+				entity = null;
+				return;
+			}
+		}
+
+		Lucid.Utils.log("LayerEntities @ addEntity: entity with id " + id + " doesnt exist!");
 	},
 
 	/**

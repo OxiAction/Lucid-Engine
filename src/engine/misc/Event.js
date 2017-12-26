@@ -35,10 +35,18 @@ Lucid.Event = function() {
 		},
 
 		unbind: function(eventName, callback){
-			if(eventName in events === false  )	return;
+			if(eventName in events === false) {
+				return;
+			}
 
-			events[eventName].splice(events[eventName].indexOf(callback), 1);
+			for (var i = 0; i < events[eventName].length; ++i) {
+				if (events[eventName][i].toString() == callback.toString()) {
+					events[eventName].splice(i, 1);
+				}
+			}
 
+			// this does not work with bound functions:
+			// events[eventName].splice(events[eventName].indexOf(callback), 1);
 		},
 		
 		trigger: function(eventName /* , args... */){

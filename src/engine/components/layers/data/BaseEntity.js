@@ -13,10 +13,10 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	healthMin: 0, // minimum health - curent < minimum -> Lucid.Entity.STATE.DEAD
 	healthMax: 100, // maximum health
 
-	width: 0,
-	height: 0,
+	width: 0, // entity width
+	height: 0, // entity height
 
-	assetFilePath: null,
+	assetFilePath: null, // full path to an asset
 
 	assetX: 0, // asset position X
 	assetY: 0, // asset position Y
@@ -41,20 +41,26 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	path: null, // if theres a path array defined the entity will walk node by node
 				// until it reaches the end node of the path
 
-	dir: null, // the direction of the entity - e.g. Lucid.BaseEntity.DIR.TOP means
-			   // entity is heading towards top
+	dir: null, // the direction of the entity - e.g. Lucid.BaseEntity.DIR.LEFT means
+			   // entity is heading towards left
+	dirTemp: null, // temp direction holder - this is for the "flickering" bugfix
+	dirTimeout: null, // timeout which sets the dir - this is for the "flickering" bugfix
 
 	moveDirections: {},
 
+	gravityXStep: 0, // the gravity force on the x-axis (can be both: negative and positive floats)
+	gravityYStep: 0, // the gravity force on the y-axis (can be both: negative and positive floats)
+	gravityXAccelerationStep: 0, // private - the current step x
+	gravityYAccelerationStep: 0, // private - the current step y
+
 	accelerationUpStep: 0.1, // for speed-up
 	accelerationDownStep: 0.2, // for breaking
-	accelerationMax: 1, // maximum for acceleration
+	accelerationMax: 1, // maximum for acceleration - this shouldnt be higher than 1!
 	accelerationX: 0, // current acceleration on x-axis
 	accelerationY: 0, // current acceleration on y-axis
 
 	pathDirectionX:  null, // the current path direction on x-axis
 	pathDirectionY: null, // the current path direction on y-axis
-
 
 	/**
 	 * Automatically called when instantiated.
@@ -287,7 +293,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 			}
 		}
 
-	// MOVEMENT
+	// MOVEMENT && GRAVITY
 
 		var movementX = false;
 
@@ -331,183 +337,233 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 			}
 		}
 
-		// the new target x / y
-		var newX = this.x + this.accelerationX * delta * this.speed;
-		var newY = this.y + this.accelerationY * delta * this.speed;
+		// increase gravity step
+		this.gravityXAccelerationStep++;
+		this.gravityYAccelerationStep++;
 
-	// COLLISION
+		// the new target x / y
+		var newX = this.x + this.accelerationX * delta * this.speed + this.gravityXStep * this.gravityXAccelerationStep;
+		var newY = this.y + this.accelerationY * delta * this.speed + this.gravityYStep * this.gravityYAccelerationStep;
+
+	// COLLISION - checking entity vs entity && entity vs grid
 
 		if (this.colliding) {
 
-			// LAYER ENTITIES COLLISION
+			// This is a common problem for hit detection: if the difference
+			// between the new and the old position is too large, objects can
+			// clip THROUGH collision objects. So we split this up and calculate
+			// step by step.
+			//
+			// @type       {Number}
+			//
+			var updateSteps = 1 + Math.round(Math.max(Math.abs(newX - lastX), Math.abs(newY - lastY)));
 
-			var layerEntities = this.engine.getLayerEntities();
-			if (layerEntities) {
-				var entities = layerEntities.getEntities();
+			var updateStepX = (newX - lastX) / updateSteps;
+			var updateStepY = (newY - lastY) / updateSteps;
 
-				if (entities) {
-					for (var i = 0; i < entities.length; ++i) {
-						var entity = entities[i];
-						if (entity != this && entity.colliding) {
-							var inUp = newY < entity.y + entity.height;
-							var inDown = newY + this.height > entity.y;
+			var collisionX = false;
+			var collisionY = false;
 
-							var inLeft = newX < entity.x + entity.width;
-							var inRight = newX + this.width > entity.x;
+			newX = lastX;
+			newY = lastY;
 
-							// TODO: could be improved by adding entity types
-							// e.g.: some entity is SOLID, some is LIGHT -> only LIGHT moves
-							if (inUp && inDown && inLeft && inRight) {
-								newX = lastX;
-								newY = lastY;
+			UpdateSteps:
+			for (var j = 0; j < updateSteps; ++j) {
+				// if both - x and y-axis - collided -> stop!
+				if (collisionX && collisionY) {
+					break UpdateSteps;
+				}
+
+				// as long as the x-axis doesnt collide increment it
+				if (!collisionX) {
+					newX += updateStepX;
+				}
+
+				// as long as the y-axis doesnt collide increment it
+				if (!collisionY) {
+					newY += updateStepY;
+				}
+
+			// ENTITY VS ENTITY
+
+				var layerEntities = this.engine.getLayerEntities();
+				if (layerEntities) {
+					var entities = layerEntities.getEntities();
+
+					if (entities) {
+						for (var i = 0; i < entities.length; ++i) {
+							var entity = entities[i];
+
+							// dont collide against self AND only collide against entities with
+							// the colliding property true
+							if (entity != this && entity.colliding) {
+
+								// gather collision data...
+								var collisionData = this.getCollisionDataBoxVsBox({
+									x: newX,
+									y: newY,
+									lastX: lastX,
+									lastY: lastY,
+									width: this.width,
+									height: this.height
+								}, entity);
+
+								// ... and process it
+								newX = collisionData.x;
+								newY = collisionData.y;
+								collisionX = collisionData.collisionX;
+								collisionY = collisionData.collisionY;
+
+								// trigger collision event
+								if (collisionX || collisionY) {
+									Lucid.Event.trigger(Lucid.BaseEntity.EVENT.COLLISION, entity, collisionData);
+								}
 							}
 						}
 					}
 				}
-			}
 
-			// LAYER COLLISION COLLISION
-			
-			var layerCollision = this.engine.getLayerCollision();
-			if (layerCollision) {
-				var data = layerCollision.getData();
+			// ENTITY VS GRID
 
-				if (data) {
-					var gridIndices = this.getGridIndices();
-					var xIndex = gridIndices[0];
-					var yIndex = gridIndices[1];
+				var layerCollision = this.engine.getLayerCollision();
+				if (layerCollision) {
+					var data = layerCollision.getData();
 
-					var tileUp = data[yIndex - 1][xIndex];
-					var tileDown = data[yIndex + 1][xIndex];
+					if (data) {
+						var entityGridEntry = this.getGridIndices(newX - updateStepX, newY - updateStepY);
+						var entityGridEntryX = entityGridEntry[0];
+						var entityGridEntryY = entityGridEntry[1];
 
-					var tileLeft = data[yIndex][xIndex - 1];
-					var tileRight = data[yIndex][xIndex + 1];
+						/**
+						 * Adjoining grid entries.
+						 *
+						 * @type       {Array}
+						 */
+						var collidingGridEntries = [];
 
-					var tileUpLeft = data[yIndex - 1][xIndex - 1];
-					var tileUpRight = data[yIndex - 1][xIndex + 1];
-
-					var tileDownLeft = data[yIndex + 1][xIndex - 1];
-					var tileDownRight = data[yIndex + 1][xIndex + 1];
-
-				// UP / DOWN / LEFT / RIGHT
-
-					var inUp = newY < (yIndex - 1) * tileSize + tileSize;
-					var inDown = newY + this.height > (yIndex + 1) * tileSize;
-
-					var inLeft = newX < (xIndex - 1) * tileSize + tileSize;
-					var inRight = newX + this.width > (xIndex + 1) * tileSize;
-
-					// 0 X 0
-					// 0 P 0
-					// 0 0 0
-					if (tileUp && tileUp == 1 && inUp) {
-						newY = lastY;
-					}
-
-					// 0 0 0
-					// 0 P 0
-					// 0 X 0
-					if (tileDown && tileDown == 1 && inDown) {
-						newY = lastY;
-					}
-
-					// 0 0 0
-					// X P 0
-					// 0 0 0
-					if (tileLeft && tileLeft == 1 && inLeft) {
-						newX = lastX;
-					}
-
-					// 0 0 0
-					// 0 P X
-					// 0 0 0
-					if (tileRight && tileRight == 1 && inRight) {
-						newX = lastX;
-					}
-
-				// DIAGONALS
-
-					// X 0 0
-					// 0 P 0
-					// 0 0 0
-					if (tileUpLeft && tileUpLeft == 1 && inUp && inLeft) {
-						// make sure we move UP
-						if (newY < lastY) {
-							newY = lastY;
+						if (data[entityGridEntryY]) {
+							// tile left
+							if (data[entityGridEntryY][entityGridEntryX - 1] == 1) {
+								collidingGridEntries.push([entityGridEntryX - 1, entityGridEntryY]);
+							}
+							// tile right
+							if (data[entityGridEntryY][entityGridEntryX + 1] == 1) {
+								collidingGridEntries.push([entityGridEntryX + 1, entityGridEntryY]);
+							}
 						}
 
-						// make sure we move LEFT
-						if (newX < lastX) {
-							newX = lastX;
-						}
-					}
+						if (data[entityGridEntryY - 1]) {
+							// tile up
+							if (data[entityGridEntryY - 1][entityGridEntryX] == 1) {
+								collidingGridEntries.push([entityGridEntryX, entityGridEntryY - 1]);
+							}
 
-					// 0 0 X
-					// 0 P 0
-					// 0 0 0
-					if (tileUpRight && tileUpRight == 1 && inUp && inRight) {
-						// make sure we move UP
-						if (newY < lastY) {
-							newY = lastY;
-						}
-
-						// make sure we move RIGHT
-						if (newX > lastX) {
-							newX = lastX;
-						}
-					}
-
-					// 0 0 0
-					// 0 P 0
-					// X 0 0
-					if (tileDownLeft && tileDownLeft == 1 && inDown && inLeft) {
-						// make sure we move DOWN
-						if (newY > lastY) {
-							newY = lastY;
+							// tile up-left
+							if (data[entityGridEntryY - 1][entityGridEntryX - 1] == 1) {
+								collidingGridEntries.push([entityGridEntryX - 1, entityGridEntryY - 1]);
+							}
+							// tile up-right
+							if (data[entityGridEntryY - 1][entityGridEntryX + 1] == 1) {
+								collidingGridEntries.push([entityGridEntryX + 1, entityGridEntryY - 1]);
+							}
 						}
 
-						// make sure we move LEFT
-						if (newX < lastX) {
-							newX = lastX;
-						}
-					}
+						if (data[entityGridEntryY + 1]) {
+							// tile down
+							if (data[entityGridEntryY + 1][entityGridEntryX] == 1) {
+								collidingGridEntries.push([entityGridEntryX, entityGridEntryY + 1]);
+							}
 
-					// 0 0 0
-					// 0 P 0
-					// 0 0 X
-					if (tileDownRight && tileDownRight == 1 && inDown && inRight) {
-						// make sure we move DOWN
-						if (newY > lastY) {
-							newY = lastY;
+							// tile down-left
+							if (data[entityGridEntryY + 1][entityGridEntryX - 1] == 1) {
+								collidingGridEntries.push([entityGridEntryX - 1, entityGridEntryY + 1]);
+							}
+							// tile down-right
+							if (data[entityGridEntryY + 1][entityGridEntryX + 1] == 1) {
+								collidingGridEntries.push([entityGridEntryX + 1, entityGridEntryY + 1]);
+							}
 						}
 
-						// make sure we move RIGHT
-						if (newX > lastX) {
-							newX = lastX;
+						for (var i = 0; i < collidingGridEntries.length; ++i) {
+							var collidingGridEntry = collidingGridEntries[i];
+
+							// gather collision data...
+							var collisionData = this.getCollisionDataBoxVsBox({
+								x: newX,
+								y: newY,
+								lastX: lastX,
+								lastY: lastY,
+								width: this.width,
+								height: this.height
+							}, {
+								x: collidingGridEntry[0] * tileSize,
+								y: collidingGridEntry[1] * tileSize,
+								width: tileSize,
+								height: tileSize
+							});
+
+							// ... and process it
+							newX = collisionData.x;
+							newY = collisionData.y;
+							collisionX = collisionData.collisionX;
+							collisionY = collisionData.collisionY;
+
+							// trigger collision event
+							if (collisionX || collisionY) {
+								Lucid.Event.trigger(Lucid.BaseEntity.EVENT.COLLISION, collidingGridEntry, collisionData);
+							}
 						}
 					}
 				}
-			}
 
-	}
+			} // end for (updateSteps)
+
+		} // end if (this.colliding)
+
+	// GRAVITY
+
+		// check if we had collision on x-axis - if so: reset gravity x acceleration!
+		if (collisionX) {
+			this.gravityXAccelerationStep = 0;
+		}
+
+		// check if we had collision on y-axis - if so: reset gravity y acceleration!
+		if (collisionY) {
+			this.gravityYAccelerationStep = 0;
+		}
 
 	// UPDATE X / Y
 
 		if (this.x != newX || this.y != newY) {
 			this.moved = true;
 
-
+			var newDir = null;
 			if (this.x < newX) {
-				this.dir = Lucid.BaseEntity.DIR.RIGHT;
+				newDir = Lucid.BaseEntity.DIR.RIGHT;
+				
 			} else if (this.x > newX) {
-				this.dir = Lucid.BaseEntity.DIR.LEFT;
+				newDir = Lucid.BaseEntity.DIR.LEFT;
 			}
 
 			if (this.y < newY) {
-				this.dir = Lucid.BaseEntity.DIR.DOWN;
+				newDir = Lucid.BaseEntity.DIR.DOWN;
+				
 			} else if (this.y > newY) {
-				this.dir = Lucid.BaseEntity.DIR.UP;
+				newDir = Lucid.BaseEntity.DIR.UP;
 			}
+
+			// prevent dir "flickering" (fast switches in dir)
+
+				if (this.dirTemp != newDir) {
+					clearTimeout(this.dirTimeout);
+				}
+
+				this.dirTemp = newDir;
+				this.dirTimeout = setTimeout(function() {
+					this.dir = newDir;
+				}.bind(this), 50);
+
+			// end "flickering" fix
 
 			this.x = newX;
 			this.y = newY;
@@ -542,17 +598,31 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 			return;
 		}
 
-		this.canvasContext.drawImage(
+		var canvasContext = this.canvasContext;
+		var relativeX = Math.floor(this.x - this.camera.x);
+		var relativeY = Math.floor(this.y - this.camera.y);
+		canvasContext.drawImage(
 			this.asset,		// specifies the image, canvas, or video element to use
 			this.assetX,	// the x coordinate where to start clipping
 			this.assetY,	// the y coordinate where to start clipping
 			this.width,		// the width of the clipped image
 			this.height,	// the height of the clipped image
-			Math.floor(this.x - this.camera.x),	// the x coordinate where to place the image on the canvas
-			Math.floor(this.y - this.camera.y),	// the y coordinate where to place the image on the canvas
+			relativeX,	// the x coordinate where to place the image on the canvas
+			relativeY,	// the y coordinate where to place the image on the canvas
 			this.width,		// the width of the image to use (stretch or reduce the image)
 			this.height		// the height of the image to use (stretch or reduce the image)
 		);
+		relativeX += 0.5;
+		relativeY += 0.5;
+		canvasContext.strokeStyle = "red";
+		canvasContext.lineWidth = 1;
+		canvasContext.beginPath();
+		canvasContext.moveTo(relativeX, relativeY);
+		canvasContext.lineTo(relativeX + this.width - 1, relativeY);
+		canvasContext.lineTo(relativeX + this.width - 1, relativeY + this.height - 1);
+		canvasContext.lineTo(relativeX, relativeY + this.height - 1);
+		canvasContext.lineTo(relativeX, relativeY - 0.5);
+		canvasContext.stroke();
 	},
 
 	/**
@@ -587,57 +657,80 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	},
 
 	/**
-	 * Checks and handles the collision between two objects. Using
-	 * https://en.wikipedia.org/wiki/Minkowski_addition
+	 * Simulates a collision between box1 and box2.
+	 * In case of collision: Returns corrected position data for box1.
 	 *
-	 * @deprecated Deprecated - manipulating x / y outside of the renderUpdate loop is bad!
-	 *
-	 * @param      {Object}  e1      The e 1
-	 * @param      {Object}  e2      The e 2
+	 * @param      {Object}  box1    Data Object for box1. Required properties:
+	 *                               x, y, width, height, lastX, lastY. lastX /
+	 *                               lastY are required, to determine the
+	 *                               direction box1 is coming from.
+	 * @param      {Object}  box2    Data Object for box2. Required properties:
+	 *                               x, y, width, height
+	 * @return     {Object}  The collision data Object with properties: x (the
+	 *                       new x-position for box1), y (the new y-position for
+	 *                       box1), collisionX (true if there was x-axis
+	 *                       collision), collisionY (true if there was y-axis
+	 *                       collision)
 	 */
-	checkHandleCollision: function(e1, e2) {
-		var elementsHalfWidth = 0.5 * (e1.width + e2.width);
-		var elementsHalfHeight = 0.5 * (e1.height + e2.height);
-		var elementsDifferenceX = e1.x - e2.x;
-		var elementsDifferenceY = e1.y - e2.y;
+	getCollisionDataBoxVsBox(box1, box2) {
+		var x = box1.x;
+		var y = box1.y;
+		var collisionX = false;
+		var collisionY = false;
 
-		if (Math.abs(elementsDifferenceX) <= elementsHalfWidth && Math.abs(elementsDifferenceY) <= elementsHalfHeight) {
-			
-			var wY = elementsHalfWidth * elementsDifferenceY;
-			var hX = elementsHalfHeight * elementsDifferenceX;
+		// is box1 overlapping box2?
+		if (box1.x < box2.x + box2.width &&
+			box1.x + box1.width > box2.x &&
+			box1.y < box2.y + box2.height &&
+			box1.y + box1.height > box2.y) {
 
-			if (wY > hX) {
-				if (wY > -hX) {
-					// top
-					e1.y = e2.y + e2.height;
-				}
-				else {
-					// right
-					e1.x = e2.x - e1.width;
-				}
-			} else {
-				if (wY > -hX) {
-					// left
-					e1.x = e2.x + e2.width;
-				}
-				else {
-					// bottom
-					e1.y = e2.y - e1.height;
-				}
+			// box1 comes from the left side
+			if (box1.lastX + box1.width <= box2.x) {
+				x = box2.x - box1.width;
+				collisionX = true;
 			}
+			// box1 comes from the right side
+			else if (box1.lastX >= box2.x + box2.width) {
+				x = box2.x + box2.width;
+				collisionX = true;
+			}
+
+			// box1 comes from the up side
+			if (box1.lastY + box1.height <= box2.y) {
+				y = box2.y - box1.height;
+				collisionY = true;
+			}
+			// box1 comes from the down side
+			else if (box1.lastY >= box2.y + box2.height) {
+				y = box2.y + box2.height;
+				collisionY = true;
+			}
+		}
+
+		return {
+			x: x,
+			y: y,
+			collisionX: collisionX,
+			collisionY: collisionY
 		}
 	},
 
 	/**
 	 * Translates x/y Numbers to grid (tileSize) array based indices.
 	 *
-	 * @return     {Array}  The grid indices.
+	 * @param      {Number}  x       X position.
+	 * @param      {Number}  y       Y position.
+	 * @return     {Array}   The grid indices.
 	 */
-	getGridIndices: function() {
-		var x = Math.floor((this.x + (this.width / 2)) / this.map.tileSize);
-		var y = Math.floor((this.y + (this.height / 2)) / this.map.tileSize);
+	getGridIndices: function(x, y) {
+		if (x == undefined) {
+			x = this.x;
+		}
+		if (y == undefined) {
+			y = this.y;
+		}
 
-		return [x, y];
+		return [Math.floor((x + (this.width / 2)) / this.map.tileSize), Math.floor((y + (this.height / 2)) / this.map.tileSize)];
 	},
 
 	/**
@@ -650,6 +743,10 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	resize: function(config) {
 		this.canvas.width = config.wWidth;
 		this.canvas.height = config.wHeight;
+	},
+
+	collidesWithEntity: function(collidingEntity) {
+
 	},
 
 	/**
@@ -680,7 +777,8 @@ Lucid.BaseEntity.EVENT = {
 	LOADED_ASSET_FILE_SUCCESS: "BaseEntityLoadedAssetFileSuccess",
 	LOADED_ASSET_FILE_ERROR: "BaseEntityLoadedAssetFileError",
 	LOADING_SUCCESS: "BaseEntityLoadingSuccess",
-	LOADING_ERROR: "BaseEntityLoadingError"
+	LOADING_ERROR: "BaseEntityLoadingError",
+	COLLISION: "BaseEntityCollision"
 };
 
 // some states for entities

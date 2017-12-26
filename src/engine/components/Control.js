@@ -1,5 +1,7 @@
 /**
  * Engine default Control.
+ * 
+ * @deprecated Dont use this anymore.
  */
 Lucid.Control = Lucid.BaseComponent.extend({
 	// config variables and their default values
