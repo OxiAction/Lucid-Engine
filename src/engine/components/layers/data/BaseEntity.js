@@ -399,7 +399,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 							if (entity != this && entity.colliding) {
 
 								// gather collision data...
-								var collisionData = this.getCollisionDataBoxVsBox({
+								var collisionData = Lucid.Math.getCollisionDataBoxVsBox({
 									x: newX,
 									y: newY,
 									lastX: lastX,
@@ -488,7 +488,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 							var collidingGridEntry = collidingGridEntries[i];
 
 							// gather collision data...
-							var collisionData = this.getCollisionDataBoxVsBox({
+							var collisionData = Lucid.Math.getCollisionDataBoxVsBox({
 								x: newX,
 								y: newY,
 								lastX: lastX,
@@ -653,65 +653,6 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 			this.moveDirections = {};
 			this.pathDirectionX = null;
 			this.pathDirectionY = null;
-		}
-	},
-
-	/**
-	 * Simulates a collision between box1 and box2.
-	 * In case of collision: Returns corrected position data for box1.
-	 *
-	 * @param      {Object}  box1    Data Object for box1. Required properties:
-	 *                               x, y, width, height, lastX, lastY. lastX /
-	 *                               lastY are required, to determine the
-	 *                               direction box1 is coming from.
-	 * @param      {Object}  box2    Data Object for box2. Required properties:
-	 *                               x, y, width, height
-	 * @return     {Object}  The collision data Object with properties: x (the
-	 *                       new x-position for box1), y (the new y-position for
-	 *                       box1), collisionX (true if there was x-axis
-	 *                       collision), collisionY (true if there was y-axis
-	 *                       collision)
-	 */
-	getCollisionDataBoxVsBox(box1, box2) {
-		var x = box1.x;
-		var y = box1.y;
-		var collisionX = false;
-		var collisionY = false;
-
-		// is box1 overlapping box2?
-		if (box1.x < box2.x + box2.width &&
-			box1.x + box1.width > box2.x &&
-			box1.y < box2.y + box2.height &&
-			box1.y + box1.height > box2.y) {
-
-			// box1 comes from the left side
-			if (box1.lastX + box1.width <= box2.x) {
-				x = box2.x - box1.width;
-				collisionX = true;
-			}
-			// box1 comes from the right side
-			else if (box1.lastX >= box2.x + box2.width) {
-				x = box2.x + box2.width;
-				collisionX = true;
-			}
-
-			// box1 comes from the up side
-			if (box1.lastY + box1.height <= box2.y) {
-				y = box2.y - box1.height;
-				collisionY = true;
-			}
-			// box1 comes from the down side
-			else if (box1.lastY >= box2.y + box2.height) {
-				y = box2.y + box2.height;
-				collisionY = true;
-			}
-		}
-
-		return {
-			x: x,
-			y: y,
-			collisionX: collisionX,
-			collisionY: collisionY
 		}
 	},
 

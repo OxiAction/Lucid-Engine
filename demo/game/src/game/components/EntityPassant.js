@@ -68,7 +68,7 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		this._super(interpolationPercentage);
 	},
 
-	collision(event, item, collisionData) {
+	collision(eventName, item, collisionData) {
 		if (item.componentName == "EntityPotion") {
 			var layerEntities = this.engine.getLayerEntities();
 			if (layerEntities) {

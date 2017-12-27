@@ -43,6 +43,8 @@ function Game() {
 		debugPanic: true,
 		debugGrid: true
 	});
+
+	// Lucid.Input.init(engine.getCanvas());
 	
 	// start engine
 	engine.start();
@@ -52,15 +54,13 @@ function Game() {
 
 	// update all the components initially! mandatory
 	engine.resize();
-
-	var mapName = "map1";
 	
 	// setup Camera
 	var camera = new Lucid.Camera();
 	engine.setCamera(camera);
 
-	// load the file into DOM
-	engine.loadMapFile(mapName);
+	// load the map file into DOM
+	engine.loadMapFile("map1");
 
 	// initialize and config EasyStar.js
 	var easystar = new EasyStar.js();

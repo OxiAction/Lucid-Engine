@@ -84,7 +84,14 @@ Lucid.AI = Lucid.BaseComponent.extend({
 				entityRelativeX = Math.floor(entity.x - this.camera.x) + entity.width / 2;
 				entityRelativeY = Math.floor(entity.y - this.camera.y) + entity.height / 2;
 
-				var entityInTargetSightRadius = this.pointInCircle(entityRelativeX, entityRelativeY, targetRelativeX, targetRelativeY, target.sightRadius);
+				var entityInTargetSightRadius = Lucid.Math.getPointInCircle({
+						x: entityRelativeX,
+						y: entityRelativeY
+					}, {
+						x: targetRelativeX,
+						y: targetRelativeY,
+						radius: target.sightRadius
+					});
 				
 				if (entityInTargetSightRadius) {
 					
@@ -94,15 +101,16 @@ Lucid.AI = Lucid.BaseComponent.extend({
 					canvasContext.strokeStyle = "red";
 					canvasContext.moveTo(targetRelativeX, targetRelativeY);
 
-					var collisionPoint = this.getCollisionPoint(target.x + (target.width / 2), target.y + (target.height / 2), target.sightRadius, {x: targetRelativeX, y: targetRelativeY}, {x: entityRelativeX, y: entityRelativeY});
+					var collisionPoint = this.getCollisionPoint(target.x + (target.width / 2),
+																target.y + (target.height / 2), 
+																target.sightRadius, 
+																{x: targetRelativeX, y: targetRelativeY}, 
+																{x: entityRelativeX, y: entityRelativeY});
 					if (collisionPoint) {
 						entityRelativeX = collisionPoint.x;
 						entityRelativeY = collisionPoint.y;
 					}
-
 					
-					// entityRelativeX -= offset;
-					// entityRelativeY -= offset;
 					canvasContext.lineTo(entityRelativeX, entityRelativeY);
 					canvasContext.lineTo(entityRelativeX - headlen * Math.cos(angle - Math.PI/6), entityRelativeY - headlen * Math.sin(angle - Math.PI/6));
 					canvasContext.moveTo(entityRelativeX, entityRelativeY);
@@ -112,53 +120,6 @@ Lucid.AI = Lucid.BaseComponent.extend({
 		}
 
 		canvasContext.stroke();
-	},
-
-	/**
-	 * Tests if x / y is inside circle.
-	 *
-	 * @param      {number}  x       x point to test.
-	 * @param      {number}  y       y point to test.
-	 * @param      {number}  cx      circle center x.
-	 * @param      {number}  cy      circle center y.
-	 * @param      {number}  radius  The radius.
-	 * @return     {number}  Returns true if point is in circle.
-	 */
-	pointInCircle: function(x, y, cx, cy, radius) {
-		return Math.sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy)) <= radius;
-	},
-
-	/**
-	 * http://paulbourke.net/geometry/pointlineplane/
-	 *
-	 * @param      {number}  x1      The start x of line 1.
-	 * @param      {number}  y1      The start y of line 1.
-	 * @param      {number}  x2      The end x of line 1.
-	 * @param      {number}  y2      The end y of line 1.
-	 * @param      {number}  x3      The start x of line 2.
-	 * @param      {number}  y3      The start y of line 2.
-	 * @param      {number}  x4      The end x of line 2.
-	 * @param      {number}  y4      The end y of line 2.
-	 * @return     {Object}  An Object which contains information about the
-	 *                       intersection or null if nothing intersects. If
-	 *                       Object.seg1 and Object.seg2 both are true, the
-	 *                       lines actually collide.
-	 */
-	twoLinesIntersect: function(x1, y1, x2, y2, x3, y3, x4, y4) {
-		var denom = (y4 - y3)*(x2 - x1) - (x4 - x3)*(y2 - y1);
-
-		if (denom == 0) {
-			return null;
-		}
-		var ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
-		var ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
-
-		return {
-			x: x1 + ua * (x2 - x1),
-			y: y1 + ua * (y2 - y1),
-			seg1: ua >= 0 && ua <= 1,
-			seg2: ub >= 0 && ub <= 1
-		};
 	},
 
 	getCollisionPoint: function(x, y, radius, targetVector, entityVector) {
@@ -183,63 +144,52 @@ Lucid.AI = Lucid.BaseComponent.extend({
 						if (targetVector.x < entityVector.x) {
 							// left side of the cell
 							cellSides.push({
-								start: {
-									x: offsetX,
-									y: offsetY
-								},
-								end: {
-									x: offsetX,
-									y: offsetY + tileSize
-								}
+								startX: offsetX,
+								startY: offsetY,
+								endX: offsetX,
+								endY: offsetY + tileSize
 							});
 						} else {
 							// right side of the cell
 							cellSides.push({
-								start: {
-									x: offsetX + tileSize,
-									y: offsetY
-								},
-								end: {
-									x: offsetX + tileSize,
-									y: offsetY + tileSize
-								}
+								startX: offsetX + tileSize,
+								startY: offsetY,
+								endX: offsetX + tileSize,
+								endY: offsetY + tileSize
 							});
 						}
 
 						if (targetVector.y < entityVector.y) {
 							// top side of the cell
 							cellSides.push({
-								start: {
-									x: offsetX,
-									y: offsetY
-								},
-								end: {
-									x: offsetX + tileSize,
-									y: offsetY
-								}
+								startX: offsetX,
+								startY: offsetY,
+								endX: offsetX + tileSize,
+								endY: offsetY
 							});
 						} else {
 							// bottom side of the cell
 							cellSides.push({
-								start: {
-									x: offsetX,
-									y: offsetY + tileSize
-								},
-								end: {
-									x: offsetX + tileSize,
-									y: offsetY + tileSize
-								}
+								startX: offsetX,
+								startY: offsetY + tileSize,
+								endX: offsetX + tileSize,
+								endY: offsetY + tileSize
 							});
 						}
 
 						for (var k = 0; k < cellSides.length; ++k) {
 							var cellSide = cellSides[k];
-							var intersection = this.twoLinesIntersect(targetVector.x, targetVector.y, entityVector.x, entityVector.y, cellSide.start.x, cellSide.start.y, cellSide.end.x, cellSide.end.y);
+							var collisionData = Lucid.Math.getCollisionDataLineVsLine({
+								startX: targetVector.x,
+								startY: targetVector.y,
+								endX: entityVector.x,
+								endY: entityVector.y
+							}, cellSide);
 
-							if (intersection && intersection.seg1 && intersection.seg2) {
+							if (collisionData && collisionData.seg1 && collisionData.seg2) {
 								return {
-									x: intersection.x,
-									y: intersection.y
+									x: collisionData.x,
+									y: collisionData.y
 								}
 							}
 						}

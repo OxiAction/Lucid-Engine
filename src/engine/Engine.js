@@ -740,6 +740,15 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 		}
 
 		return false;
+	},
+
+	/**
+	 * Gets the canvas.
+	 *
+	 * @return     {Canvas}  The canvas.
+	 */
+	getCanvas: function() {
+		return this.canvas;
 	}
 });
 
