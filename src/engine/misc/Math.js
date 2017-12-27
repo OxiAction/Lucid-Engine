@@ -2,7 +2,7 @@
 var Lucid = Lucid || {};
 
 /**
- * Math is a utils collection for the Engine.
+ * Math related util functions.
  *
  * @class      Math (name)
  * @return     {Object}  Returns public methods.
@@ -35,27 +35,29 @@ Lucid.Math = function() {
 		 *
 		 * http://paulbourke.net/geometry/pointlineplane/
 		 *
-		 * Section on website: Intersection point of two line segments in 2 dimensions
+		 * Section on website: Intersection point of two line segments in 2
+		 * dimensions
 		 *
 		 * Notes:
 		 * - The denominators for the equations for ua and ub are the same.
 		 *
-		 * - If the denominator for the equations for ua and ub is 0 then the two
-		 *   lines are parallel.
+		 * - If the denominator for the equations for ua and ub is 0 then the
+		 *   two lines are parallel.
 		 *
-		 * - If the denominator and numerator for the equations for ua and ub are 0
-		 *   then the two lines are coincident.
+		 * - If the denominator and numerator for the equations for ua and ub
+		 *   are 0 then the two lines are coincident.
 		 *
-		 * - The equations apply to lines, if the intersection of line segments is
-		 *   required then it is only necessary to test if ua and ub lie between 0
-		 *   and 1. Whichever one lies within that range then the corresponding line
-		 *   segment contains the intersection point. If both lie within the range
-		 *   of 0 to 1 then the intersection point is within both line segments.
+		 * - The equations apply to lines, if the intersection of line segments
+		 *   is required then it is only necessary to test if ua and ub lie
+		 *   between 0 and 1. Whichever one lies within that range then the
+		 *   corresponding line segment contains the intersection point. If both
+		 *   lie within the range of 0 to 1 then the intersection point is
+		 *   within both line segments.
 		 *
-		 * @param      {Object}  line1   Data Object for line1. Required properties:
-		 *                               startX, startY, endX, endY.
-		 * @param      {Object}  line2   Data Object for line2. Required properties:
-		 *                               startX, startY, endX, endY.
+		 * @param      {Object}  line1   Data Object for line1. Required
+		 *                               properties: startX, startY, endX, endY.
+		 * @param      {Object}  line2   Data Object for line2. Required
+		 *                               properties: startX, startY, endX, endY.
 		 * @return     {Object}  An Object which contains information about the
 		 *                       intersection or null if nothing intersects. If
 		 *                       Object.seg1 and Object.seg2 both are true, the
@@ -80,20 +82,21 @@ Lucid.Math = function() {
 		},
 
 		/**
-		 * Simulates a collision between box1 and box2.
-		 * In case of collision: Returns corrected position data for box1.
+		 * Simulates a (potential) collision between box1 and box2. In case of
+		 * collision: Returns corrected position data for box1.
 		 *
-		 * @param      {Object}  box1    Data Object for box1. Required properties:
-		 *                               x, y, width, height, lastX, lastY. lastX /
-		 *                               lastY are required, to determine the
-		 *                               direction box1 is coming from.
-		 * @param      {Object}  box2    Data Object for box2. Required properties:
-		 *                               x, y, width, height
-		 * @return     {Object}  The collision data Object with properties: x (the
-		 *                       new x-position for box1), y (the new y-position for
-		 *                       box1), collisionX (true if there was x-axis
-		 *                       collision), collisionY (true if there was y-axis
-		 *                       collision)
+		 * @param      {Object}  box1    Data Object for box1. Required
+		 *                               properties: x, y, width, height, lastX,
+		 *                               lastY. lastX / lastY are required, to
+		 *                               determine the direction box1 is coming
+		 *                               from.
+		 * @param      {Object}  box2    Data Object for box2. Required
+		 *                               properties: x, y, width, height
+		 * @return     {Object}  The collision data Object with properties: x
+		 *                       (the new x-position for box1), y (the new
+		 *                       y-position for box1), collisionX (true if there
+		 *                       was x-axis collision), collisionY (true if
+		 *                       there was y-axis collision)
 		 */
 		getCollisionDataBoxVsBox: function(box1, box2) {
 			var x = box1.x;
@@ -135,7 +138,44 @@ Lucid.Math = function() {
 				y: y,
 				collisionX: collisionX,
 				collisionY: collisionY
-			}
+			};
 		},
+
+		/**
+		 * Translates entity x/y to grid based array indices.
+		 *
+		 * @param      {Object}  entity    Data Object for entity. Required
+		 *                                 properties: x, y, width, height.
+		 * @param      {Number}  tileSize  The tile size.
+		 * @return     {Array}   The grid indices.
+		 */
+		getEntityToGridIndices: function(entity, tileSize) {
+			return [Math.floor((entity.x + (entity.width / 2)) / tileSize), Math.floor((entity.y + (entity.height / 2)) / tileSize)];
+		},
+
+		/**
+		 * Translates mouse x/y to grid based array indices.
+		 *
+		 * @param      {Number}  mouseX  The mouse x value.
+		 * @param      {Number}  mouseY  The mouse y value.
+		 * @param      {Map}     map     Map Object.
+		 * @param      {Camera}  camera  Camera Object.
+		 * @return     {Array}   The valid grid indices OR null (e.g. if out of
+		 *                       grid bounds).
+		 */
+		getMouseToGridIndices: function(mouseX, mouseY, map, camera) {
+			var x = Math.floor((mouseX + camera.x) / map.tileSize);
+			var y = Math.floor((mouseY + camera.y) / map.tileSize);
+			
+			// check bounds
+			if (x < 0 ||
+				x > map.cols - 1 ||
+				y < 0 ||
+				y > map.rows - 1) {
+				return null;
+			}
+
+			return [x, y];
+		}
 	}
 }();

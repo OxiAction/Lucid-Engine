@@ -83,9 +83,9 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 		}
 
 		if (this.snapToGrid) {
-			var indices = this.getGridIndices();
-			this.x = Math.round(indices[0] * this.map.tileSize + (this.map.tileSize / 2) - (this.width / 2));
-			this.y = Math.round(indices[1] * this.map.tileSize + (this.map.tileSize / 2) - (this.height / 2));
+			var entityGridIndices = Lucid.Math.getEntityToGridIndices(this, this.map.tileSize);
+			this.x = Math.round(entityGridIndices[0] * this.map.tileSize + (this.map.tileSize / 2) - (this.width / 2));
+			this.y = Math.round(entityGridIndices[1] * this.map.tileSize + (this.map.tileSize / 2) - (this.height / 2));
 		}
 
 		// events for loading the asset
@@ -430,9 +430,14 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 					var data = layerCollision.getData();
 
 					if (data) {
-						var entityGridEntry = this.getGridIndices(newX - updateStepX, newY - updateStepY);
-						var entityGridEntryX = entityGridEntry[0];
-						var entityGridEntryY = entityGridEntry[1];
+						var entityGridIndices = Lucid.Math.getEntityToGridIndices({
+							x: newX - updateStepX,
+							y: newY - updateStepY,
+							width: this.width,
+							height: this.height
+						}, this.map.tileSize);
+						var entityGridIndexX = entityGridIndices[0];
+						var entityGridIndexY = entityGridIndices[1];
 
 						/**
 						 * Adjoining grid entries.
@@ -441,46 +446,46 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 						 */
 						var collidingGridEntries = [];
 
-						if (data[entityGridEntryY]) {
+						if (data[entityGridIndexY]) {
 							// tile left
-							if (data[entityGridEntryY][entityGridEntryX - 1] == 1) {
-								collidingGridEntries.push([entityGridEntryX - 1, entityGridEntryY]);
+							if (data[entityGridIndexY][entityGridIndexX - 1] == 1) {
+								collidingGridEntries.push([entityGridIndexX - 1, entityGridIndexY]);
 							}
 							// tile right
-							if (data[entityGridEntryY][entityGridEntryX + 1] == 1) {
-								collidingGridEntries.push([entityGridEntryX + 1, entityGridEntryY]);
+							if (data[entityGridIndexY][entityGridIndexX + 1] == 1) {
+								collidingGridEntries.push([entityGridIndexX + 1, entityGridIndexY]);
 							}
 						}
 
-						if (data[entityGridEntryY - 1]) {
+						if (data[entityGridIndexY - 1]) {
 							// tile up
-							if (data[entityGridEntryY - 1][entityGridEntryX] == 1) {
-								collidingGridEntries.push([entityGridEntryX, entityGridEntryY - 1]);
+							if (data[entityGridIndexY - 1][entityGridIndexX] == 1) {
+								collidingGridEntries.push([entityGridIndexX, entityGridIndexY - 1]);
 							}
 
 							// tile up-left
-							if (data[entityGridEntryY - 1][entityGridEntryX - 1] == 1) {
-								collidingGridEntries.push([entityGridEntryX - 1, entityGridEntryY - 1]);
+							if (data[entityGridIndexY - 1][entityGridIndexX - 1] == 1) {
+								collidingGridEntries.push([entityGridIndexX - 1, entityGridIndexY - 1]);
 							}
 							// tile up-right
-							if (data[entityGridEntryY - 1][entityGridEntryX + 1] == 1) {
-								collidingGridEntries.push([entityGridEntryX + 1, entityGridEntryY - 1]);
+							if (data[entityGridIndexY - 1][entityGridIndexX + 1] == 1) {
+								collidingGridEntries.push([entityGridIndexX + 1, entityGridIndexY - 1]);
 							}
 						}
 
-						if (data[entityGridEntryY + 1]) {
+						if (data[entityGridIndexY + 1]) {
 							// tile down
-							if (data[entityGridEntryY + 1][entityGridEntryX] == 1) {
-								collidingGridEntries.push([entityGridEntryX, entityGridEntryY + 1]);
+							if (data[entityGridIndexY + 1][entityGridIndexX] == 1) {
+								collidingGridEntries.push([entityGridIndexX, entityGridIndexY + 1]);
 							}
 
 							// tile down-left
-							if (data[entityGridEntryY + 1][entityGridEntryX - 1] == 1) {
-								collidingGridEntries.push([entityGridEntryX - 1, entityGridEntryY + 1]);
+							if (data[entityGridIndexY + 1][entityGridIndexX - 1] == 1) {
+								collidingGridEntries.push([entityGridIndexX - 1, entityGridIndexY + 1]);
 							}
 							// tile down-right
-							if (data[entityGridEntryY + 1][entityGridEntryX + 1] == 1) {
-								collidingGridEntries.push([entityGridEntryX + 1, entityGridEntryY + 1]);
+							if (data[entityGridIndexY + 1][entityGridIndexX + 1] == 1) {
+								collidingGridEntries.push([entityGridIndexX + 1, entityGridIndexY + 1]);
 							}
 						}
 
@@ -654,24 +659,6 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 			this.pathDirectionX = null;
 			this.pathDirectionY = null;
 		}
-	},
-
-	/**
-	 * Translates x/y Numbers to grid (tileSize) array based indices.
-	 *
-	 * @param      {Number}  x       X position.
-	 * @param      {Number}  y       Y position.
-	 * @return     {Array}   The grid indices.
-	 */
-	getGridIndices: function(x, y) {
-		if (x == undefined) {
-			x = this.x;
-		}
-		if (y == undefined) {
-			y = this.y;
-		}
-
-		return [Math.floor((x + (this.width / 2)) / this.map.tileSize), Math.floor((y + (this.height / 2)) / this.map.tileSize)];
 	},
 
 	/**

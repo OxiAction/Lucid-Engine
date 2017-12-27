@@ -30,27 +30,6 @@ Lucid.LayerCollision = Lucid.LayerTileSet.extend({
 	},
 
 	/**
-	 * Gets the grid indices by mouseX and mouseY.
-	 *
-	 * @param      {Number}  mouseX  The mouse x value.
-	 * @param      {Number}  mouseY  The mouse y value.
-	 * @return     {Array}   The valid grid indices OR null (e.g. if out of grid bounds).
-	 */
-	getGridIndicesByMouse: function(mouseX, mouseY) {
-		var x = Math.floor((mouseX + this.camera.x) / this.map.tileSize)
-		var y = Math.floor((mouseY + this.camera.y) / this.map.tileSize)
-		
-		// check bounds
-		if (x < 0 ||
-			x > this.map.cols - 1 ||
-			y < 0 ||
-			y > this.map.rows - 1) {
-			return null;
-		}
-		return [x, y]
-	},
-
-	/**
 	 * Resize method. Usually called when the screen / browser dimensions have
 	 * changed.
 	 *

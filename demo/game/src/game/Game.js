@@ -84,7 +84,7 @@ function Game() {
 			// TODO: if we dont call this NOW its all messed up... needs to be fixed!
 			engine.resize();
 
-// START of pathfinding testing stuff ...
+		// START of pathfinding testing stuff ...
 			
 			// get the layer which is responsible for entities
 			//
@@ -101,10 +101,10 @@ function Game() {
 
 			// check if entityPassant is present
 			if (layerEntities && entityPassant) {
+				// tell the camera to follow entity passant
 				camera.setFollowTarget(entityPassant);
-				// controlGroup.setTarget(entityPassant);
 
-
+				// some key listeners...
 				window.addEventListener("keydown", function(e) {
 					if (e.keyCode == 37) {
 						entityPassant.move(Lucid.BaseEntity.DIR.LEFT, true);
@@ -131,19 +131,23 @@ function Game() {
 
 			// add click event
 			window.addEventListener("click", function(e) {
-				
-				// get grid data from collision layer
-				var collisionData = engine.getLayerCollision().getData();
+				// get layer collision from engine
+				var layerCollision = engine.getLayerCollision();
 
-				// set the collision grid data
+				// get grid data from layer collision
+				var collisionData = layerCollision.getData();
+
+				// set easystars grid to our layer collision data
 				easystar.setGrid(collisionData);
 
 				if (layerEntities && entityPassant) {
-					var clickedGridIndices = engine.getLayerCollision().getGridIndicesByMouse(e.clientX, e.clientY);
-					var entityPassantGridIndices = entityPassant.getGridIndices();
+					// entity passant are our start x / y indices
+					var entityPassantGridIndices = Lucid.Math.getEntityToGridIndices(entityPassant, layerCollision.getMap().tileSize);
+					// clicked are our end x / y indices
+					var clickedGridIndices = Lucid.Math.getMouseToGridIndices(e.clientX, e.clientY, layerCollision.getMap(), layerCollision.getCamera());
 					
 					// check if both "vectors" are valid
-					if (clickedGridIndices && entityPassantGridIndices) {
+					if (entityPassantGridIndices && clickedGridIndices) {
 						Lucid.Utils.log("Game: clicked on tile @ " + clickedGridIndices[0] + "/" + clickedGridIndices[1]);
 
 						// set new path indices
@@ -177,7 +181,7 @@ function Game() {
 				}
 			});
 
-// ... END of pathfinding testing stuff
+		// ... END of pathfinding testing stuff
 			
 		});
 	});
