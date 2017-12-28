@@ -7,14 +7,25 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	x: 0, // current x position
 	y: 0, // current y position
 
+	relativeX: 0, // pre-calculated relative x (anchor: top left)
+	relativeY: 0, // pre-calculated relative y (anchor: top left)
+
+	relativeCenterX: 0, // pre-calculated relative center x (anchor: top left + width / 2)
+	relativeCenterY: 0, // pre-calculated relative center y (anchor: top left + height / 2)
+
+	width: 0, // entity width
+	height: 0, // entity height
+
+	halfWidth: 0, // pre-calculated half width (width / 2)
+	halfHeight: 0, // pre-calculated half height (height / 2)
+
 	sightRadius: 300, // sight radius in pixels
 
 	healthCurrent: 100, // current health
 	healthMin: 0, // minimum health - curent < minimum -> Lucid.Entity.STATE.DEAD
 	healthMax: 100, // maximum health
 
-	width: 0, // entity width
-	height: 0, // entity height
+	
 
 	assetFilePath: null, // full path to an asset
 
@@ -75,6 +86,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 		this.checkSetEngine();
 		this.checkSetCamera();
 
+		this.updateAllCoordinatesAndSizes();
+
 		this.canvas = document.createElement("canvas");
 		this.canvasContext = this.canvas.getContext("2d");
 
@@ -84,8 +97,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 
 		if (this.snapToGrid) {
 			var entityGridIndices = Lucid.Math.getEntityToGridIndices(this, this.map.tileSize);
-			this.x = Math.round(entityGridIndices[0] * this.map.tileSize + (this.map.tileSize / 2) - (this.width / 2));
-			this.y = Math.round(entityGridIndices[1] * this.map.tileSize + (this.map.tileSize / 2) - (this.height / 2));
+			this.x = Math.round(entityGridIndices[0] * this.map.tileSize + (this.map.tileSize / 2) - this.halfWidth);
+			this.y = Math.round(entityGridIndices[1] * this.map.tileSize + (this.map.tileSize / 2) - this.halfHeight);
 		}
 
 		// events for loading the asset
@@ -189,8 +202,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 		var currNode = path[0];
 
 		if (currNode) {
-			var targetX = Math.round(currNode.x * this.map.tileSize + (this.map.tileSize / 2) - (this.width / 2));
-			var targetY = Math.round(currNode.y * this.map.tileSize + (this.map.tileSize / 2) - (this.height / 2));
+			var targetX = Math.round(currNode.x * this.map.tileSize + (this.map.tileSize / 2) - this.halfWidth);
+			var targetY = Math.round(currNode.y * this.map.tileSize + (this.map.tileSize / 2) - this.halfHeight);
 
 			if (targetX < this.x) {
 				this.pathDirectionX = Lucid.BaseEntity.DIR.LEFT;
@@ -211,16 +224,16 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	},
 
 	/**
-	 * { function_description }
+	 * TODO: desc
 	 *
-	 * @param      {number}  delta   The delta
+	 * @param      {Number}  delta   The delta.
 	 */
 	renderUpdate: function(delta) {
 
 		var lastX = this.x;
 		var lastY = this.y;
 
-	// PATH
+	// PATH - handle path related move direction commands (if defined)
 
 		var tileSize = this.map.tileSize;
 
@@ -231,8 +244,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 			} else {
 				var currNode = this.path[0];
 
-				var targetX = Math.round(currNode.x * tileSize + (tileSize / 2) - (this.width / 2));
-				var targetY = Math.round(currNode.y * tileSize + (tileSize / 2) - (this.height / 2));
+				var targetX = Math.round(currNode.x * tileSize + (tileSize / 2) - this.halfWidth);
+				var targetY = Math.round(currNode.y * tileSize + (tileSize / 2) - this.halfHeight);
 
 				var targetXReached = this.pathDirectionX == null ||
 							(this.pathDirectionX == Lucid.BaseEntity.DIR.RIGHT && Math.round(this.x) >= targetX) ||
@@ -293,7 +306,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 			}
 		}
 
-	// MOVEMENT && GRAVITY
+	// MOVEMENT - handling basic movement and acceleration and gravity
 
 		var movementX = false;
 
@@ -557,7 +570,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 				newDir = Lucid.BaseEntity.DIR.UP;
 			}
 
-			// prevent dir "flickering" (fast switches in dir)
+			// prevent too fast direction changes (which results in "flickering" animations)
 
 				if (this.dirTemp != newDir) {
 					clearTimeout(this.dirTimeout);
@@ -575,6 +588,9 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 		} else {
 			this.moved = false;
 		}
+
+		this.setX(newX);
+		this.setY(newY);
 	},
 
 	move: function(dir, move) {
@@ -604,8 +620,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 		}
 
 		var canvasContext = this.canvasContext;
-		var relativeX = Math.floor(this.x - this.camera.x);
-		var relativeY = Math.floor(this.y - this.camera.y);
+		var relativeX = this.relativeX;//Math.floor(this.x - this.camera.x);
+		var relativeY = this.relativeY;//Math.floor(this.y - this.camera.y);
 		canvasContext.drawImage(
 			this.asset,		// specifies the image, canvas, or video element to use
 			this.assetX,	// the x coordinate where to start clipping
@@ -660,6 +676,74 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 			this.pathDirectionY = null;
 		}
 	},
+	
+	/**
+	 * Update stuff like halfWidth, reletativeX, relativeCenterX...
+	 */
+	updateAllCoordinatesAndSizes() {
+		this.setX(this.x);
+		this.setY(this.y);
+		this.setWidth(this.width);
+		this.setHeight(this.height);
+	},
+
+	/**
+	 * Sets the x position.
+	 *
+	 * @param      {Number}  x       New x-position.
+	 */
+	setX(x) {
+		this.x = x;
+		this.updateRelativeX();
+	},
+
+	/**
+	 * Sets the y position.
+	 *
+	 * @param      {Number}  y       New y-position.
+	 */
+	setY(y) {
+		this.y = y;
+		this.updateRelativeY();
+	},
+
+	/**
+	 * Sets the width.
+	 *
+	 * @param      {Number}  width   New width.
+	 */
+	setWidth(width) {
+		this.width = width;
+		this.halfWidth = width / 2;
+		this.updateRelativeX();
+	},
+
+	/**
+	 * Sets the height.
+	 *
+	 * @param      {Number}  height  New height.
+	 */
+	setHeight(height) {
+		this.height = height;
+		this.halfHeight = height / 2;
+		this.updateRelativeY();
+	},
+
+	/**
+	 * Updates the relativeX and relativeCenterX based on x, halfWidth and camera.x.
+	 */
+	updateRelativeX() {
+		this.relativeX = Math.floor(this.x - this.camera.x);
+		this.relativeCenterX = this.relativeX + this.halfWidth; 
+	},
+
+	/**
+	 * Updates the relativeY and relativeCenterY based on y, halfHeight and camera.y.
+	 */
+	updateRelativeY() {
+		this.relativeY = Math.floor(this.y - this.camera.y);
+		this.relativeCenterY = this.relativeY + this.halfHeight; 
+	},
 
 	/**
 	 * Resize method. Usually called when the screen / browser dimensions have
@@ -671,10 +755,6 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	resize: function(config) {
 		this.canvas.width = config.wWidth;
 		this.canvas.height = config.wHeight;
-	},
-
-	collidesWithEntity: function(collidingEntity) {
-
 	},
 
 	/**

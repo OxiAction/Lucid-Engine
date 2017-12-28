@@ -5,6 +5,10 @@ Lucid.Camera = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	x: 0,
 	y: 0,
+	width: 0,
+	height: 0,
+	halfWidth: 0,
+	halfHeight: 0,
 
 	offsetX: 0,
 	offsetY: 0,
@@ -36,8 +40,8 @@ Lucid.Camera = Lucid.BaseComponent.extend({
 	 */
 	renderUpdate: function(delta) {
 		if (this.followTarget) {
-			this.x += Math.floor((this.followTarget.x - this.x - (this.width / 2) + (this.followTarget.width / 2)) * delta);
-			this.y += Math.floor((this.followTarget.y - this.y - (this.height / 2) + (this.followTarget.height / 2)) * delta);
+			this.x += Math.floor((this.followTarget.x - this.x - this.halfWidth + this.followTarget.halfWidth) * delta);
+			this.y += Math.floor((this.followTarget.y - this.y - this.halfHeight + this.followTarget.halfHeight) * delta);
 		}
 	},
 
@@ -63,7 +67,12 @@ Lucid.Camera = Lucid.BaseComponent.extend({
 	 *                               properties wWidth and wHeight.
 	 */
 	resize: function(config) {
-		this.width = config.wWidth;
-		this.height = config.wHeight;
+		var wWidth = config.wWidth;
+		var wHeight = config.wHeight;
+
+		this.width = wWidth;
+		this.height = wHeight;
+		this.halfWidth = wWidth / 2;
+		this.halfHeight = wHeight / 2;
 	}
 });

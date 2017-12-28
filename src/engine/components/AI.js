@@ -4,7 +4,10 @@
 Lucid.AI = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	behavior: null,
-	target: null,
+	originEntity: null, // the entity, this AI is attached to
+	drawData: {
+		entitiesLineOfSight: []
+	},
 
 	// local variables
 	// ...
@@ -27,8 +30,22 @@ Lucid.AI = Lucid.BaseComponent.extend({
 		return true;
 	},
 
-	setTarget: function(target) {
-		this.target = target;
+	/**
+	 * Sets the origin entity.
+	 *
+	 * @param      {Object}  originEntity  The origin entity.
+	 */
+	setOriginEntity: function(originEntity) {
+		this.originEntity = originEntity;
+	},
+
+	/**
+	 * Gets the origin entity.
+	 *
+	 * @return     {Object}  The origin entity..
+	 */
+	getOriginEntity: function() {
+		return this.originEntity;
 	},
 
 	/**
@@ -45,14 +62,62 @@ Lucid.AI = Lucid.BaseComponent.extend({
 	},
 
 	renderUpdate: function(delta) {
-		var target = this.target;
+		var originEntity = this.getOriginEntity();
 		var layerEntities = this.engine.getLayerEntities();
 		var layerCollision = this.engine.getLayerCollision();
 
-		// TODO: this is just quick & dirty
+		if (!originEntity || !layerEntities || !layerCollision) {
+			return;
+		}
+
+		var entities = layerEntities.getEntities();
+
+		var originEntityRelativeCenterX = originEntity.relativeCenterX;
+		var originEntityRelativeCenterY = originEntity.relativeCenterY;
+		var targetEntityRelativeCenterX;
+		var targetEntityRelativeCenterY;
+
+		this.drawData.entitiesLineOfSight = [];
+
+		for (var i = 0; i < entities.length; ++i) {
+			var targetEntity = entities[i];
+			var targetEntityID = targetEntity.getID();;
+
+			if (originEntity != targetEntity) {
+				targetEntityRelativeCenterX = targetEntity.relativeCenterX;
+				targetEntityRelativeCenterY = targetEntity.relativeCenterY;
+
+				var targetEntityInOriginEntitySightRadius = Lucid.Math.getPointInCircle({
+						x: targetEntityRelativeCenterX,
+						y: targetEntityRelativeCenterY
+					}, {
+						x: originEntityRelativeCenterX,
+						y: originEntityRelativeCenterY,
+						radius: originEntity.sightRadius
+					});
+				
+				if (targetEntityInOriginEntitySightRadius) {
+					var collisionDataEntityLineOfSight = this.getCollisionDataEntityLineOfSight(originEntity, targetEntity, layerCollision.getData(), this.map, this.camera);
+
+					if (collisionDataEntityLineOfSight) {
+						targetEntityRelativeCenterX = collisionDataEntityLineOfSight.x;
+						targetEntityRelativeCenterY = collisionDataEntityLineOfSight.y;
+					}
+
+					this.drawData.entitiesLineOfSight.push({
+						x: targetEntityRelativeCenterX,
+						y: targetEntityRelativeCenterY
+					});
+				}
+			}
+		}
+	},
+
+	renderDraw: function(interpolationPercentage) {
+		var originEntity = this.getOriginEntity();
 		var layerAIDebug = this.engine.getLayer("layer-ai-debug");
 
-		if (!target || !layerEntities || !layerCollision || !layerAIDebug) {
+		if (!originEntity || !layerAIDebug) {
 			return;
 		}
 
@@ -63,85 +128,79 @@ Lucid.AI = Lucid.BaseComponent.extend({
 
 		canvasContext.beginPath();
 
-		var entities = layerEntities.getEntities();
+		var originEntityRelativeCenterX = originEntity.relativeCenterX;
+		var originEntityRelativeCenterY = originEntity.relativeCenterY;
 
-		var targetRelativeX = Math.floor(target.x - this.camera.x) + target.width / 2;
-		var targetRelativeY = Math.floor(target.y - this.camera.y) + target.height / 2;
-		var entityRelativeX;
-		var entityRelativeY;
-		var angle;
-		var headlen = 10;
-
-		canvasContext.strokeStyle = "black";
-		canvasContext.arc(targetRelativeX, targetRelativeY, target.sightRadius, 0, 2 * Math.PI, false);
+		
+		canvasContext.arc(originEntityRelativeCenterX, originEntityRelativeCenterY, originEntity.sightRadius, 0, 2 * Math.PI, false);
 		canvasContext.fillStyle = "rgba(255, 255, 255, 0.1)";
 		canvasContext.fill();
 
-		for (var i = 0; i < entities.length; ++i) {
-			var entity = entities[i];
+		if (this.drawData.entitiesLineOfSight.length) {
+			canvasContext.strokeStyle = "red";
+		} else {
+			canvasContext.strokeStyle = "black";
+		}
+		
+		for (var i = 0; i < this.drawData.entitiesLineOfSight.length; ++i) {
+			var entityLineOfSight = this.drawData.entitiesLineOfSight[i];
+			var entityLineOfSightX = entityLineOfSight.x;
+			var entityLineOfSightY = entityLineOfSight.y;
 
-			if (target != entity) {
-				entityRelativeX = Math.floor(entity.x - this.camera.x) + entity.width / 2;
-				entityRelativeY = Math.floor(entity.y - this.camera.y) + entity.height / 2;
+			canvasContext.moveTo(originEntityRelativeCenterX, originEntityRelativeCenterY);
+			canvasContext.lineTo(entityLineOfSightX, entityLineOfSightY);
 
-				var entityInTargetSightRadius = Lucid.Math.getPointInCircle({
-						x: entityRelativeX,
-						y: entityRelativeY
-					}, {
-						x: targetRelativeX,
-						y: targetRelativeY,
-						radius: target.sightRadius
-					});
-				
-				if (entityInTargetSightRadius) {
-					
-					// var offset = Math.max(entity.width / 2, entity.height / 2);
-					angle = Math.atan2(entityRelativeY - targetRelativeY, entityRelativeX - targetRelativeX);
-
-					canvasContext.strokeStyle = "red";
-					canvasContext.moveTo(targetRelativeX, targetRelativeY);
-
-					var collisionPoint = this.getCollisionPoint(target.x + (target.width / 2),
-																target.y + (target.height / 2), 
-																target.sightRadius, 
-																{x: targetRelativeX, y: targetRelativeY}, 
-																{x: entityRelativeX, y: entityRelativeY});
-					if (collisionPoint) {
-						entityRelativeX = collisionPoint.x;
-						entityRelativeY = collisionPoint.y;
-					}
-					
-					canvasContext.lineTo(entityRelativeX, entityRelativeY);
-					canvasContext.lineTo(entityRelativeX - headlen * Math.cos(angle - Math.PI/6), entityRelativeY - headlen * Math.sin(angle - Math.PI/6));
-					canvasContext.moveTo(entityRelativeX, entityRelativeY);
-					canvasContext.lineTo(entityRelativeX - headlen * Math.cos(angle + Math.PI/6), entityRelativeY - headlen * Math.sin(angle + Math.PI/6));
-				}
-			}
+			// draw arrow
+			var lineOfSightAngle = Math.atan2(entityLineOfSightY - originEntityRelativeCenterY, entityLineOfSightX - originEntityRelativeCenterX);
+			canvasContext.lineTo(entityLineOfSightX - 20 * Math.cos(lineOfSightAngle - Math.PI / 6), entityLineOfSightY - 20 * Math.sin(lineOfSightAngle - Math.PI / 6));
+			canvasContext.moveTo(entityLineOfSightX, entityLineOfSightY);
+			canvasContext.lineTo(entityLineOfSightX - 20 * Math.cos(lineOfSightAngle + Math.PI / 6), entityLineOfSightY - 20 * Math.sin(lineOfSightAngle + Math.PI / 6));
 		}
 
 		canvasContext.stroke();
 	},
 
-	getCollisionPoint: function(x, y, radius, targetVector, entityVector) {
-		var tileSize = this.map.tileSize;
+	/**
+	 * If targetEntity is in line-of-sight of originEntity returns null.
+	 * Otherwise returns the line-of-sight collision x/y.
+	 *
+	 * @param      {Object}  originEntity   The origin entity.
+	 * @param      {Object}  targetEntity   The target entity.
+	 * @param      {Array}   collisionData  The collision data (2D-Array data -
+	 *                                      1 values mean colliding).
+	 * @param      {Map}     map            Map Object.
+	 * @param      {Camera}  camera         Camera Object.
+	 * @return     {Object}  Returns the line-of-sight collision x/y OR null if
+	 *                       targetEntity is in line-of-sight.
+	 */
+	getCollisionDataEntityLineOfSight: function(originEntity, targetEntity, collisionData, map, camera) {
+		var tileSize = map.tileSize;
 
-		var originCellX = Math.floor(x / tileSize);
-		var originCellY = Math.floor(y / tileSize);
-		var radiusInCells = Math.round(radius / tileSize);
+		var originEntityGridIndices = Lucid.Math.getEntityToGridIndices(originEntity, tileSize);
 
-		var data = this.engine.getLayerCollision().getData();
+		var originEntityGridIndexX = originEntityGridIndices[0];
+		var originEntityGridIndexY = originEntityGridIndices[1];
 
-		for (var i = originCellY - radiusInCells; i < originCellY + radiusInCells; ++i) {
-			if (data[i]) {
-				for (var j = originCellX - radiusInCells; j < originCellX + radiusInCells; ++j) {
-					var cell = data[i][j];
+		var radiusInCells = Math.round(originEntity.sightRadius / tileSize);
+
+		var line1 = {
+			startX: originEntity.relativeCenterX,
+			startY: originEntity.relativeCenterY,
+			endX: targetEntity.relativeCenterX,
+			endY: targetEntity.relativeCenterY
+		};
+
+		for (var i = originEntityGridIndexY - radiusInCells; i < originEntityGridIndexY + radiusInCells; ++i) {
+			if (collisionData != undefined && collisionData[i]) {
+				for (var j = originEntityGridIndexX - radiusInCells; j < originEntityGridIndexX + radiusInCells; ++j) {
+					var cell = collisionData[i][j];
 					if (cell && cell == 1) {
-						var offsetX = j * tileSize - this.camera.x;
-						var offsetY = i * tileSize - this.camera.y;
+						var offsetX = j * tileSize - camera.x;
+						var offsetY = i * tileSize - camera.y;
 
 						var cellSides = [];
 
-						if (targetVector.x < entityVector.x) {
+						if (originEntity.relativeCenterX < targetEntity.relativeCenterX) {
 							// left side of the cell
 							cellSides.push({
 								startX: offsetX,
@@ -159,7 +218,7 @@ Lucid.AI = Lucid.BaseComponent.extend({
 							});
 						}
 
-						if (targetVector.y < entityVector.y) {
+						if (originEntity.relativeCenterY < targetEntity.relativeCenterY) {
 							// top side of the cell
 							cellSides.push({
 								startX: offsetX,
@@ -179,17 +238,12 @@ Lucid.AI = Lucid.BaseComponent.extend({
 
 						for (var k = 0; k < cellSides.length; ++k) {
 							var cellSide = cellSides[k];
-							var collisionData = Lucid.Math.getCollisionDataLineVsLine({
-								startX: targetVector.x,
-								startY: targetVector.y,
-								endX: entityVector.x,
-								endY: entityVector.y
-							}, cellSide);
+							var collisionDataLineVsLine = Lucid.Math.getCollisionDataLineVsLine(line1, cellSide);
 
-							if (collisionData && collisionData.seg1 && collisionData.seg2) {
+							if (collisionDataLineVsLine && collisionDataLineVsLine.seg1 && collisionDataLineVsLine.seg2) {
 								return {
-									x: collisionData.x,
-									y: collisionData.y
+									x: collisionDataLineVsLine.x,
+									y: collisionDataLineVsLine.y
 								}
 							}
 						}

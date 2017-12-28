@@ -24,7 +24,7 @@ var EntityFighter = Lucid.BaseEntity.extend({
 		this.updateAnim();
 
 		var ai = new Lucid.AI({
-			target: this,
+			originEntity: this,
 			behavior: {
 				type: Lucid.AI.BEHAVIOR.TYPE.HOLD,
 				data: {
@@ -64,12 +64,12 @@ var EntityFighter = Lucid.BaseEntity.extend({
 	},
 
 	renderUpdate: function(delta) {
+		this._super(delta);
+
 		for (var i = 0; i < this.ais.length; ++i) {
 			var ai = this.ais[i];
 			ai.renderUpdate(delta);
 		}
-
-		this._super(delta);
 	},
 
 	renderDraw: function(interpolationPercentage) {
@@ -91,6 +91,11 @@ var EntityFighter = Lucid.BaseEntity.extend({
 		}
 
 		this._super(interpolationPercentage);
+
+		for (var i = 0; i < this.ais.length; ++i) {
+			var ai = this.ais[i];
+			ai.renderDraw(interpolationPercentage);
+		}
 	},
 
 	destroy: function() {

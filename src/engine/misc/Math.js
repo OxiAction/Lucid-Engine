@@ -150,7 +150,7 @@ Lucid.Math = function() {
 		 * @return     {Array}   The grid indices.
 		 */
 		getEntityToGridIndices: function(entity, tileSize) {
-			return [Math.floor((entity.x + (entity.width / 2)) / tileSize), Math.floor((entity.y + (entity.height / 2)) / tileSize)];
+			return [Math.floor((entity.x + entity.halfWidth) / tileSize), Math.floor((entity.y + entity.halfHeight) / tileSize)];
 		},
 
 		/**

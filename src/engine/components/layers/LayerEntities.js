@@ -87,7 +87,16 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 	 *                               simulate in the update.
 	 */
 	renderUpdate: function(delta) {
-		for (var i = 0; i < this.entities.length; ++i) {
+		var i = 0;
+		var length = this.entities.length;
+
+		// pre calculate all coordinates and sizes
+		for (i = 0; i < length; ++i) {
+			this.entities[i].updateAllCoordinatesAndSizes();
+		}
+
+		// normal render update
+		for (i = 0; i < length; ++i) {
 			this.entities[i].renderUpdate(delta);
 		}
 	},
