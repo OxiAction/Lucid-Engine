@@ -446,8 +446,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 						var entityGridIndices = Lucid.Math.getEntityToGridIndices({
 							x: newX - updateStepX,
 							y: newY - updateStepY,
-							width: this.width,
-							height: this.height
+							halfWidth: this.halfWidth,
+							halfHeight: this.halfHeight
 						}, this.map.tileSize);
 						var entityGridIndexX = entityGridIndices[0];
 						var entityGridIndexY = entityGridIndices[1];
@@ -582,9 +582,6 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 				}.bind(this), 50);
 
 			// end "flickering" fix
-
-			this.x = newX;
-			this.y = newY;
 		} else {
 			this.moved = false;
 		}

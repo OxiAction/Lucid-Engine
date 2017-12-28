@@ -145,7 +145,7 @@ Lucid.Math = function() {
 		 * Translates entity x/y to grid based array indices.
 		 *
 		 * @param      {Object}  entity    Data Object for entity. Required
-		 *                                 properties: x, y, width, height.
+		 *                                 properties: x, y, halfWidth, halfHeight.
 		 * @param      {Number}  tileSize  The tile size.
 		 * @return     {Array}   The grid indices.
 		 */
