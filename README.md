@@ -28,10 +28,15 @@ The following covers the structured project tasks. Every task is followed by the
 * collision implementation - **medium**
 * A* pathfinding implementation - **medium**
 
+#### Milestones Metting 3 (no meeting yet)
+
+* entities physics **medium**
+* AI implementation part: "line-of-sight" **medium**
+
 ### Open tasks (**critical**):
 
 * AI implementation (new since Milestone 1 - this and A* pathfinding are now two seperate tasks! A* pathfinding is done already) - **in progress** - **hard**
-* items implementation (new since Milestone 1) - **easy**
+* events implementation (new since Milestone 2) - **medium**
 * a final (basic) game based on the engine - **medium**
 * basic editor and its forms - **hard**
 

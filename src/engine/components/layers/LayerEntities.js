@@ -75,7 +75,7 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 			}
 		}
 
-		Lucid.Utils.log("LayerEntities @ addEntity: entity with id " + id + " doesnt exist!");
+		Lucid.Utils.log("LayerEntities @ removeEntity: entity with id " + id + " doesnt exist!");
 	},
 
 	/**
@@ -88,15 +88,14 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 	 */
 	renderUpdate: function(delta) {
 		var i = 0;
-		var length = this.entities.length;
-
+		
 		// pre calculate all coordinates and sizes
-		for (i = 0; i < length; ++i) {
+		for (i = 0; i < this.entities.length; ++i) {
 			this.entities[i].updateAllCoordinatesAndSizes();
 		}
 
 		// normal render update
-		for (i = 0; i < length; ++i) {
+		for (i = 0; i < this.entities.length; ++i) {
 			this.entities[i].renderUpdate(delta);
 		}
 	},

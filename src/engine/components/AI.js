@@ -79,9 +79,13 @@ Lucid.AI = Lucid.BaseComponent.extend({
 
 		this.drawData.entitiesLineOfSight = [];
 
+
+		var targetEntity;
+		var entitiesInLineOfSight = [];
+
 		for (var i = 0; i < entities.length; ++i) {
-			var targetEntity = entities[i];
-			var targetEntityID = targetEntity.getID();;
+			targetEntity = entities[i];
+
 
 			if (originEntity != targetEntity) {
 				targetEntityRelativeCenterX = targetEntity.relativeCenterX;
@@ -99,9 +103,15 @@ Lucid.AI = Lucid.BaseComponent.extend({
 				if (targetEntityInOriginEntitySightRadius) {
 					var collisionDataEntityLineOfSight = this.getCollisionDataEntityLineOfSight(originEntity, targetEntity, layerCollision.getData(), this.map, this.camera);
 
+					// NOT in line-of-sight
 					if (collisionDataEntityLineOfSight) {
 						targetEntityRelativeCenterX = collisionDataEntityLineOfSight.x;
 						targetEntityRelativeCenterY = collisionDataEntityLineOfSight.y;
+					}
+					// IS in line-of-sight
+					else {
+						// collect all entities in line-of-sight
+						entitiesInLineOfSight.push(targetEntity);
 					}
 
 					this.drawData.entitiesLineOfSight.push({
@@ -111,6 +121,26 @@ Lucid.AI = Lucid.BaseComponent.extend({
 				}
 			}
 		}
+
+		// sort entities by distance to origin - the first element will be the closest one!
+		// simple pythagorean theorem:
+		entitiesInLineOfSight.sort(function(entity1, entity2) {
+			var x = entity1.relativeCenterX - originEntityRelativeCenterX;
+			var y = entity1.relativeCenterY - originEntityRelativeCenterY;
+			var entity1DistanceToOrigin = Math.sqrt(x * x + y * y);
+
+			x = entity2.relativeCenterX - originEntityRelativeCenterX;
+			y = entity2.relativeCenterY - originEntityRelativeCenterY;
+			var entity2DistanceToOrigin = Math.sqrt(x * x + y * y);
+
+			return entity1DistanceToOrigin - entity2DistanceToOrigin;
+		});
+
+		/*
+		if (entitiesInLineOfSight && entitiesInLineOfSight[0]) {
+			console.log(entitiesInLineOfSight[0].getID());
+		}
+		*/
 	},
 
 	renderDraw: function(interpolationPercentage) {

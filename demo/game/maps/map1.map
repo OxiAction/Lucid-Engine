@@ -66,7 +66,9 @@ Lucid.data.maps.map1 = {
 							y: 100,
 							colliding: 1,
 							render: 1,
-							snapToGrid: 1
+							snapToGrid: 1,
+							team: 1,
+							type: Lucid.BaseEntity.TYPE.UNIT
 						},
 
 						{
@@ -76,7 +78,9 @@ Lucid.data.maps.map1 = {
 							y: 400,
 							colliding: 1,
 							render: 1,
-							snapToGrid: 1
+							snapToGrid: 1,
+							team: 2,
+							type: Lucid.BaseEntity.TYPE.UNIT
 						},
 
 						{
@@ -86,7 +90,9 @@ Lucid.data.maps.map1 = {
 							y: 570,
 							colliding: 1,
 							render: 1,
-							snapToGrid: 1
+							snapToGrid: 1,
+							team: 0,
+							type: Lucid.BaseEntity.TYPE.ITEM
 						}
 					]
 				}

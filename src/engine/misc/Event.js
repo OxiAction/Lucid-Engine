@@ -30,7 +30,9 @@ Lucid.Event = function() {
 
 	return {
 		bind: function(eventName, callback) {
-			events[eventName] = events[eventName] || [];
+			if (!events[eventName]) {
+				events[eventName] = [];
+			}
 			events[eventName].push(callback);
 		},
 
@@ -39,9 +41,13 @@ Lucid.Event = function() {
 				return;
 			}
 
-			for (var i = 0; i < events[eventName].length; ++i) {
-				if (events[eventName][i].toString() == callback.toString()) {
-					events[eventName].splice(i, 1);
+			if (callback == undefined) {
+				events[eventName] = null;
+			} else {
+				for (var i = 0; i < events[eventName].length; ++i) {
+					if (events[eventName][i].toString() == callback.toString()) {
+						events[eventName].splice(i, 1);
+					}
 				}
 			}
 

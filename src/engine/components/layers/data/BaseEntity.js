@@ -25,8 +25,6 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	healthMin: 0, // minimum health - curent < minimum -> Lucid.Entity.STATE.DEAD
 	healthMax: 100, // maximum health
 
-	
-
 	assetFilePath: null, // full path to an asset
 
 	assetX: 0, // asset position X
@@ -39,6 +37,9 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	colliding: true, // does it collide with collisionData?
 	skipFirstPathSegment: true, // splices first path segment -> smoother animations
 	snapToGrid: true, // snaps the entity to the center of the nearest grid tile
+
+	team: null,
+	type: null,
 
 	// local variables
 	asset: null, // the loaded image for layers
@@ -805,4 +806,9 @@ Lucid.BaseEntity.DIR = {
 	LEFT: "left",
 	UP: "up",
 	DOWN: "down"
+};
+
+Lucid.BaseEntity.TYPE = {
+	UNIT: "unit",
+	ITEM: "item"
 };
