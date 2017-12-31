@@ -52,6 +52,7 @@ Lucid.Input = function() {
 				Lucid.Utils.error("Lucid.Input @ init: undefined target parameter!");
 				return false;
 			}
+			
 			target.addEventListener("mousedown", keyDown);
 			target.addEventListener("touchstart", keyDown);
 			window.addEventListener("keydown", keyDown);
