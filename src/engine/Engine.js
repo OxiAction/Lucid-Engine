@@ -659,6 +659,8 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 				return false;
 			}
 			this.layerCollision = layer;
+
+			Lucid.Pathfinding.setGrid(layer.getData());
 		}
 		// check for LayerEntities
 		else if (layer.type == Lucid.BaseLayer.TYPE.ENTITIES) {

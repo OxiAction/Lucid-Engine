@@ -68,6 +68,7 @@ var EntityPassant = Lucid.BaseEntity.extend({
 
 	collision(eventName, originEntity, item, collisionData) {
 		if (item.componentName == "EntityPotion" && originEntity == this) {
+			console.log(collisionData);
 			var layerEntities = this.engine.getLayerEntities();
 			if (layerEntities) {
 				layerEntities.removeEntity(item.getID());

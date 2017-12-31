@@ -430,7 +430,13 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 
 								// trigger collision event
 								if (collisionX || collisionY) {
-									Lucid.Event.trigger(Lucid.BaseEntity.EVENT.COLLISION, entity, collisionData);
+									Lucid.Event.trigger(Lucid.BaseEntity.EVENT.COLLISION, this, entity, collisionData);
+
+									if (collisionX) {
+										this.gravityXAccelerationStep = 0;
+									} else {
+										this.gravityXAccelerationStep = 0;
+									}
 								}
 							}
 						}
@@ -529,7 +535,13 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 
 							// trigger collision event
 							if (collisionX || collisionY) {
-								Lucid.Event.trigger(Lucid.BaseEntity.EVENT.COLLISION, collidingGridEntry, collisionData);
+								Lucid.Event.trigger(Lucid.BaseEntity.EVENT.COLLISION, this, collidingGridEntry, collisionData);
+
+								if (collisionX) {
+									this.gravityXAccelerationStep = 0;
+								} else {
+									this.gravityXAccelerationStep = 0;
+								}
 							}
 						}
 					}
@@ -538,18 +550,6 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 			} // end for (updateSteps)
 
 		} // end if (this.colliding)
-
-	// GRAVITY
-
-		// check if we had collision on x-axis - if so: reset gravity x acceleration!
-		if (collisionX) {
-			this.gravityXAccelerationStep = 0;
-		}
-
-		// check if we had collision on y-axis - if so: reset gravity y acceleration!
-		if (collisionY) {
-			this.gravityYAccelerationStep = 0;
-		}
 
 	// UPDATE X / Y
 
