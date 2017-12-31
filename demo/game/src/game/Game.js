@@ -62,12 +62,6 @@ function Game() {
 	// load the map file into DOM
 	engine.loadMapFile("map1");
 
-	// initialize and config EasyStar.js
-	var easystar = new EasyStar.js();
-	easystar.enableDiagonals();			// this should be fine and makes animation a bit smoother
-	easystar.disableCornerCutting(); 	// we dont want to bug through objects!
-	easystar.setAcceptableTiles([0]); 	// use zero values in the array as valid (walkable) tiles
-
 	// event is triggered if Engine has loaded the map file
 	Lucid.Event.bind(Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS + namespace, function(eventName, loaderItem) {
 		var mapFileName = loaderItem.getID();
@@ -87,12 +81,6 @@ function Game() {
 		// START of pathfinding testing stuff ...
 			
 			// get the layer which is responsible for entities
-			//
-			// we could just get it by id: var layerEntities =
-			// engine.getLayer("layer-entities");
-			//
-			// but as there can only be ONE layer which is responsible for
-			// entities, we can simply use:
 			var layerEntities = engine.getLayerEntities();
 
 			// get entity with id "passant1" from entities layer
@@ -134,12 +122,6 @@ function Game() {
 				// get layer collision from engine
 				var layerCollision = engine.getLayerCollision();
 
-				// get grid data from layer collision
-				var collisionData = layerCollision.getData();
-
-				// set easystars grid to our layer collision data
-				easystar.setGrid(collisionData);
-
 				if (layerEntities && entityPassant) {
 					// entity passant are our start x / y indices
 					var entityPassantGridIndices = Lucid.Math.getEntityToGridIndices(entityPassant, layerCollision.getMap().tileSize);
@@ -152,14 +134,14 @@ function Game() {
 
 						// set new path indices
 						// params: startX, startY, endX, endY, callback
-						easystar.findPath(entityPassantGridIndices[0], entityPassantGridIndices[1], clickedGridIndices[0], clickedGridIndices[1], function(path) {
+						Lucid.Pathfinding.findPath(entityPassantGridIndices[0], entityPassantGridIndices[1], clickedGridIndices[0], clickedGridIndices[1], function(path) {
 							if (!path) {
 								Lucid.Utils.log("Game: path was not found");
 							} else if (path.length) {
 								Lucid.Utils.log("Game: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
 							} 
 							// case: entityGridIndices are the same as clickedGridIndices
-							// this means there is no easystar path.
+							// this means there is no path.
 							else {
 								path.push({
 									x: entityPassantGridIndices[0],
@@ -176,7 +158,7 @@ function Game() {
 						});
 
 						// after setting a path, we need to run calculate()
-						easystar.calculate();
+						Lucid.Pathfinding.calculate();
 					}
 				}
 			});

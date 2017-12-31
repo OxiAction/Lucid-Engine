@@ -15,6 +15,7 @@ var EntityFighter = Lucid.BaseEntity.extend({
 		this.componentName = "EntityFighter";
 		this.width = 32;
 		this.height = 48;
+		this.speed = 5;
 		this.sightRadius = 400;
 		this.assetFilePath = "assets/entity_fighter.png";
 		

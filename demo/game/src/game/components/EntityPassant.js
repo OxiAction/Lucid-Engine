@@ -63,13 +63,11 @@ var EntityPassant = Lucid.BaseEntity.extend({
 	},
 
 	renderDraw: function(interpolationPercentage) {
-		
-
 		this._super(interpolationPercentage);
 	},
 
-	collision(eventName, item, collisionData) {
-		if (item.componentName == "EntityPotion") {
+	collision(eventName, originEntity, item, collisionData) {
+		if (item.componentName == "EntityPotion" && originEntity == this) {
 			var layerEntities = this.engine.getLayerEntities();
 			if (layerEntities) {
 				layerEntities.removeEntity(item.getID());
