@@ -198,24 +198,15 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	},
 
 	/**
-	 * The renderUpdate() function should simulate anything that is affected by time.
-	 * It can be called zero or more times per frame depending on the frame
-	 * rate.
+	 * The renderUpdate() function should simulate anything that is affected by
+	 * time. It can be called zero or more times per frame depending on the
+	 * frame rate.
 	 *
 	 * @param      {Number}  delta   The amount of time in milliseconds to
 	 *                               simulate in the update.
 	 */
 	renderUpdate: function(delta) {
 		var i;
-
-		/**
-		 * ControlGroup(s)
-		 */
-
-		// for (var i = 0; i < this.controlGroups.length; ++i) {
-		// 	var controlGroup = this.controlGroups[i];
-		// 	controlGroup.renderUpdate(delta);
-		// }
 
 		/**
 		 * Camera
@@ -252,8 +243,9 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	 *                                                simulated yet, divided by
 	 *                                                the amount of time that
 	 *                                                will be simulated the next
-	 *                                                time renderUpdate() runs. Useful
-	 *                                                for interpolating frames.
+	 *                                                time renderUpdate() runs.
+	 *                                                Useful for interpolating
+	 *                                                frames.
 	 */
 	renderDraw: function(interpolationPercentage) {
 		var engineCanvasContext = this.canvasContext;

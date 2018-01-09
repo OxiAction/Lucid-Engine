@@ -173,7 +173,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 					// no need for layer.destroy here - because the Engine will take care of this!
 					this.engine.removeLayer(layer.config.id);
 				} else {
-					Lucid.Utils.error("Map name: " + this.name + " - tried to remove Layer from Engine but Layer config or Layer id is undefined!");
+					Lucid.Utils.error("Map @ destroy: map name: " + this.name + " - tried to remove Layer from Engine but Layer config or Layer id is undefined!");
 				}
 			}
 		}

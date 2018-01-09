@@ -24,22 +24,24 @@ Lucid.Input = function() {
 		if (!validTagName(event.target.tagName)) {
 			return;
 		}
-		console.log("Lucid.Input @ keyDown: event " + event);
+
+		Lucid.Utils.log("Lucid.Input @ keyDown: event " + event);
 	}
 
 	function keyUp(event) {
 		if (!validTagName(event.target.tagName)) {
 			return;
 		}
-		console.log("Lucid.Input @ keyUp: event " + event);
+
+		Lucid.Utils.log("Lucid.Input @ keyUp: event " + event);
 	}
 
 	function mouseWheel(event) {
-		console.log("Lucid.Input @ mouseWheel: event " + event);
+		Lucid.Utils.log("Lucid.Input @ mouseWheel: event " + event);
 	}
 
 	function mouseMove(event) {
-		console.log("Lucid.Input @ mouseWheel: event " + event);
+		Lucid.Utils.log("Lucid.Input @ mouseWheel: event " + event);
 	}
 
 /**

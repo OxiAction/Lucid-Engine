@@ -47,15 +47,15 @@ Lucid.Camera = Lucid.BaseComponent.extend({
 
 	/**
 	 * Tells the Camera to follow a certain object.
-	 * Important: The object requires x / y / width / height properties.
+	 * Important: The object requires x / y / halfWidth / halfHeight properties.
 	 *
 	 * @param      {Object}  object  The object
 	 */
 	setFollowTarget: function(followTarget) {
-		if ("x" in followTarget && "y" in followTarget && "width" in followTarget && "height" in followTarget) {
+		if ("x" in followTarget && "y" in followTarget && "halfWidth" in followTarget && "halfHeight" in followTarget) {
 			this.followTarget = followTarget;
 		} else {
-			Lucid.Utils.error("Camera @ setFollowObject: the target object doesnt have proper properties - x, y, width, height are required!");
+			Lucid.Utils.error("Camera @ setFollowObject: the target object doesnt have proper properties - x, y, halfWidth, halfHeight are required!");
 		}
 	},
 

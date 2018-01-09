@@ -79,9 +79,9 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 	},
 
 	/**
-	 * The renderUpdate() function should simulate anything that is affected by time.
-	 * It can be called zero or more times per frame depending on the frame
-	 * rate.
+	 * The renderUpdate() function should simulate anything that is affected by
+	 * time. It can be called zero or more times per frame depending on the
+	 * frame rate.
 	 *
 	 * @param      {Number}  delta   The amount of time in milliseconds to
 	 *                               simulate in the update.

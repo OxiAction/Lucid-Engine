@@ -50,6 +50,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 
 	moved: false, // required for collision detection
 
+	ai: null, // attached ai
+
 	path: null, // if theres a path array defined the entity will walk node by node
 				// until it reaches the end node of the path
 
@@ -225,9 +227,12 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	},
 
 	/**
-	 * TODO: desc
+	 * The renderUpdate() function should simulate anything that is affected by
+	 * time. It can be called zero or more times per frame depending on the
+	 * frame rate.
 	 *
-	 * @param      {Number}  delta   The delta.
+	 * @param      {Number}  delta   The amount of time in milliseconds to
+	 *                               simulate in the update.
 	 */
 	renderUpdate: function(delta) {
 
@@ -237,13 +242,13 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	// PATH - handle path related move direction commands (if defined)
 
 		var tileSize = this.map.tileSize;
-
-		if (this.path) {
-			if (this.path[0] === undefined) {
+		var path = this.getPath();
+		if (path) {
+			if (path[0] === undefined) {
 				this.path = null;
-				
+				Lucid.Event.trigger(Lucid.BaseEntity.EVENT.REACHED_END_PATH, this);
 			} else {
-				var currNode = this.path[0];
+				var currNode = path[0];
 
 				var targetX = Math.round(currNode.x * tileSize + (tileSize / 2) - this.halfWidth);
 				var targetY = Math.round(currNode.y * tileSize + (tileSize / 2) - this.halfHeight);
@@ -257,16 +262,16 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 							(this.pathDirectionY == Lucid.BaseEntity.DIR.UP && Math.round(this.y) <= targetY);
 
 				if (targetXReached && targetYReached) {
-					this.path.splice(0,1);
+					path.splice(0,1);
 
-					this.setPathDirections(this.path);
+					this.setPathDirections(path);
 					
 					this.moveDirections = {};
 				} else {
 					var currPathOffsetX = this.accelerationX * delta * this.speed / this.accelerationUpStep;
 					var currPathOffsetY = this.accelerationY * delta * this.speed / this.accelerationUpStep;
 
-					var nextNode = this.path[1];
+					var nextNode = path[1];
 
 					if (nextNode) {
 						if (this.moveDirections[Lucid.BaseEntity.DIR.RIGHT] && nextNode.x > currNode.x) {
@@ -589,11 +594,13 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 
 		this.setX(newX);
 		this.setY(newY);
-	},
 
-	move: function(dir, move) {
-		this.setPath(null);
-		this.moveDirections[dir] = move;
+	// HANDLE AI
+
+		var ai = this.getAI();
+		if (ai) {
+			ai.renderUpdate(delta);
+		}
 	},
 
 	/**
@@ -618,19 +625,21 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 		}
 
 		var canvasContext = this.canvasContext;
-		var relativeX = this.relativeX;//Math.floor(this.x - this.camera.x);
-		var relativeY = this.relativeY;//Math.floor(this.y - this.camera.y);
+		var relativeX = this.relativeX;
+		var relativeY = this.relativeY;
+
 		canvasContext.drawImage(
 			this.asset,		// specifies the image, canvas, or video element to use
 			this.assetX,	// the x coordinate where to start clipping
 			this.assetY,	// the y coordinate where to start clipping
 			this.width,		// the width of the clipped image
 			this.height,	// the height of the clipped image
-			relativeX,	// the x coordinate where to place the image on the canvas
-			relativeY,	// the y coordinate where to place the image on the canvas
+			relativeX,		// the x coordinate where to place the image on the canvas
+			relativeY,		// the y coordinate where to place the image on the canvas
 			this.width,		// the width of the image to use (stretch or reduce the image)
 			this.height		// the height of the image to use (stretch or reduce the image)
 		);
+		
 		relativeX += 0.5;
 		relativeY += 0.5;
 		canvasContext.strokeStyle = "red";
@@ -642,6 +651,24 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 		canvasContext.lineTo(relativeX, relativeY + this.height - 1);
 		canvasContext.lineTo(relativeX, relativeY - 0.5);
 		canvasContext.stroke();
+
+		var ai = this.getAI();
+		if (ai) {
+			ai.renderDraw(interpolationPercentage);
+		}
+	},
+
+	/**
+	 * Sets a move state.
+	 *
+	 * @param      {String}   dir     The direction. Use
+	 *                                Lucid.BaseEntity.DIR.XXX.
+	 * @param      {Boolean}  move    Tells whether or not to move in the set
+	 *                                dir.
+	 */
+	setMoveDirection: function(dir, move) {
+		this.setPath(null);
+		this.moveDirections[dir] = move;
 	},
 
 	/**
@@ -657,7 +684,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 * Sets the path. If theres a path array defined the entity will walk node
 	 * by node until it reaches the end node of the path.
 	 *
-	 * @param      {<type>}  path    The new Path or null if you want to cancel current Path.
+	 * @param      {Array}  path    The new Path or null if you want to cancel
+	 *                              current Path.
 	 */
 	setPath: function(path) {
 		if (path) {
@@ -666,12 +694,58 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 			}
 
 			this.setPathDirections(path);
+
+			// path already exists
+			if (this.path) {
+				Lucid.Event.trigger(Lucid.BaseEntity.EVENT.STOP_PATH, this);
+			}
+
 			this.path = path;
+			Lucid.Event.trigger(Lucid.BaseEntity.EVENT.START_PATH, this);
 		} else if (this.path) {
 			this.path = null;
 			this.moveDirections = {};
 			this.pathDirectionX = null;
 			this.pathDirectionY = null;
+			Lucid.Event.trigger(Lucid.BaseEntity.EVENT.STOP_PATH, this);
+		}
+	},
+
+	/**
+	 * Gets the path.
+	 *
+	 * @return     {Array}  The path.
+	 */
+	getPath: function() {
+		return this.path;
+	},
+
+	/**
+	 * Sets the ai.
+	 *
+	 * @param      {AI}  ai      The ai.
+	 */
+	setAI: function(ai) {
+		this.ai = ai;
+	},
+
+	/**
+	 * Gets the ai.
+	 *
+	 * @return     {AI}  The ai.
+	 */
+	getAI: function() {
+		return this.ai;
+	},
+
+	/**
+	 * Removes the ai.
+	 */
+	removeAI: function() {
+		var ai = this.getAI();
+		if (ai) {
+			ai.destroy();
+			ai = null;
 		}
 	},
 	
@@ -764,6 +838,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace);
 		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_ERROR + this.componentNamespace);
 
+		this.removeAI();
+
 		this.loaded = false;
 	}
 });
@@ -784,7 +860,10 @@ Lucid.BaseEntity.EVENT = {
 	LOADED_ASSET_FILE_ERROR: "BaseEntityLoadedAssetFileError",
 	LOADING_SUCCESS: "BaseEntityLoadingSuccess",
 	LOADING_ERROR: "BaseEntityLoadingError",
-	COLLISION: "BaseEntityCollision"
+	COLLISION: "BaseEntityCollision",
+	START_PATH: "BaseEntityStartPath",
+	STOP_PATH: "BaseEntityStopPath",
+	REACHED_END_PATH: "BaseEntityReachedEndPath"
 };
 
 // some states for entities

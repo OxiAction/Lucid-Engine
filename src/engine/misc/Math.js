@@ -176,6 +176,13 @@ Lucid.Math = function() {
 			}
 
 			return [x, y];
+		},
+
+		getDistanceBetweenTwoEntities: function(entity1, entity2) {
+			var x = entity1.relativeCenterX - entity2.relativeCenterX;
+			var y = entity1.relativeCenterY - entity2.relativeCenterY;
+			
+			return Math.sqrt(x * x + y * y);
 		}
 	}
 }();

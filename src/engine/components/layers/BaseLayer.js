@@ -4,10 +4,10 @@
 Lucid.BaseLayer = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	z: 0, // z-index!
-	id: null,
-	type: null,
-	image: null,
-	data: null,
+	id: null, // unique id
+	type: null, // type based on Lucid.BaseLayer.TYPE.XXX
+	image: null, // image data
+	data: null, // grid data
 	effects: null, // effects
 	render: true, // determines if the content is rendered
 	persistent: false, // determines if this layer will be auto deleted by the Engine
@@ -66,9 +66,9 @@ Lucid.BaseLayer = Lucid.BaseComponent.extend({
 	},
 
 	/**
-	 * The renderUpdate() function should simulate anything that is affected by time.
-	 * It can be called zero or more times per frame depending on the frame
-	 * rate.
+	 * The renderUpdate() function should simulate anything that is affected by
+	 * time. It can be called zero or more times per frame depending on the
+	 * frame rate.
 	 *
 	 * @param      {Number}  delta   The amount of time in milliseconds to
 	 *                               simulate in the update.
@@ -128,6 +128,12 @@ Lucid.BaseLayer = Lucid.BaseComponent.extend({
  * Getter & Setter
  */
 
+	/**
+	 * Gets the tile Number inside the grid.
+	 *
+	 * @param      {Number}  index   The index.
+	 * @return     {Number}  The tile.
+	 */
 	getTile: function(index) {
 		if (index < this.data.length) {
 			return this.data[index];
@@ -136,18 +142,38 @@ Lucid.BaseLayer = Lucid.BaseComponent.extend({
 		}
 	},
 
+	/**
+	 * Gets the canvas.
+	 *
+	 * @return     {Object}  The canvas.
+	 */
 	getCanvas: function() {
 		return this.canvas;
 	},
 
+	/**
+	 * Gets the canvas context.
+	 *
+	 * @return     {Object}  The canvas context.
+	 */
 	getCanvasContext: function() {
 		return this.canvasContext;
 	},
 
+	/**
+	 * Gets the grid data.
+	 *
+	 * @return     {Array}  The grid data.
+	 */
 	getData: function() {
 		return this.data;
 	},
 	
+	/**
+	 * Sets the collision data.
+	 *
+	 * @param      {Array}  collisionData  The collision data.
+	 */
 	setCollisionData: function(collisionData) {
 		this.collisionData = collisionData;
 	}

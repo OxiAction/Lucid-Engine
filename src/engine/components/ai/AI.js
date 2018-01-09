@@ -5,9 +5,10 @@ Lucid.AI = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	behavior: null,
 	originEntity: null, // the entity, this AI is attached to
-	drawData: {
-		entitiesLineOfSight: []
-	},
+
+	modules: [],
+	entitiesData: [],
+	layer: null,
 
 	// local variables
 	// ...
@@ -30,6 +31,21 @@ Lucid.AI = Lucid.BaseComponent.extend({
 		return true;
 	},
 
+	addModule: function(module) {
+		module.setAI(this);
+		this.modules.push(module);
+	},
+
+	removeModule: function(module) {
+		module.destroy();
+		this.modules.erase(module);
+		module = null;
+	},
+
+	getModules: function() {
+		return this.modules;
+	},
+
 	/**
 	 * Sets the origin entity.
 	 *
@@ -46,6 +62,22 @@ Lucid.AI = Lucid.BaseComponent.extend({
 	 */
 	getOriginEntity: function() {
 		return this.originEntity;
+	},
+
+	setLayer: function(layer) {
+		this.layer = layer;
+	},
+
+	getLayer: function() {
+		return this.layer;
+	},
+
+	getEntitiesInLineOfSight: function() {
+		return this.entitiesInLineOfSight;
+	},
+
+	getEntitiesData: function() {
+		return this.entitiesData;
 	},
 
 	/**
@@ -77,14 +109,10 @@ Lucid.AI = Lucid.BaseComponent.extend({
 		var targetEntityRelativeCenterX;
 		var targetEntityRelativeCenterY;
 
-		this.drawData.entitiesLineOfSight = [];
-
-
-		var targetEntity;
-		var entitiesInLineOfSight = [];
+		this.entitiesData = [];
 
 		for (var i = 0; i < entities.length; ++i) {
-			targetEntity = entities[i];
+			var targetEntity = entities[i];
 
 
 			if (originEntity != targetEntity) {
@@ -101,114 +129,43 @@ Lucid.AI = Lucid.BaseComponent.extend({
 					});
 				
 				if (targetEntityInOriginEntitySightRadius) {
-					var collisionDataEntityLineOfSight = this.getCollisionDataEntityLineOfSight(originEntity, targetEntity, layerCollision.getData(), this.map, this.camera);
-
-					// NOT in line-of-sight
-					if (collisionDataEntityLineOfSight) {
-						targetEntityRelativeCenterX = collisionDataEntityLineOfSight.x;
-						targetEntityRelativeCenterY = collisionDataEntityLineOfSight.y;
-					}
-					// IS in line-of-sight
-					else {
-						// collect all entities in line-of-sight
-						entitiesInLineOfSight.push(targetEntity);
-					}
-
-					this.drawData.entitiesLineOfSight.push({
-						x: targetEntityRelativeCenterX,
-						y: targetEntityRelativeCenterY
+					this.entitiesData.push({
+						entity: targetEntity,
+						collisionData: this.getCollisionDataEntityLineOfSight(originEntity, targetEntity, layerCollision.getData(), this.map, this.camera)
 					});
 				}
 			}
 		}
 
-		var foundEntityOfAnotherTeam = false;
-
 		// sort entities by distance to origin - the first element will be the closest one!
-		// simple pythagorean theorem:
-		entitiesInLineOfSight.sort(function(entity1, entity2) {
-			var x = entity1.relativeCenterX - originEntityRelativeCenterX;
-			var y = entity1.relativeCenterY - originEntityRelativeCenterY;
-			var entity1DistanceToOrigin = Math.sqrt(x * x + y * y);
-
-			x = entity2.relativeCenterX - originEntityRelativeCenterX;
-			y = entity2.relativeCenterY - originEntityRelativeCenterY;
-			var entity2DistanceToOrigin = Math.sqrt(x * x + y * y);
-
-			return entity1DistanceToOrigin - entity2DistanceToOrigin;
+		this.entitiesData.sort(function(entityData1, entityData2) {
+			return Lucid.Math.getDistanceBetweenTwoEntities(entityData1.entity, originEntity) - Lucid.Math.getDistanceBetweenTwoEntities(entityData2.entity, originEntity);
 		});
 
-		for (i = 0; i < entitiesInLineOfSight.length; ++i) {
-			targetEntity = entitiesInLineOfSight[i];
 
-			// follow!
-			if (targetEntity.type == Lucid.BaseEntity.TYPE.UNIT && targetEntity.team != originEntity.team) {
-				foundEntityOfAnotherTeam = true;
-
-				var originEntityGridIndices = Lucid.Math.getEntityToGridIndices(originEntity, this.map.tileSize);
-				var targetEntityGridIndices = Lucid.Math.getEntityToGridIndices(targetEntity, this.map.tileSize);
-
-				Lucid.Pathfinding.findPath(originEntityGridIndices[0], originEntityGridIndices[1], targetEntityGridIndices[0], targetEntityGridIndices[1], function(path) {
-					if (path) {
-						originEntity.setPath(path);
-					}
-				});
-
-				Lucid.Pathfinding.calculate();
-				break;
-			}
-		}
-
-		if (!foundEntityOfAnotherTeam) {
-			originEntity.setPath(null);
+		for (i = 0; i < this.modules.length; ++i) {
+			this.modules[i].renderUpdate(delta);
 		}
 	},
 
 	renderDraw: function(interpolationPercentage) {
-		var originEntity = this.getOriginEntity();
-		var layerAIDebug = this.engine.getLayer("layer-ai-debug");
+		var layer = this.getLayer();
 
-		if (!originEntity || !layerAIDebug) {
-			return;
+		if (!layer) {
+			layer = this.engine.getLayer("layer-ai-debug");
+			this.setLayer(layer);
 		}
 
-		var canvasContext = layerAIDebug.getCanvasContext();
-		canvasContext.width = this.camera.width;
-		canvasContext.height = this.camera.height;
-		canvasContext.clearRect(0, 0, this.camera.width, this.camera.height);
+		if (layer) {
+			var canvasContext = layer.getCanvasContext();
+			canvasContext.width = this.camera.width;
+			canvasContext.height = this.camera.height;
+			canvasContext.clearRect(0, 0, this.camera.width, this.camera.height);
 
-		canvasContext.beginPath();
-
-		var originEntityRelativeCenterX = originEntity.relativeCenterX;
-		var originEntityRelativeCenterY = originEntity.relativeCenterY;
-
-		
-		canvasContext.arc(originEntityRelativeCenterX, originEntityRelativeCenterY, originEntity.sightRadius, 0, 2 * Math.PI, false);
-		canvasContext.fillStyle = "rgba(255, 255, 255, 0.1)";
-		canvasContext.fill();
-
-		if (this.drawData.entitiesLineOfSight.length) {
-			canvasContext.strokeStyle = "red";
-		} else {
-			canvasContext.strokeStyle = "black";
+			for (var i = 0; i < this.modules.length; ++i) {
+				this.modules[i].renderDraw(interpolationPercentage);
+			}
 		}
-		
-		for (var i = 0; i < this.drawData.entitiesLineOfSight.length; ++i) {
-			var entityLineOfSight = this.drawData.entitiesLineOfSight[i];
-			var entityLineOfSightX = entityLineOfSight.x;
-			var entityLineOfSightY = entityLineOfSight.y;
-
-			canvasContext.moveTo(originEntityRelativeCenterX, originEntityRelativeCenterY);
-			canvasContext.lineTo(entityLineOfSightX, entityLineOfSightY);
-
-			// draw arrow
-			var lineOfSightAngle = Math.atan2(entityLineOfSightY - originEntityRelativeCenterY, entityLineOfSightX - originEntityRelativeCenterX);
-			canvasContext.lineTo(entityLineOfSightX - 20 * Math.cos(lineOfSightAngle - Math.PI / 6), entityLineOfSightY - 20 * Math.sin(lineOfSightAngle - Math.PI / 6));
-			canvasContext.moveTo(entityLineOfSightX, entityLineOfSightY);
-			canvasContext.lineTo(entityLineOfSightX - 20 * Math.cos(lineOfSightAngle + Math.PI / 6), entityLineOfSightY - 20 * Math.sin(lineOfSightAngle + Math.PI / 6));
-		}
-
-		canvasContext.stroke();
 	},
 
 	/**
@@ -307,42 +264,17 @@ Lucid.AI = Lucid.BaseComponent.extend({
 	},
 
 	destroy: function() {
+		var modules = this.getModules();
+		for (var i = 0; i < modules.length; ++i) {
+			var module = modules[i];
+			module.destroy();
+			module = null;
+		}
+
+		modules = null;
+
+		this.entitiesData = null;
+
 		this._super();
 	}
-
-	
 });
-
-// behavior constants
-Lucid.AI.BEHAVIOR = {
-	TYPE: {
-		/**
-		 * follow another Entity
-		 * 
-		 * data = {
-		 * 	target: Entity,			// the target Entity to follow
-		 * 	keepDistance: number	// the distance kept between target and this
-		 * }
-		 */
-		FOLLOW: "follow",
-
-		/**
-		 * randomly patrol a certrain radius using the origin position as center
-		 * 
-		 * data = {
-		 * 	radius: number,		// radius to patrol
-		 * 	allowJump: boolean	// stay on the ground currently attached on or jump on higher / lower grounds too
-		 * }
-		 */
-		PATROL: "patrol",
-
-		/**
-		 * hold origin position
-		 * 
-		 * data = {
-		 * 	moveOnTrigger: boolean	// move when triggered - e.g. when engaging a fight with another Entity - after the fight returns to origin position
-		 * }
-		 */
-		HOLD: "holdPosition"
-	}
-};

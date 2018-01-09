@@ -138,10 +138,10 @@ Lucid.BaseComponent = Class.extend({
 	/**
 	 * Sets the active state.
 	 *
-	 * @param      {Boolean}  value   The value.
+	 * @param      {Boolean}  active  The value.
 	 */
-	setActive: function(value) {
-		this.active = value;
+	setActive: function(active) {
+		this.active = active;
 	},
 
 	/**

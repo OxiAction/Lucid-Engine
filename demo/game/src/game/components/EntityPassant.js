@@ -21,9 +21,49 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		this.animInterval = setInterval(this.updateAnim.bind(this), 500);
 		this.updateAnim();
 
-		Lucid.Event.bind(Lucid.BaseEntity.EVENT.COLLISION + this.componentNamespace, this.collision.bind(this));
+		Lucid.Event.bind(Lucid.BaseEntity.EVENT.COLLISION + this.componentNamespace, this.handleCollision.bind(this));
+		Lucid.Event.bind(Lucid.BaseEntity.EVENT.START_PATH + this.componentNamespace, this.handleStartPath.bind(this));
+		Lucid.Event.bind(Lucid.BaseEntity.EVENT.STOP_PATH + this.componentNamespace, this.handleStopPath.bind(this));
+		Lucid.Event.bind(Lucid.BaseEntity.EVENT.REACHED_END_PATH + this.componentNamespace, this.handleReachedEndPath.bind(this));
 
 		return true;
+	},
+
+	handleCollision(eventName, originEntity, item, collisionData) {
+		if (originEntity != this) {
+			return;
+		}
+
+		if (item.componentName == "EntityPotion") {
+			var layerEntities = this.engine.getLayerEntities();
+			if (layerEntities) {
+				layerEntities.removeEntity(item.getID());
+			}
+		}
+	},
+
+	handleStartPath: function(eventName, originEntity) {
+		if (originEntity != this) {
+			return;
+		}
+
+		Lucid.Utils.log("EntityFighter @ handleStartPath");
+	},
+
+	handleStopPath: function(eventName, originEntity) {
+		if (originEntity != this) {
+			return;
+		}
+
+		Lucid.Utils.log("EntityFighter @ handleStopPath");
+	},
+
+	handleReachedEndPath: function(eventName, originEntity) {
+		if (originEntity != this) {
+			return;
+		}
+		
+		Lucid.Utils.log("EntityFighter @ handleReachedEndPath");
 	},
 
 	updateAnim: function() {
@@ -66,23 +106,16 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		this._super(interpolationPercentage);
 	},
 
-	collision(eventName, originEntity, item, collisionData) {
-		if (item.componentName == "EntityPotion" && originEntity == this) {
-			console.log(collisionData);
-			var layerEntities = this.engine.getLayerEntities();
-			if (layerEntities) {
-				layerEntities.removeEntity(item.getID());
-			}
-		}
-	},
-
 	destroy: function() {
-		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.COLLISION + this.componentNamespace, this.collision.bind(this));
-
 		if (this.animInterval) {
 			clearInterval(this.animInterval);
 			this.animInterval = null;
 		}
+
+		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.COLLISION + this.componentNamespace);
+		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.START_PATH + this.componentNamespace);
+		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.STOP_PATH + this.componentNamespace);
+		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.REACHED_END_PATH + this.componentNamespace);
 
 		this._super();
 	}

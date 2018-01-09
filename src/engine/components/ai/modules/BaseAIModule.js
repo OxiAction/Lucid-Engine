@@ -1,7 +1,9 @@
 /**
- * BaseAIModule.
+ * Basic AI module.
  */
 Lucid.BaseAIModule = Lucid.BaseComponent.extend({
+
+	ai: null, // reference to AI
 
 	/**
 	 * Automatically called when instantiated.
@@ -12,13 +14,20 @@ Lucid.BaseAIModule = Lucid.BaseComponent.extend({
 	init: function(config) {
 		this._super(config);
 
+		this.checkSetMap();
+		this.checkSetCamera();
+		this.checkSetEngine();
+
 		return true;
 	},
 
 	/**
-	 * TODO: desc
+	 * The renderUpdate() function should simulate anything that is affected by
+	 * time. It can be called zero or more times per frame depending on the
+	 * frame rate.
 	 *
-	 * @param      {Number}  delta   The delta.
+	 * @param      {Number}  delta   The amount of time in milliseconds to
+	 *                               simulate in the update.
 	 */
 	renderUpdate: function(delta) {
 	},
@@ -39,6 +48,24 @@ Lucid.BaseAIModule = Lucid.BaseComponent.extend({
 	},
 
 	/**
+	 * Sets the ai.
+	 *
+	 * @param      {AI}  ai      The ai.
+	 */
+	setAI: function(ai) {
+		this.ai = ai;
+	},
+
+	/**
+	 * Gets the ai.
+	 *
+	 * @return     {AI}  The ai.
+	 */
+	getAI: function() {
+		return this.ai;
+	},
+
+	/**
 	 * Resize method. Usually called when the screen / browser dimensions have
 	 * changed.
 	 *
@@ -54,5 +81,6 @@ Lucid.BaseAIModule = Lucid.BaseComponent.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	destroy: function() {
+		this._super();
 	}
 });

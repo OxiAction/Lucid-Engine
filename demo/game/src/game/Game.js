@@ -95,24 +95,25 @@ function Game() {
 				// some key listeners...
 				window.addEventListener("keydown", function(e) {
 					if (e.keyCode == 37) {
-						entityPassant.move(Lucid.BaseEntity.DIR.LEFT, true);
+						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.LEFT, true);
 					} else if (e.keyCode == 39) {
-						entityPassant.move(Lucid.BaseEntity.DIR.RIGHT, true);
+						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.RIGHT, true);
 					} else if (e.keyCode == 40) {
-						entityPassant.move(Lucid.BaseEntity.DIR.DOWN, true);
+						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.DOWN, true);
 					} else if (e.keyCode == 38) {
-						entityPassant.move(Lucid.BaseEntity.DIR.UP, true);
+						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.UP, true);
 					}
 				});
+				
 				window.addEventListener("keyup", function(e) {
 					if (e.keyCode == 37) {
-						entityPassant.move(Lucid.BaseEntity.DIR.LEFT, false);
+						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.LEFT, false);
 					} else if (e.keyCode == 39) {
-						entityPassant.move(Lucid.BaseEntity.DIR.RIGHT, false);
+						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.RIGHT, false);
 					} else if (e.keyCode == 40) {
-						entityPassant.move(Lucid.BaseEntity.DIR.DOWN, false);
+						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.DOWN, false);
 					} else if (e.keyCode == 38) {
-						entityPassant.move(Lucid.BaseEntity.DIR.UP, false);
+						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.UP, false);
 					}
 				});
 			}
