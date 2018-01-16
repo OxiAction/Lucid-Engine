@@ -10,6 +10,7 @@ Important: This may **not** be an up-to-date build (its a seperate **public** re
 2D game engine, written in JavaScript.
 
 ## Open tasks & nice to have:
+* dynamic loading of JavaScript files on demand (require-style)
 * basic editor and its forms
 * animation manager
 * map related events triggering
