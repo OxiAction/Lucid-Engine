@@ -8,7 +8,6 @@ Lucid.AI = Lucid.BaseComponent.extend({
 
 	modules: [],
 	entitiesData: [],
-	layer: null,
 
 	// local variables
 	// ...
@@ -62,14 +61,6 @@ Lucid.AI = Lucid.BaseComponent.extend({
 	 */
 	getOriginEntity: function() {
 		return this.originEntity;
-	},
-
-	setLayer: function(layer) {
-		this.layer = layer;
-	},
-
-	getLayer: function() {
-		return this.layer;
 	},
 
 	getEntitiesInLineOfSight: function() {
@@ -149,22 +140,8 @@ Lucid.AI = Lucid.BaseComponent.extend({
 	},
 
 	renderDraw: function(interpolationPercentage) {
-		var layer = this.getLayer();
-
-		if (!layer) {
-			layer = this.engine.getLayer("layer-ai-debug");
-			this.setLayer(layer);
-		}
-
-		if (layer) {
-			var canvasContext = layer.getCanvasContext();
-			canvasContext.width = this.camera.width;
-			canvasContext.height = this.camera.height;
-			canvasContext.clearRect(0, 0, this.camera.width, this.camera.height);
-
-			for (var i = 0; i < this.modules.length; ++i) {
-				this.modules[i].renderDraw(interpolationPercentage);
-			}
+		for (var i = 0; i < this.modules.length; ++i) {
+			this.modules[i].renderDraw(interpolationPercentage);
 		}
 	},
 
@@ -270,9 +247,7 @@ Lucid.AI = Lucid.BaseComponent.extend({
 			module.destroy();
 			module = null;
 		}
-
 		modules = null;
-
 		this.entitiesData = null;
 
 		this._super();

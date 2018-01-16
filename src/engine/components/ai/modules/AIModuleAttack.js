@@ -84,7 +84,6 @@ Lucid.AIModuleAttack = Lucid.BaseAIModule.extend({
 	 *                                                frames.
 	 */
 	renderDraw: function(interpolationPercentage) {
-		this._super(interpolationPercentage);
 	},
 
 	startAttack: function(originEntity, targetEntity) {

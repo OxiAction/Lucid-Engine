@@ -1,35 +1,33 @@
 /**
- * Engine default BaseEntity. This Component is Layer related and represented by
- * the Layer.data value(s).
+ * Basically, every Object on-screen which has (potential) movement
+ * characteristics, should inherit from the BaseEntity class.
+ *
+ * The core of this class includes:
+ * - physics (gravity, acceleration)
+ * - directional movement handling
+ * - pathfinding movement handling. NOTE: The evaluation of a valid path is NOT
+ *   done here. In this class we will just process the results of the (valid)
+ *   path and convert it into movement
+ * - collision against grid AND other entities
+ *
+ * TODOS:
+ * - advanced physics (like bouncing)
+ * - health management
+ * - dynamic spawning (this is also Map related)
+ * - high speed and pathfinding causes some weird issues
  */
 Lucid.BaseEntity = Lucid.BaseComponent.extend({
-	// config variables and their default values
+// config variables and their default values
+
 	x: 0, // current x position
 	y: 0, // current y position
-
-	relativeX: 0, // pre-calculated relative x (anchor: top left)
-	relativeY: 0, // pre-calculated relative y (anchor: top left)
-
-	relativeCenterX: 0, // pre-calculated relative center x (anchor: top left + width / 2)
-	relativeCenterY: 0, // pre-calculated relative center y (anchor: top left + height / 2)
-
 	width: 0, // entity width
 	height: 0, // entity height
-
-	halfWidth: 0, // pre-calculated half width (width / 2)
-	halfHeight: 0, // pre-calculated half height (height / 2)
-
 	sightRadius: 300, // sight radius in pixels
-
 	healthCurrent: 100, // current health
 	healthMin: 0, // minimum health - curent < minimum -> Lucid.Entity.STATE.DEAD
 	healthMax: 100, // maximum health
-
 	assetFilePath: null, // full path to an asset
-
-	assetX: 0, // asset position X
-	assetY: 0, // asset position Y
-
 	name: "Unknown", // name
 	speed: 1, // movement speed of the entity
 	vulnerable: true, // if set to false entity is immortal (cant loose any health / die)
@@ -37,18 +35,31 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	colliding: true, // does it collide with collisionData?
 	skipFirstPathSegment: true, // splices first path segment -> smoother animations
 	snapToGrid: true, // snaps the entity to the center of the nearest grid tile
+	team: null, // numeric value for teams - same values mean same team
+	type: null, // type of the entity - see Lucid.BaseEntity.TYPE.XXX
+	parentLayer: null, // a reference to the layer this entity is rendered on
 
-	team: null,
-	type: null,
+// local variables
 
-	// local variables
+	relativeX: 0, // pre-calculated relative x (anchor: top left)
+	relativeY: 0, // pre-calculated relative y (anchor: top left)
+	relativeCenterX: 0, // pre-calculated relative center x (anchor: top left + width / 2)
+	relativeCenterY: 0, // pre-calculated relative center y (anchor: top left + height / 2)
+	halfWidth: 0, // pre-calculated half width (width / 2)
+	halfHeight: 0, // pre-calculated half height (height / 2)
+
+	assetX: 0, // asset position X
+	assetY: 0, // asset position Y
 	asset: null, // the loaded image for layers
-	loaded: false, // determines if map has loaded everything
+
+	loaded: false, // determines if the assets have been loaded
 
 	canvas: null,
 	canvasContext: null,
 
 	moved: false, // required for collision detection
+
+	pathByClick: false, // if enabled, you can click and the grid and the entity will walk the path
 
 	ai: null, // attached ai
 
@@ -60,7 +71,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	dirTemp: null, // temp direction holder - this is for the "flickering" bugfix
 	dirTimeout: null, // timeout which sets the dir - this is for the "flickering" bugfix
 
-	moveDirections: {},
+	moveDirections: {}, // mainly used in the renderUpdate function. It determines the
+	                    // current (calculated) directions of the entity.
 
 	gravityXStep: 0, // the gravity force on the x-axis (can be both: negative and positive floats)
 	gravityYStep: 0, // the gravity force on the y-axis (can be both: negative and positive floats)
@@ -235,6 +247,9 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 *                               simulate in the update.
 	 */
 	renderUpdate: function(delta) {
+		if (!this.getActive()) {
+			return;
+		}
 
 		var lastX = this.x;
 		var lastY = this.y;
@@ -640,17 +655,23 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 			this.height		// the height of the image to use (stretch or reduce the image)
 		);
 		
-		relativeX += 0.5;
-		relativeY += 0.5;
-		canvasContext.strokeStyle = "red";
-		canvasContext.lineWidth = 1;
-		canvasContext.beginPath();
-		canvasContext.moveTo(relativeX, relativeY);
-		canvasContext.lineTo(relativeX + this.width - 1, relativeY);
-		canvasContext.lineTo(relativeX + this.width - 1, relativeY + this.height - 1);
-		canvasContext.lineTo(relativeX, relativeY + this.height - 1);
-		canvasContext.lineTo(relativeX, relativeY - 0.5);
-		canvasContext.stroke();
+		if (Lucid.Debug.getEnabled() && Lucid.Debug.getEntityHitBox()) {
+			var layerDebug = Lucid.Debug.getLayerDebug();
+			var layerDebugCanvasContext = layerDebug.getCanvasContext();
+
+			relativeX += 0.5;
+			relativeY += 0.5;
+
+			layerDebugCanvasContext.beginPath();
+			layerDebugCanvasContext.strokeStyle = "red";
+			layerDebugCanvasContext.lineWidth = 1;
+			layerDebugCanvasContext.moveTo(relativeX, relativeY);
+			layerDebugCanvasContext.lineTo(relativeX + this.width - 1, relativeY);
+			layerDebugCanvasContext.lineTo(relativeX + this.width - 1, relativeY + this.height - 1);
+			layerDebugCanvasContext.lineTo(relativeX, relativeY + this.height - 1);
+			layerDebugCanvasContext.lineTo(relativeX, relativeY - 0.5);
+			layerDebugCanvasContext.stroke();
+		}
 
 		var ai = this.getAI();
 		if (ai) {
@@ -718,6 +739,76 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 */
 	getPath: function() {
 		return this.path;
+	},
+
+	/**
+	 * Enable pathfinding by clicking on the grid. This requires the Lucid.Input
+	 * class to be initiated.
+	 *
+	 * @param      {Boolean}  pathByClick  The value
+	 */
+	setPathByClick: function(pathByClick) {
+		// add (only if NOT added yet)
+		if (pathByClick && !this.pathByClick) {
+
+			Lucid.Event.bind(Lucid.Input.EVENTS.KEY_DOWN + this.componentNamespace, function(eventName, code) {
+				// check for mouse left click AND active state
+				if (code == Lucid.Input.KEYS["MOUSE_LEFT"] && this.getActive()) {
+
+					// entity passant are our start x / y indices
+					var entityGridIndices = Lucid.Math.getEntityToGridIndices(this, this.map.tileSize);
+					// clicked are our end x / y indices
+					var inputPosition = Lucid.Input.getPosition();
+					var clickedGridIndices = Lucid.Math.getMouseToGridIndices(inputPosition.x, inputPosition.y, this.map, this.camera);
+					
+					// check if both "vectors" are valid
+					if (entityGridIndices && clickedGridIndices) {
+						Lucid.Utils.log("BaseEntity @ setPathByClick: clicked on tile @ " + clickedGridIndices[0] + "/" + clickedGridIndices[1]);
+
+						// set new path indices
+						// params: startX, startY, endX, endY, callback
+						Lucid.Pathfinding.findPath(entityGridIndices[0], entityGridIndices[1], clickedGridIndices[0], clickedGridIndices[1], function(path) {
+							if (!path) {
+								Lucid.Utils.log("BaseEntity @ setPathByClick: path was not found");
+							} else if (path.length) {
+								Lucid.Utils.log("BaseEntity @ setPathByClick: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
+							} 
+							// case: entityGridIndices are the same as clickedGridIndices
+							// this means there is no path.
+							else {
+								path.push({
+									x: entityGridIndices[0],
+									y: entityGridIndices[1]
+								});
+
+								Lucid.Utils.log("BaseEntity @ setPathByClick: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
+							}
+							
+							// set path (if not null)
+							if (path) {
+								this.setPath(path);
+							}
+						}.bind(this));
+
+						// after setting a path, we need to run calculate()
+						Lucid.Pathfinding.calculate();
+					}
+				}
+			}.bind(this));
+		}
+		// remove (only if ALREADY added)
+		else if (this.pathByClick) {
+			Lucid.Event.unbind(Lucid.Input.EVENTS.KEY_DOWN + this.componentNamespace);
+		}
+
+		this.pathByClick = pathByClick;
+	},
+
+	/**
+	 * Gets the parent layer.
+	 */
+	getParentLayer: function() {
+		return this.parentLayer;
 	},
 
 	/**
@@ -837,6 +928,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	destroy: function() {
 		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace);
 		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.LOADED_ASSET_FILE_ERROR + this.componentNamespace);
+
+		this.setPathByClick(false);
 
 		this.removeAI();
 

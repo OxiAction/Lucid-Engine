@@ -1,8 +1,6 @@
-
-
 document.addEventListener("DOMContentLoaded", function() {
    // setup
-	Lucid.Utils.setDebug(1);
+	Lucid.Utils.setDebug(0);
 
 	// check support
 	if (!Lucid.Utils.engineSupported()) {
@@ -26,153 +24,82 @@ function Game() {
 	// required for event listener removing
 	var namespace = ".Game";
 
-	// engine
-	var engine;
-
-	// custom update function
-	this.update = function() {
-		// call original
-		engine.update();
-
-		// custom code goes here...
-	}
+	// set-up debugging related stuff
+	Lucid.Debug.setEngineFPS(false);
+	Lucid.Debug.setMapTileSizeGrid(false);
+	Lucid.Debug.setEntityHitBox(false);
+	Lucid.Debug.setAISightRadius(false);
+	Lucid.Debug.setAILineOfSight(false);
 
 	// init engine
-	engine = new Lucid.Engine({
-		debugFPS: true,
-		debugPanic: true,
-		debugGrid: true
-	});
-
-	// Lucid.Input.init(engine.getCanvas());
-	
-	// start engine
+	var engine = new Lucid.Engine();
 	engine.start();
+
+	// setup camera
+	var camera = new Lucid.Camera();
+	engine.setCamera(camera);
 
 	// listener for resize event
 	window.addEventListener("resize", engine.resize.bind(engine), false);
 
-	// update all the components initially! mandatory
-	engine.resize();
-	
-	// setup Camera
-	var camera = new Lucid.Camera();
-	engine.setCamera(camera);
+	// setup input manager
+	Lucid.Input.init(engine.getCanvas());
 
-	// load the map file into DOM
-	engine.loadMapFile("map1");
-
-	// event is triggered if Engine has loaded the map file
-	Lucid.Event.bind(Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS + namespace, function(eventName, loaderItem) {
-		var mapFileName = loaderItem.getID();
-		var map = engine.buildMapByFileName(mapFileName);
-		
-		// set the map - this will also start loading the map assets
-		engine.setMap(map);
-
-		// event is triggered if Map has loaded everything
-		Lucid.Event.bind(Lucid.Map.EVENT.LOADING_SUCCESS + namespace, function(eventName, map) {
-			// build the map
-			map.build();
-
-			// TODO: if we dont call this NOW its all messed up... needs to be fixed!
-			engine.resize();
-
-		// START of pathfinding testing stuff ...
-			
-			// get the layer which is responsible for entities
-			var layerEntities = engine.getLayerEntities();
-
-			// get entity with id "passant1" from entities layer
-			var entityPassant = layerEntities.getEntity("passant1");
-			var entityFighter = layerEntities.getEntity("fighter1");
-
-			// check if entityPassant is present
-			if (layerEntities && entityPassant) {
-				// tell the camera to follow entity passant
-				camera.setFollowTarget(entityPassant);
-
-				// some key listeners...
-				window.addEventListener("keydown", function(e) {
-					if (e.keyCode == 37) {
-						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.LEFT, true);
-					} else if (e.keyCode == 39) {
-						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.RIGHT, true);
-					} else if (e.keyCode == 40) {
-						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.DOWN, true);
-					} else if (e.keyCode == 38) {
-						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.UP, true);
-					}
-				});
-				
-				window.addEventListener("keyup", function(e) {
-					if (e.keyCode == 37) {
-						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.LEFT, false);
-					} else if (e.keyCode == 39) {
-						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.RIGHT, false);
-					} else if (e.keyCode == 40) {
-						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.DOWN, false);
-					} else if (e.keyCode == 38) {
-						entityPassant.setMoveDirection(Lucid.BaseEntity.DIR.UP, false);
-					}
-				});
-			}
-
-			// add click event
-			window.addEventListener("click", function(e) {
-				// get layer collision from engine
-				var layerCollision = engine.getLayerCollision();
-
-				if (layerEntities && entityPassant) {
-					// entity passant are our start x / y indices
-					var entityPassantGridIndices = Lucid.Math.getEntityToGridIndices(entityPassant, layerCollision.getMap().tileSize);
-					// clicked are our end x / y indices
-					var clickedGridIndices = Lucid.Math.getMouseToGridIndices(e.clientX, e.clientY, layerCollision.getMap(), layerCollision.getCamera());
-					
-					// check if both "vectors" are valid
-					if (entityPassantGridIndices && clickedGridIndices) {
-						Lucid.Utils.log("Game: clicked on tile @ " + clickedGridIndices[0] + "/" + clickedGridIndices[1]);
-
-						// set new path indices
-						// params: startX, startY, endX, endY, callback
-						Lucid.Pathfinding.findPath(entityPassantGridIndices[0], entityPassantGridIndices[1], clickedGridIndices[0], clickedGridIndices[1], function(path) {
-							if (!path) {
-								Lucid.Utils.log("Game: path was not found");
-							} else if (path.length) {
-								Lucid.Utils.log("Game: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
-							} 
-							// case: entityGridIndices are the same as clickedGridIndices
-							// this means there is no path.
-							else {
-								path.push({
-									x: entityPassantGridIndices[0],
-									y: entityPassantGridIndices[1]
-								});
-
-								Lucid.Utils.log("Game: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
-							}
-							
-							// set path for entityPassant if not null
-							if (path) {
-								entityPassant.setPath(path);
-							}
-						});
-
-						// after setting a path, we need to run calculate()
-						Lucid.Pathfinding.calculate();
-					}
-				}
-			});
-
-		// ... END of pathfinding testing stuff
-			
-		});
+	// custom layer for the ui
+	var layerUI = new LayerUI({
+		id: "layer-ui",
+		type: Lucid.BaseLayer.TYPE.UI,
+		z: 20,
+		active: false
 	});
-	
-	
-	
-	
+	engine.addLayer(layerUI);
 
+	// custom layer for the menu
+	var layerMenu = new LayerMenu({
+		id: "layer-menu",
+		type: Lucid.BaseLayer.TYPE.UI,
+		z: 30
+	});
+	engine.addLayer(layerMenu);
 
-	
+	// LAYER UI: menu button key down event
+	Lucid.Event.bind(LayerUI.EVENT.MENU_BUTTON_KEY_DOWN + namespace, function(eventName) {
+		engine.getMap().setActive(false);
+		layerMenu.setActive(true);
+		layerUI.setActive(false);
+	});
+
+	// MAP FILE: on loading succes hide menu
+	Lucid.Event.bind(Lucid.Engine.EVENT.START_LOADING_MAP_FILE + namespace, function(eventName, fileName, filePath) {
+		layerMenu.setActive(false);
+	});
+
+	// MAP FILE: on loading error show menu again
+	Lucid.Event.bind(Lucid.Engine.EVENT.LOADED_MAP_FILE_ERROR + namespace, function(eventName, loaderItem) {
+		layerMenu.setActive(true);
+	});
+
+	// MAP: wait for the map to load its assets
+	Lucid.Event.bind(Lucid.Map.EVENT.LOADING_SUCCESS + namespace, function(eventName, map) {
+		// build the map!
+		map.build();
+
+		// show LayerUI
+		layerUI.setActive(true);
+
+		// change menu for LayerMenu
+		layerMenu.setCurrentMenuConfig(layerMenu.menuConfigIngame);
+	});
+
+	// LAYER MENU: custom event for the "back to game" button in the menu
+	Lucid.Event.bind(LayerMenu.EVENT.CUSTOM_EVENT + namespace, function(eventName, customEventName) {
+		if (customEventName == "closeMenu") {
+			layerUI.setActive(true);
+			layerMenu.setActive(false);
+			engine.getMap().setActive(true);
+		}
+	});
+
+	// for testing purpose...
+	// engine.loadMap("map1");
 }

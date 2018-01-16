@@ -29,10 +29,15 @@ Lucid.Event = function() {
  */
 
 	return {
+		getEvents: function() {
+			return events;
+		},
+
 		bind: function(eventName, callback) {
 			if (!events[eventName]) {
 				events[eventName] = [];
 			}
+			
 			events[eventName].push(callback);
 		},
 
@@ -42,7 +47,7 @@ Lucid.Event = function() {
 			}
 
 			if (callback == undefined) {
-				events[eventName] = null;
+				delete events[eventName];
 			} else {
 				for (var i = 0; i < events[eventName].length; ++i) {
 					if (events[eventName][i].toString() == callback.toString()) {
@@ -51,7 +56,8 @@ Lucid.Event = function() {
 				}
 			}
 
-			// this does not work with bound functions:
+			// DEPRECATED: This does not work with bound functions!
+			// 
 			// events[eventName].splice(events[eventName].indexOf(callback), 1);
 		},
 		
@@ -72,16 +78,38 @@ Lucid.Event = function() {
 				}
 
 				// now lets check if the propertyName is the same as the eventName
-				if (propertyName == eventName) {
-					// call all the callback functions
-					for(var i = 0; i < events[orgPropertyName].length; ++i){
+				if (propertyName == eventName && events[orgPropertyName]) {
+					var i = 0;
+					while(events[orgPropertyName]) {
 						var callback = events[orgPropertyName][i];
 						if (callback) {
 							// pass through parameters - starting with the eventName and
 							// followed by the custom arguments
 							callback.apply(this, arguments);
 						}
+
+						++i;
+
+						// IF (at runtime) the events[orgPropertyName] gets null (for whatever reason)
+						// OR if we have run through all entries
+						// THEN stop!
+						if (!events[orgPropertyName] || i >= events[orgPropertyName].length) {
+							break;
+						}
 					}
+
+					// DEPRECATED: This caused bugs and problems when changing the events array 
+					// on runtime while this is iterating through it!
+					// 
+					// call all the callback functions
+					// for(var i = 0; i < events[orgPropertyName].length; ++i){
+					// 	var callback = events[orgPropertyName][i];
+					// 	if (callback) {
+					// 		// pass through parameters - starting with the eventName and
+					// 		// followed by the custom arguments
+					// 		callback.apply(this, arguments);
+					// 	}
+					// }
 				}
 			}
 		}

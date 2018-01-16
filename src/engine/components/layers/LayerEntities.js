@@ -27,34 +27,40 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 
 		if (this.data) {
 			for (var i = 0; i < this.data.length; ++i) {
-				var data = this.data[i];
-				// check if componentName property is given AND also check if theres a variable / object defined with this componentName
-				if ("componentName" in data && window[data.componentName]) {
-					this.addEntity(data);
-				}
-				// error reporting
-				else {
-					if (!("componentName" in data)) {
-						Lucid.Utils.error("LayerEntities @ init: trying to instanciate a new entity but componentName property is missing in data[" + i + "]!");
-					} else {
-						Lucid.Utils.error("LayerEntities @ init: trying to instanciate a new entity but window[" + data.componentName + "] is not defined!");
-					}
-				}
+				this.addEntity(this.data[i]);
 			}
 		}
 
 		return true;
 	},
 
+	/**
+	 * Adds an entity.
+	 *
+	 * @param      {Object}  data    The data
+	 * @return     {Object}  Returns the created Entity on success or null.
+	 */
 	addEntity: function(data) {
+		// check if componentName property is given AND also check if theres a class defined with this componentName
+		if (!("componentName" in data)) {
+			Lucid.Utils.error("LayerEntities @ addEntity: trying to instanciate a new entity but componentName property is missing in data[" + i + "]!");
+			return null;
+		} else if (!window[data.componentName]) {
+			Lucid.Utils.error("LayerEntities @ addEntity: trying to instanciate a new entity but window[" + data.componentName + "] is not defined!");
+			return null;
+		}
+
 		var entity;
 		for (var i = 0; i < this.entities.length; ++i) {
 			entity = this.entities[i];
 			if (entity.getID() == data.id) {
 				Lucid.Utils.log("LayerEntities @ addEntity: entity with id " + data.id + " already exists!");
-				return;
+				return null;
 			}
 		}
+
+		// inject
+		data.parentLayer = this;
 
 		// instanciate entity! Apply the data object as config parameter
 		entity = new window[data.componentName](data);
@@ -62,8 +68,15 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 		entity.load();
 		// add to our entities render list
 		this.entities.push(entity);
+
+		return entity;
 	},
 
+	/**
+	 * Removes an entity (by id).
+	 *
+	 * @param      {string}  id      The identifier
+	 */
 	removeEntity: function(id) {
 		for (var i = 0; i < this.entities.length; ++i) {
 			var entity = this.entities[i];
@@ -87,6 +100,10 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 	 *                               simulate in the update.
 	 */
 	renderUpdate: function(delta) {
+		if (!this.getActive()) {
+			return;
+		}
+
 		var i = 0;
 		
 		// pre calculate all coordinates and sizes
@@ -156,6 +173,19 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 				return entity;
 			}
 		}
+	},
+
+	/**
+	 * Sets the active state. Delegates the state to all related Entities too!
+	 *
+	 * @param      {Boolean}  active  The value.
+	 */
+	setActive: function(active) {
+		for (i = 0; i < this.entities.length; ++i) {
+			this.entities[i].setActive(active);
+		}
+
+		this._super(active);
 	},
 
 	/**

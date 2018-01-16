@@ -14,7 +14,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 	// local variables
 	asset: null, // the loaded image for layers
 	loaded: false, // determines if map has loaded everything
-	build: false, // determines if map is build
+	isBuild: false, // determines if map is build
 
 	/**
 	 * Automatically called when instantiated.
@@ -127,7 +127,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 	 * @return     {boolean}  Returns true on success.
 	 */
 	build: function() {
-		if (!this.build) {
+		if (this.isBuild) {
 			Lucid.Utils.log("Map @ build: already build!");
 			return false;
 		}
@@ -136,7 +136,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 			Lucid.Utils.log("Map @ build: asset is NOT loaded yet - call loadAsset() first");
 			return false;
 		}
-
+		
 		if (!this.layers || this.layers.length < 1) {
 			Lucid.Utils.error("Map @ build: " + this.name + " - layers are not defined!");
 			return false;
@@ -144,6 +144,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 
 		Lucid.Utils.log("Map @ build: createAddLayers in Engine");
 		for (var i = 0; i < this.layers.length; ++i) {
+			// check if layer is valid
 			if (this.layers[i].config !== undefined && this.layers[i].config.id !== undefined) {
 				this.engine.createAddLayer(this.layers[i].config);
 			} else {
@@ -151,9 +152,38 @@ Lucid.Map = Lucid.BaseComponent.extend({
 			}
 		}
 
-		this.build = true;
+		this.isBuild = true;
 
 		return true;
+	},
+
+	/**
+	 * Sets the active state. Basically this acts like a "pause / play" state
+	 * for the map and everything related to it.
+	 *
+	 * @param      {Boolean}  active  The value.
+	 */
+	setActive: function(active) {
+		// if the map was build, go through all the map related layers and set new active state
+		if (this.isBuild) {
+			for (var i = 0; i < this.layers.length; ++i) {
+				// check if layer is valid
+				if (this.layers[i].config !== undefined && this.layers[i].config.id !== undefined) {
+					var layer = this.engine.getLayer(this.layers[i].config.id);
+
+					// "play"
+					if (active) {
+						layer.setActive(true);
+					}
+					// "pause"
+					else {
+						layer.setActive(false);
+					}
+				}
+			}
+		}
+
+		this._super(active);
 	},
 
 	/**
@@ -166,7 +196,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 		Lucid.Event.unbind(Lucid.Map.EVENT.LOADED_ASSET_FILE_ERROR + this.componentNamespace);
 
 		// only if build we need to remove layers
-		if (this.build) {
+		if (this.isBuild) {
 			for (var i = 0; i < this.layers.length; ++i) {
 				var layer = this.layers[i];
 				if (layer != null && layer.config !== undefined && layer.config.id !== undefined) {
@@ -180,7 +210,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 
 		this.layers = null;
 		this.loaded = false;
-		this.build = false;
+		this.isBuild = false;
 
 		this._super();
 
@@ -206,8 +236,8 @@ Lucid.Map.TYPE = {
 
 // event constants
 Lucid.Map.EVENT = {
-	LOADED_ASSET_FILE_SUCCESS: "MapLoadedAssetFileSuccess",
-	LOADED_ASSET_FILE_ERROR: "MapLoadedAssetFileError",
-	LOADING_SUCCESS: "MapLoadingComplete",
-	LOADING_ERROR: "MapLoadingError"
+	LOADED_ASSET_FILE_SUCCESS: "mapLoadedAssetFileSuccess",
+	LOADED_ASSET_FILE_ERROR: "mapLoadedAssetFileError",
+	LOADING_SUCCESS: "mapLoadingSuccess",
+	LOADING_ERROR: "mapLoadingError"
 };

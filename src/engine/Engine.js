@@ -1,3 +1,5 @@
+"use strict";
+
 // namespace
 var Lucid = Lucid || {};
 
@@ -32,22 +34,17 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	containerID: "engine-container", // wrapper / container ID
 	canvasID: "engine-canvas", // cavas ID
 
-	// debug stuff
-	debugFPS: false, // display frames per second
-	debugPanic: false, // display panic state if panic is true
-	debugGrid: false, // display a map.tileSize based grid
-
 	// local variables
 	
 	container: null, // the wrapper / container
 	canvas: null, // EVERYTHING will be rendered into this canvas
 	canvasContext: null,
 
-	controlGroups: [], // added ControlGroup(s)
-
 	layerCollision: null, // LayerCollision instance. UNIQUE
 	layerEntities: null, // LayerEntities instance. UNIQUE
 	layers: [], // collection of all layers
+
+	currentMapFileName: null, // holds the fileName of the currently loading OR loaded Map
 
 	
 	// rendering frame related stuff
@@ -185,8 +182,7 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	},
 
 	/**
-	 * The renderBegin() function is typically used to process input before the
-	 * updates run.
+	 * Drawing debug related stuff.
 	 *
 	 * @param      {Number}  timestamp   The current timestamp (when the frame
 	 *                                   started), in milliseconds.
@@ -194,7 +190,54 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	 *                                   been simulated, in milliseconds.
 	 */
 	renderBegin: function(timestamp, frameDelta) {
-		
+		if (Lucid.Debug.getEnabled()) {
+			var layerDebug = Lucid.Debug.getLayerDebug();
+			var layerDebugCanvasContext = layerDebug.getCanvasContext();
+
+			layerDebugCanvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+			layerDebugCanvasContext.font = "normal 12px Arial, Helvetica Neue, Helvetica, sans-serif";
+
+			// draw a grid (depending on the map.tileSize)
+			if (Lucid.Debug.getMapTileSizeGrid() && this.map && this.camera) {
+				layerDebugCanvasContext.beginPath();
+				layerDebugCanvasContext.strokeStyle = "black";
+
+				var tileSize = this.map.tileSize;
+
+				var i;
+				var numColsScreen = Math.floor(this.camera.width / tileSize) + 2;
+				for (i = 0; i < numColsScreen; ++i) {
+					var posX = i * tileSize - this.camera.x % tileSize + 0.5; // + 0.5 fixes lines pixel snapping
+					layerDebugCanvasContext.moveTo(posX, 0);
+					layerDebugCanvasContext.lineTo(posX, this.camera.height);
+				}
+				var numRowsScreen = Math.floor(this.camera.height / tileSize) + 2;
+				for (i = 0; i < numRowsScreen; ++i) {
+					var posY = i * tileSize - this.camera.y % tileSize + 0.5;
+					layerDebugCanvasContext.moveTo(0, posY);
+					layerDebugCanvasContext.lineTo(this.camera.width, posY);
+				}
+
+				layerDebugCanvasContext.stroke();
+			}
+
+			var debugTextsYOffset = 20;
+
+			// draw frames per second as text
+			if (Lucid.Debug.getEngineFPS()) {
+				layerDebugCanvasContext.fillStyle = "red";
+				layerDebugCanvasContext.fillText("FPS: " + Math.round(this.fps), 10, debugTextsYOffset);
+				debugTextsYOffset += 15;
+			}
+
+			// draw panic status
+			if (Lucid.Debug.getEnginePanic()) {
+				layerDebugCanvasContext.fillStyle = "red";
+				layerDebugCanvasContext.fillText("Panic: " + this.panic, 10, debugTextsYOffset);
+				debugTextsYOffset += 15;
+			}
+		}
 	},
 
 	/**
@@ -287,14 +330,17 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	 *                                fallen too far behind real time.
 	 */
 	renderEnd: function(fps, panic) {
+		/*
 		// cache variable
 		var canvasContext = this.canvasContext;
 
-		this.canvasContext.fillStyle = "Red";
+		this.canvasContext.fillStyle = "red";
 		this.canvasContext.font = "normal 12px Arial, Helvetica Neue, Helvetica, sans-serif";
 
 		// draw a grid (depending on the map.tileSize)
-		if (this.debugGrid && this.map && this.camera) {
+		if (Lucid.Debug.getMapTileSizeGrid() && this.map && this.camera) {
+			canvasContext.strokeStyle = "black";
+
 			var tileSize = this.map.tileSize;
 
 			canvasContext.beginPath();
@@ -319,15 +365,16 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 		var debugTextsYOffset = 20;
 
 		// draw frames per second as text
-		if (this.debugFPS) {
+		if (Lucid.Debug.getEngineFPS()) {
 			canvasContext.fillText("FPS: " + Math.round(fps), 10, debugTextsYOffset);
 			debugTextsYOffset += 15;
 		}
 
-		if (this.debugPanic) {
+		if (Lucid.Debug.getEnginePanic()) {
 			canvasContext.fillText("Panic: " + panic, 10, debugTextsYOffset);
 			debugTextsYOffset += 15;
 		}
+		*/
 
 		if (panic) {
 			// TODO: handle panic!
@@ -375,6 +422,18 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 			window.cancelAnimationFrame(this.renderFrameID);
 			this.renderFrameID = null;
 		}
+	},
+
+	/**
+	 * Sets the camera.
+	 *
+	 * @param      {Camera}  camera  The camera
+	 */
+	setCamera: function(camera) {
+		this._super(camera);
+
+		// call resize event to update the new Camera
+		this.resize();
 	},
 
 	/**
@@ -460,41 +519,49 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	},
 
 /**
- * ControlGroup
- */
-
-	/**
-	 * Adds a control group.
-	 *
-	 * @param      {ControlGroup}  controlGroup  The control group.
-	 */
-	addControlGroup: function(controlGroup) {
-		this.controlGroups.push(controlGroup);
-	},
-
-	/**
-	 * Removes a control group.
-	 *
-	 * @param      {ControlGroup}  controlGroup  The control group.
-	 */
-	removeControlGroup: function(controlGroup) {
-		this.controlGroups.erase(controlGroup);
-	},
-
-/**
  * Map
  */
 
-	/**
-	 * Loads a map file into the DOM.
-	 *
-	 * @param      {String}  fileName  The map file name.
-	 */
-	loadMapFile: function(fileName) {
-		Lucid.Utils.log("Engine @ loadMapFile: load map with fileName: " + fileName);
+ 	loadMap: function(fileName) {
+ 		// remove current map
+		this.destroyMap();
 
-		var filePath = this.folderPaths.maps + fileName + this.extensions.maps;
+ 		this.currentMapFileName = fileName;
 
+ 		Lucid.Utils.log("Engine @ loadMap: load map with fileName: " + fileName);
+
+ 		var filePath = this.folderPaths.maps + fileName + this.extensions.maps;
+
+ 		// notify everyone that we have started loading the map file
+ 		Lucid.Event.trigger(Lucid.Engine.EVENT.START_LOADING_MAP_FILE, fileName, filePath);
+ 		
+ 		// error event handling
+		Lucid.Event.bind(Lucid.Engine.EVENT.LOADED_MAP_FILE_ERROR + this.componentNamespace, function(eventName, loaderItem) {
+			this.cleanupMapLoading();
+			this.currentMapFileName = null;
+		}.bind(this));
+
+		// success event handling
+		Lucid.Event.bind(Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS + this.componentNamespace, function(eventName, loaderItem) {
+			this.cleanupMapLoading();
+
+			var mapFileName = loaderItem.getID();
+
+			// lets check if the currently loaded Map file is still the one required!
+			if (this.currentMapFileName && mapFileName != this.currentMapFileName) {
+
+				// restart loading process
+				this.loadMap(this.currentMapFileName);
+
+				return;
+			}
+
+			// set the Map and start loading its assets
+			this.setMapByFileName(mapFileName);
+
+		}.bind(this));
+
+		// load map file
 		var loaderItem = new Lucid.LoaderItem({
 			id: fileName,
 			dataType: Lucid.Loader.TYPE.SCRIPT,
@@ -504,15 +571,25 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 		});
 
 		Lucid.Loader.add(loaderItem);
-	},
+ 	},
+
+ 	/**
+ 	 * Removes Map loading related stuff.
+ 	 */
+ 	cleanupMapLoading: function() {
+ 		Lucid.Event.unbind(Lucid.Engine.EVENT.LOADED_MAP_FILE_ERROR + this.componentNamespace);
+ 		Lucid.Event.unbind(Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS + this.componentNamespace);
+ 	},
 
 	/**
-	 * Build a Map by fileName.
+	 * Sets a Map by fileName. The fileName will be used to fetch the Map data
+	 * from the DOM. After that, a new Map object will be instantiated with the
+	 * given data. This will also trigger the loading process of the Map assets.
 	 *
 	 * @param      {String}  fileName  The Map file name.
 	 * @return     {Map}     The build Map.
 	 */
-	buildMapByFileName: function(fileName) {
+	setMapByFileName: function(fileName) {
 		var loaderItem = Lucid.Loader.get(fileName);
 
 		if (!loaderItem) {
@@ -520,12 +597,14 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 			return null;
 		}
 
-		Lucid.Utils.log("Engine @ setBuildMapByFileName: building Map: " + fileName);
+		Lucid.Utils.log("Engine @ setMapByFileName: building Map: " + fileName);
 
+		// fetch data from DOM
 		var mapData = window.Lucid.data.maps[fileName];
+
 		var mapConfig = mapData.config;
 		if (mapConfig === undefined) {
-			Lucid.Utils.error("Engine @ setBuildMapByFileName: Map data doesnt have a config: " + fileName);
+			Lucid.Utils.error("Engine @ setMapByFileName: Map data doesnt have a config: " + fileName);
 			return null;
 		}
 
@@ -533,30 +612,37 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 		mapConfig.engine = this;
 		mapConfig.camera = this.getCamera();
 
-		return new Lucid.Map(mapConfig);
+		this.setMap(new Lucid.Map(mapConfig));
 	},
 
 	/**
-	 * Sets the map and starts loading the asset.
+	 * Sets a Map. This will also trigger the loading process of the Map assets.
 	 *
 	 * @param      {Map}  map     The map.
 	 * @override
 	 */
 	setMap: function(map) {
 		this.map = map;
+
+		Lucid.Event.trigger(Lucid.Engine.EVENT.SET_MAP, map);
+
+		// start loading assets
 		this.map.load();
 	},
+
 	/**
-	 * Destroy the current Engine.map.
+	 * Destroy the current Map. If the Map was build this process will
+	 * also remove the corresponding Layers from the Engine.
 	 *
-	 * @param      {String}   fileName  The map file name.
 	 * @return     {Boolean}  Returns true on success.
 	 */
-	destoryMap: function() {
+	destroyMap: function() {
 		if (this.map == null) {
 			Lucid.Utils.log("Engine @ destroyMap: Engine.map is null - nothing to destroy");
 			return false;
 		}
+
+		Lucid.Event.trigger(Lucid.Engine.EVENT.DESTROY_MAP, this.map);
 
 		this.map.destroy();
 		this.map = null;
@@ -669,6 +755,9 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 		// update z-sorting
 		this.layers.sortByKey("z");
 
+		// call resize event to update the new Layer(s)
+		this.resize();
+
 		return true;
 	},
 
@@ -743,6 +832,15 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	 */
 	getCanvas: function() {
 		return this.canvas;
+	},
+
+	/**
+	 * Gets the canvas context.
+	 *
+	 * @return     {Object}  The canvas.
+	 */
+	getCanvasContext: function() {
+		return this.canvasContext;
 	}
 });
 
@@ -751,6 +849,9 @@ Lucid.Engine.EVENT = {
 	TOGGLE_LAYER: "toggleLayer",
 	PAUSE: "pause",
 	PLAY: "play",
-	LOADED_MAP_FILE_SUCCESS: "loadedMapFileSuccess",
-	LOADED_MAP_FILE_ERROR: "loadedMapFileError"
+	SET_MAP: "setMap", // eventName, Map
+	DESTROY_MAP: "setMap", // eventName, Map
+	START_LOADING_MAP_FILE: "startLoadingMapFile", // eventName, fileName, filePath
+	LOADED_MAP_FILE_SUCCESS: "loadedMapFileSuccess", // eventName, LoaderItem
+	LOADED_MAP_FILE_ERROR: "loadedMapFileError" // eventName, LoaderItem
 };

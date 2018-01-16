@@ -187,7 +187,8 @@ Lucid.Utils = function() {
 		 * @param      {String}  msg     The error message.
 		 */
 		error: function(msg) {
-			this.log("[ERROR] message: " + msg);
+			// this.log("[ERROR] message: " + msg);
+			throw new TypeError("[ERROR] message: " + msg);
 		},
 
 		/**

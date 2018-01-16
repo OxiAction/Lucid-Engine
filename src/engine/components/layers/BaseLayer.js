@@ -37,7 +37,7 @@ Lucid.BaseLayer = Lucid.BaseComponent.extend({
 		}
 
 		if (!this.type) {
-			Lucid.Utils.error("Layer @ init: type is null!");
+			Lucid.Utils.error("Layer @ init: type is null! Use Lucid.BaseLayer.TYPE.XXX as a type.");
 			return false;
 		}
 

@@ -80,62 +80,70 @@ Lucid.AIModuleFollow = Lucid.BaseAIModule.extend({
 	 *                                                frames.
 	 */
 	renderDraw: function(interpolationPercentage) {
-		var ai = this.getAI();
-		var layer = ai.getLayer();
-
-		if (!layer) {
+		if (!Lucid.Debug.getEnabled()) {
 			return;
 		}
 
+		if (!Lucid.Debug.getAISightRadius() && !Lucid.Debug.getAILineOfSight()) {
+			return;
+		}
+
+		var layerDebug = Lucid.Debug.getLayerDebug();
+		var layerDebugCanvasContext = layerDebug.getCanvasContext();
+
+		var ai = this.getAI();
 		var originEntity = ai.getOriginEntity();
 		var entitiesData = ai.getEntitiesData();
 
-		var canvasContext = layer.getCanvasContext();
-		canvasContext.beginPath();
-
 		var originEntityRelativeCenterX = originEntity.relativeCenterX;
 		var originEntityRelativeCenterY = originEntity.relativeCenterY;
-		
-		canvasContext.arc(originEntityRelativeCenterX, originEntityRelativeCenterY, originEntity.sightRadius, 0, 2 * Math.PI, false);
-		canvasContext.fillStyle = "rgba(255, 255, 255, 0.1)";
-		canvasContext.fill();
 
-		if (entitiesData.length) {
-			canvasContext.strokeStyle = "red";
-		} else {
-			canvasContext.strokeStyle = "black";
+		// draw sight radius
+		if (Lucid.Debug.getAISightRadius()) {
+			layerDebugCanvasContext.beginPath();
+			layerDebugCanvasContext.strokeStyle = entitiesData.length ? "red" : "black";
+			layerDebugCanvasContext.arc(originEntityRelativeCenterX, originEntityRelativeCenterY, originEntity.sightRadius, 0, 2 * Math.PI, false);
+			layerDebugCanvasContext.fillStyle = "rgba(255, 255, 255, 0.1)";
+			layerDebugCanvasContext.fill();
+
+			layerDebugCanvasContext.stroke();
 		}
 		
-		for (var i = 0; i < entitiesData.length; ++i) {
-			var entityData = entitiesData[i];
+		if (Lucid.Debug.getAILineOfSight() && entitiesData.length) {
+			layerDebugCanvasContext.beginPath();
+			layerDebugCanvasContext.strokeStyle = "red";
 
-			var targetEntity = entityData.entity;
-			var targetEntityCollisionData = entityData.collisionData;
+			// draw line of sight
+			for (var i = 0; i < entitiesData.length; ++i) {
+				var entityData = entitiesData[i];
 
-			var targetEntityLineOfSightX;
-			var targetEntityLineOfSightY;
+				var targetEntity = entityData.entity;
+				var targetEntityCollisionData = entityData.collisionData;
 
-			if (!targetEntityCollisionData) {
-				targetEntityLineOfSightX = targetEntity.relativeCenterX;
-				targetEntityLineOfSightY = targetEntity.relativeCenterY;
-			} else {
-				targetEntityLineOfSightX = targetEntityCollisionData.x;
-				targetEntityLineOfSightY = targetEntityCollisionData.y;
+				var targetEntityLineOfSightX;
+				var targetEntityLineOfSightY;
+
+				if (!targetEntityCollisionData) {
+					targetEntityLineOfSightX = targetEntity.relativeCenterX;
+					targetEntityLineOfSightY = targetEntity.relativeCenterY;
+				} else {
+					targetEntityLineOfSightX = targetEntityCollisionData.x;
+					targetEntityLineOfSightY = targetEntityCollisionData.y;
+				}
+
+				layerDebugCanvasContext.moveTo(originEntityRelativeCenterX, originEntityRelativeCenterY);
+				layerDebugCanvasContext.lineTo(targetEntityLineOfSightX, targetEntityLineOfSightY);
+
+				// draw arrow
+				var lineOfSightAngle = Math.atan2(targetEntityLineOfSightY - originEntityRelativeCenterY, targetEntityLineOfSightX - originEntityRelativeCenterX);
+				layerDebugCanvasContext.lineTo(targetEntityLineOfSightX - 20 * Math.cos(lineOfSightAngle - Math.PI / 6), targetEntityLineOfSightY - 20 * Math.sin(lineOfSightAngle - Math.PI / 6));
+				layerDebugCanvasContext.moveTo(targetEntityLineOfSightX, targetEntityLineOfSightY);
+				layerDebugCanvasContext.lineTo(targetEntityLineOfSightX - 20 * Math.cos(lineOfSightAngle + Math.PI / 6), targetEntityLineOfSightY - 20 * Math.sin(lineOfSightAngle + Math.PI / 6));
 			}
 
-			canvasContext.moveTo(originEntityRelativeCenterX, originEntityRelativeCenterY);
-			canvasContext.lineTo(targetEntityLineOfSightX, targetEntityLineOfSightY);
-
-			// draw arrow
-			var lineOfSightAngle = Math.atan2(targetEntityLineOfSightY - originEntityRelativeCenterY, targetEntityLineOfSightX - originEntityRelativeCenterX);
-			canvasContext.lineTo(targetEntityLineOfSightX - 20 * Math.cos(lineOfSightAngle - Math.PI / 6), targetEntityLineOfSightY - 20 * Math.sin(lineOfSightAngle - Math.PI / 6));
-			canvasContext.moveTo(targetEntityLineOfSightX, targetEntityLineOfSightY);
-			canvasContext.lineTo(targetEntityLineOfSightX - 20 * Math.cos(lineOfSightAngle + Math.PI / 6), targetEntityLineOfSightY - 20 * Math.sin(lineOfSightAngle + Math.PI / 6));
-		}
-
-		canvasContext.stroke();
-
-		this._super(interpolationPercentage);
+			layerDebugCanvasContext.stroke();
+		}	
+		
 	},
 
 	startFollow: function(originEntity, targetEntity, path) {

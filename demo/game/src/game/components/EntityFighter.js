@@ -25,8 +25,11 @@ var EntityFighter = Lucid.BaseEntity.extend({
 		this.animInterval = setInterval(this.updateAnim.bind(this), 500);
 		this.updateAnim();
 
+		Lucid.Event.bind(Lucid.BaseEntity.EVENT.COLLISION + this.componentNamespace, this.handleCollision.bind(this));
+
 		Lucid.Event.bind(Lucid.AIModuleAttack.EVENT.START_ATTACK + this.componentNamespace, this.handleStartAttack.bind(this));
 		Lucid.Event.bind(Lucid.AIModuleAttack.EVENT.STOP_ATTACK + this.componentNamespace, this.handleStopAttack.bind(this));
+
 		Lucid.Event.bind(Lucid.AIModuleFollow.EVENT.START_FOLLOW + this.componentNamespace, this.handleStartFollow.bind(this));
 		Lucid.Event.bind(Lucid.AIModuleFollow.EVENT.STOP_FOLLOW + this.componentNamespace, this.handleStopFollow.bind(this));
 		
@@ -43,6 +46,19 @@ var EntityFighter = Lucid.BaseEntity.extend({
 		this.setAI(ai);
 
 		return true;
+	},
+
+	handleCollision(eventName, originEntity, item, collisionData) {
+		if (originEntity != this) {
+			return;
+		}
+
+		if (item.componentName == "EntityPotion") {
+			var layerEntities = this.engine.getLayerEntities();
+			if (layerEntities) {
+				layerEntities.removeEntity(item.getID());
+			}
+		}
 	},
 
 	handleStartAttack: function(eventName, originEntity, targetEntity) {
@@ -86,6 +102,10 @@ var EntityFighter = Lucid.BaseEntity.extend({
 	},
 
 	updateAnim: function() {
+		if (!this.getActive()) {
+			return;
+		}
+
 		// 0 - 1
 		if (this.animCounter == 2) {
 			this.animCounter = 0;
@@ -131,8 +151,11 @@ var EntityFighter = Lucid.BaseEntity.extend({
 			this.animInterval = null;
 		}
 		
+		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.COLLISION + this.componentNamespace);
+
 		Lucid.Event.unbind(Lucid.AIModuleAttack.EVENT.START_ATTACK + this.componentNamespace);
 		Lucid.Event.unbind(Lucid.AIModuleAttack.EVENT.STOP_ATTACK + this.componentNamespace);
+
 		Lucid.Event.unbind(Lucid.AIModuleFollow.EVENT.START_FOLLOW + this.componentNamespace);
 		Lucid.Event.unbind(Lucid.AIModuleFollow.EVENT.STOP_FOLLOW + this.componentNamespace);
 

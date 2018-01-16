@@ -7,14 +7,11 @@ Lucid.Camera = Lucid.BaseComponent.extend({
 	y: 0,
 	width: 0,
 	height: 0,
-	halfWidth: 0,
-	halfHeight: 0,
-
-	offsetX: 0,
-	offsetY: 0,
 
 	// local variables
 	followTarget: null,
+	halfWidth: 0,
+	halfHeight: 0,
 
 	/**
 	 * Automatically called when instantiated.
@@ -46,16 +43,26 @@ Lucid.Camera = Lucid.BaseComponent.extend({
 	},
 
 	/**
-	 * Tells the Camera to follow a certain object.
-	 * Important: The object requires x / y / halfWidth / halfHeight properties.
+	 * Tells the Camera to follow a certain object. Important: The object
+	 * requires x / y / halfWidth / halfHeight properties.
 	 *
-	 * @param      {Object}  object  The object
+	 * @param      {Object}   followTarget  The follow target Object.
+	 * @param      {Boolean}  instant       Jump onto target without easing?
 	 */
-	setFollowTarget: function(followTarget) {
-		if ("x" in followTarget && "y" in followTarget && "halfWidth" in followTarget && "halfHeight" in followTarget) {
-			this.followTarget = followTarget;
+	setFollowTarget: function(followTarget, instant) {
+		if (followTarget != null) {
+			if ("x" in followTarget && "y" in followTarget && "halfWidth" in followTarget && "halfHeight" in followTarget) {
+				this.followTarget = followTarget;
+
+				if (instant) {
+					this.x = Math.floor(this.followTarget.x - this.halfWidth + this.followTarget.halfWidth);
+					this.y = Math.floor(this.followTarget.y - this.halfHeight + this.followTarget.halfHeight);
+				}
+			} else {
+				Lucid.Utils.error("Camera @ setFollowObject: the followTarget object doesnt have proper properties - x, y, halfWidth, halfHeight are required!");
+			}
 		} else {
-			Lucid.Utils.error("Camera @ setFollowObject: the target object doesnt have proper properties - x, y, halfWidth, halfHeight are required!");
+			this.followTarget = null;
 		}
 	},
 

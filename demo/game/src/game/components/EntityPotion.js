@@ -6,8 +6,7 @@ var EntityPotion = Lucid.BaseEntity.extend({
 	// ...
 
 	// local variables
-	animInterval: null,
-	animCounter: 0,
+	// ...
 
 	init: function(config) {
 		this.componentName = "EntityPotion";
@@ -17,26 +16,8 @@ var EntityPotion = Lucid.BaseEntity.extend({
 		this.assetFilePath = "assets/potion.png";
 		
 		this._super(config);
-		
-		this.animInterval = setInterval(this.updateAnim.bind(this), 500);
-		this.updateAnim();
 
 		return true;
-	},
-
-	updateAnim: function() {
-		// 0 - 1
-		if (this.animCounter == 2) {
-			this.animCounter = 0;
-		}
-
-		if (this.animCounter == 0) {
-			// this.assetX = 0;
-		} else if (this.animCounter == 1) {
-			// this.assetX = this.width * 2;
-		}
-
-		this.animCounter++;
 	},
 
 	renderUpdate: function(delta) {
@@ -48,11 +29,6 @@ var EntityPotion = Lucid.BaseEntity.extend({
 	},
 
 	destroy: function() {
-		if (this.animInterval) {
-			clearInterval(this.animInterval);
-			this.animInterval = null;
-		}
-
 		this._super();
 	}
 });

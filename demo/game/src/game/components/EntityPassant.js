@@ -26,6 +26,13 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		Lucid.Event.bind(Lucid.BaseEntity.EVENT.STOP_PATH + this.componentNamespace, this.handleStopPath.bind(this));
 		Lucid.Event.bind(Lucid.BaseEntity.EVENT.REACHED_END_PATH + this.componentNamespace, this.handleReachedEndPath.bind(this));
 
+		Lucid.Event.bind(Lucid.Input.EVENTS.KEY_DOWN + this.componentNamespace, this.handleKeyDown.bind(this));
+		Lucid.Event.bind(Lucid.Input.EVENTS.KEY_UP + this.componentNamespace, this.handleKeyUp.bind(this));
+
+		this.setPathByClick(true);
+
+		this.camera.setFollowTarget(this, true);
+
 		return true;
 	},
 
@@ -66,7 +73,39 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		Lucid.Utils.log("EntityFighter @ handleReachedEndPath");
 	},
 
+	handleKeyDown(eventName, code) {
+		this.processHandleKeyUpDown(code, true);
+	},
+
+	handleKeyUp(eventName, code) {
+		this.processHandleKeyUpDown(code, false);
+	},
+
+	processHandleKeyUpDown: function(code, move) {
+		switch (code) {
+			case Lucid.Input.KEYS["LEFT_ARROW"]:
+				this.setMoveDirection(Lucid.BaseEntity.DIR.LEFT, move);
+				break;
+
+			case Lucid.Input.KEYS["RIGHT_ARROW"]:
+				this.setMoveDirection(Lucid.BaseEntity.DIR.RIGHT, move);
+				break;
+
+			case Lucid.Input.KEYS["UP_ARROW"]:
+				this.setMoveDirection(Lucid.BaseEntity.DIR.UP, move);
+				break;
+
+			case Lucid.Input.KEYS["DOWN_ARROW"]:
+				this.setMoveDirection(Lucid.BaseEntity.DIR.DOWN, move);
+				break;
+		}
+	},
+
 	updateAnim: function() {
+		if (!this.getActive()) {
+			return;
+		}
+
 		// 0 - 1
 		if (this.animCounter == 2) {
 			this.animCounter = 0;
@@ -82,6 +121,10 @@ var EntityPassant = Lucid.BaseEntity.extend({
 	},
 
 	renderUpdate: function(delta) {
+		if (!this.getActive()) {
+			return;
+		}
+		
 		switch (this.dir) {
 			case Lucid.BaseEntity.DIR.RIGHT:
 				this.assetY = 96;
@@ -116,6 +159,11 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.START_PATH + this.componentNamespace);
 		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.STOP_PATH + this.componentNamespace);
 		Lucid.Event.unbind(Lucid.BaseEntity.EVENT.REACHED_END_PATH + this.componentNamespace);
+
+		Lucid.Event.unbind(Lucid.Input.EVENTS.KEY_DOWN + this.componentNamespace);
+		Lucid.Event.unbind(Lucid.Input.EVENTS.KEY_UP + this.componentNamespace);
+
+		this.camera.setFollowTarget(null);
 
 		this._super();
 	}
