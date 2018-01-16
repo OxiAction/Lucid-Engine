@@ -7,51 +7,24 @@ This is a preview of the Lucid Engine running a simple test game:
 Important: This may **not** be an up-to-date build (its a seperate **public** repo - which is required for rendering the preview).
 
 ## Lucid Engine
-2D game engine, written in JavaScript (for the most part). Currently in development.
+2D game engine, written in JavaScript.
 
-The following covers the structured project tasks. Every task is followed by the difficulty (easy, medium, hard, very hard).
-
-### Finished tasks:
-
-#### Milestones Meeting 1 (09.11.2017)
-
-* engine base layout. This also includes stuff like the plugin system (inheritance), general structure and many mandatory functions required by the engine - **very hard**
-* loader - **medium**
-* utils - **medium**
-* map - **easy**
-
-#### Milestones Metting 2 (30.11.2017)
-
-* graphics/rendering implementation - **medium**
-* entities implementation - **easy**
-* controls implementation - **easy**
-* collision implementation - **medium**
-* A* pathfinding implementation - **medium**
-
-#### Milestones Metting 3 (no meeting yet)
-
-* entities physics **medium**
-* AI implementation part: "line-of-sight" **medium**
-
-### Open tasks (**critical**):
-
-* AI implementation (new since Milestone 1 - this and A* pathfinding are now two seperate tasks! A* pathfinding is done already) - **in progress** - **hard**
-* events implementation (new since Milestone 2) - **medium**
-* a final (basic) game based on the engine - **medium**
-* basic editor and its forms - **hard**
-
-### Optional tasks (nice to have):
-
-* extended configuration options for the editor - **medium**
-* top down AND side scroll rendering **medium**
-* extended JSDoc - **easy**
-* sounds / music - **hard**
+## Open tasks & nice to have:
+* basic editor and its forms
+* animation manager
+* map related events triggering
+* more advanced physics for the entities (like bouncing)
+* sounds / music
+* user management and dynamic spawning of user-entities
+* bugfixes of the **TODO** sections
+* a nice demo game
+* extended JSDoc
 
 ## Code Details & Coding Conventions
-This project is being developed with Sublime Text 3, a powerful editor.
+The best way to work on this project, is by using Sublime Text 3 editor.
 
 * getter and setters are **only** used for complex data types (e.g. Objects like Camera, Map etc.) but **not** for primitive data types (e.g. string, number) **unless** there is some good reason for it (e.g. you need to manipulate something when setting / getting)
-* for notifications / messaging we use the [[Publish–subscribe pattern]](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern)
+* for notifications / messaging we use the [[Publish–subscribe pattern]](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) and the corresponding Lucid.Event class.
 * use the official [[JSDoc]](http://usejsdoc.org/) documentation guidelines
 * install [[DoxyDoxygen]](https://github.com/20Tauri/DoxyDoxygen), which makes documentation in Sublime Text 3 easy and continuous
 * use the following Sublime Text 3 snippet, to create your own Engine plugins:
@@ -88,16 +61,11 @@ var TODO_NAME = BaseComponent.extend({
 ```
 
 ## Code Example
-```javascript
-var engine = new Lucid.Engine();
-```
-
-TODO...
+You can find examples in the demo folder.
 
 ## Installation
-For local testing, please use the latest Firefox version!<br />
-You will have the best results / performance with [[Firefox Quantum]](https://www.mozilla.org/en-US/firefox/).<br />
-You may encounter some warnings in the console when loading files, but those are just warnings and wont appear when the project runs on a proper server.
+Just download the branch and run the HTML file(s) from the demo folder(s).<br />
+You will have the best results / performance with [[Firefox Quantum]](https://www.mozilla.org/en-US/firefox/).
 
 ### Dependencies (third party libraries)
 
