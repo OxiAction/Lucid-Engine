@@ -48,7 +48,7 @@ var EntityFighter = Lucid.BaseEntity.extend({
 		return true;
 	},
 
-	handleCollision(eventName, originEntity, item, collisionData) {
+	handleCollision: function(eventName, originEntity, item, collisionData) {
 		if (originEntity != this) {
 			return;
 		}

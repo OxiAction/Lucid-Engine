@@ -36,7 +36,7 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		return true;
 	},
 
-	handleCollision(eventName, originEntity, item, collisionData) {
+	handleCollision: function(eventName, originEntity, item, collisionData) {
 		if (originEntity != this) {
 			return;
 		}
@@ -73,11 +73,11 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		Lucid.Utils.log("EntityFighter @ handleReachedEndPath");
 	},
 
-	handleKeyDown(eventName, code) {
+	handleKeyDown: function(eventName, code) {
 		this.processHandleKeyUpDown(code, true);
 	},
 
-	handleKeyUp(eventName, code) {
+	handleKeyUp: function(eventName, code) {
 		this.processHandleKeyUpDown(code, false);
 	},
 

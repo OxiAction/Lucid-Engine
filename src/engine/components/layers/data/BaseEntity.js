@@ -753,7 +753,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 
 			Lucid.Event.bind(Lucid.Input.EVENTS.KEY_DOWN + this.componentNamespace, function(eventName, code) {
 				// check for mouse left click AND active state
-				if (code == Lucid.Input.KEYS["MOUSE_LEFT"] && this.getActive()) {
+				if ((code == Lucid.Input.KEYS["MOUSE_LEFT"] || code == "touchstart") && this.getActive()) {
 
 					// entity passant are our start x / y indices
 					var entityGridIndices = Lucid.Math.getEntityToGridIndices(this, this.map.tileSize);
@@ -843,7 +843,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	/**
 	 * Update stuff like halfWidth, reletativeX, relativeCenterX...
 	 */
-	updateAllCoordinatesAndSizes() {
+	updateAllCoordinatesAndSizes: function() {
 		this.setX(this.x);
 		this.setY(this.y);
 		this.setWidth(this.width);
@@ -855,7 +855,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 *
 	 * @param      {Number}  x       New x-position.
 	 */
-	setX(x) {
+	setX: function(x) {
 		this.x = x;
 		this.updateRelativeX();
 	},
@@ -865,7 +865,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 *
 	 * @param      {Number}  y       New y-position.
 	 */
-	setY(y) {
+	setY: function(y) {
 		this.y = y;
 		this.updateRelativeY();
 	},
@@ -875,7 +875,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 *
 	 * @param      {Number}  width   New width.
 	 */
-	setWidth(width) {
+	setWidth: function(width) {
 		this.width = width;
 		this.halfWidth = width / 2;
 		this.updateRelativeX();
@@ -886,7 +886,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 *
 	 * @param      {Number}  height  New height.
 	 */
-	setHeight(height) {
+	setHeight: function(height) {
 		this.height = height;
 		this.halfHeight = height / 2;
 		this.updateRelativeY();
@@ -895,7 +895,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	/**
 	 * Updates the relativeX and relativeCenterX based on x, halfWidth and camera.x.
 	 */
-	updateRelativeX() {
+	updateRelativeX: function() {
 		this.relativeX = Math.floor(this.x - this.camera.x);
 		this.relativeCenterX = this.relativeX + this.halfWidth; 
 	},
@@ -903,7 +903,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	/**
 	 * Updates the relativeY and relativeCenterY based on y, halfHeight and camera.y.
 	 */
-	updateRelativeY() {
+	updateRelativeY: function() {
 		this.relativeY = Math.floor(this.y - this.camera.y);
 		this.relativeCenterY = this.relativeY + this.halfHeight; 
 	},

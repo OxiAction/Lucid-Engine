@@ -94,7 +94,7 @@ var LayerMenu = Lucid.BaseLayer.extend({
 
 	handleKeyDown: function(eventName, code) {
 		// check for mouse left click AND active state
-		if (code == Lucid.Input.KEYS["MOUSE_LEFT"] && this.getActive()) {
+		if ((code == Lucid.Input.KEYS["MOUSE_LEFT"] || code == "touchstart") && this.getActive()) {
 			this.keyDown = true;
 		}
 	},

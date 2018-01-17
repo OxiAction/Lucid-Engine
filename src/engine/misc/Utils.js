@@ -96,7 +96,7 @@ Lucid.Utils = function() {
 		 */
 		loadFile: function(url, dataType, success, error) {
 			var request = new XMLHttpRequest();
-
+			
 			// fix error message when loading on a local machine
 			if (request.overrideMimeType && (dataType == "script" || dataType == "application/json")) {
 			  request.overrideMimeType("application/json");
