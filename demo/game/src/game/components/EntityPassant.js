@@ -54,7 +54,7 @@ var EntityPassant = Lucid.BaseEntity.extend({
 			return;
 		}
 
-		Lucid.Utils.log("EntityFighter @ handleStartPath");
+		Lucid.Utils.log("EntityPassant @ handleStartPath");
 	},
 
 	handleStopPath: function(eventName, originEntity) {
@@ -62,7 +62,7 @@ var EntityPassant = Lucid.BaseEntity.extend({
 			return;
 		}
 
-		Lucid.Utils.log("EntityFighter @ handleStopPath");
+		Lucid.Utils.log("EntityPassant @ handleStopPath");
 	},
 
 	handleReachedEndPath: function(eventName, originEntity) {
@@ -70,7 +70,7 @@ var EntityPassant = Lucid.BaseEntity.extend({
 			return;
 		}
 		
-		Lucid.Utils.log("EntityFighter @ handleReachedEndPath");
+		Lucid.Utils.log("EntityPassant @ handleReachedEndPath");
 	},
 
 	handleKeyDown: function(eventName, code) {

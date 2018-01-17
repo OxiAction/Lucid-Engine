@@ -16,6 +16,9 @@ Lucid.Map = Lucid.BaseComponent.extend({
 	loaded: false, // determines if map has loaded everything
 	isBuild: false, // determines if map is build
 
+	gravityX: 0,
+	gravityY: 0,
+
 	/**
 	 * Automatically called when instantiated.
 	 *

@@ -25,7 +25,7 @@ function Game() {
 	var namespace = ".Game";
 
 	// set-up debugging related stuff
-	Lucid.Debug.setEngineFPS(false);
+	Lucid.Debug.setEngineFPS(true);
 	Lucid.Debug.setMapTileSizeGrid(false);
 	Lucid.Debug.setEntityHitBox(false);
 	Lucid.Debug.setAISightRadius(false);
@@ -101,5 +101,5 @@ function Game() {
 	});
 
 	// for testing purpose...
-	// engine.loadMap("map1");
+	// engine.loadMap("map2");
 }

@@ -6,7 +6,9 @@ Lucid.data.maps.map1 = {
 		cols: 12,
 		rows: 25,
 		tileSize: 64,
-		assetFilePath: "assets/map_tiles.png",
+		assetFilePath: "assets/map1_tiles.png",
+		gravityX: 0,
+		gravityY: 0,
 
 		// layers
 		layers: [

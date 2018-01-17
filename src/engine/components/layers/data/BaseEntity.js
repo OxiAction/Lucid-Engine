@@ -76,8 +76,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 
 	gravityXStep: 0, // the gravity force on the x-axis (can be both: negative and positive floats)
 	gravityYStep: 0, // the gravity force on the y-axis (can be both: negative and positive floats)
-	gravityXAccelerationStep: 0, // private - the current step x
-	gravityYAccelerationStep: 0, // private - the current step y
+	gravityXAccelerationStep: 0, // the current step x
+	gravityYAccelerationStep: 0, // the current step y
 
 	accelerationUpStep: 0.1, // for speed-up
 	accelerationDownStep: 0.2, // for breaking
@@ -105,6 +105,14 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 
 		this.canvas = document.createElement("canvas");
 		this.canvasContext = this.canvas.getContext("2d");
+
+		if (this.gravityXStep == 0) {
+			this.gravityXStep = this.map.gravityX;
+		}
+
+		if (this.gravityYStep == 0) {
+			this.gravityYStep = this.map.gravityY;
+		}
 
 		if (!this.dir) {
 			this.dir = Lucid.BaseEntity.DIR.DOWN;
@@ -455,7 +463,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 									if (collisionX) {
 										this.gravityXAccelerationStep = 0;
 									} else {
-										this.gravityXAccelerationStep = 0;
+										this.gravityYAccelerationStep = 0;
 									}
 								}
 							}
@@ -560,7 +568,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 								if (collisionX) {
 									this.gravityXAccelerationStep = 0;
 								} else {
-									this.gravityXAccelerationStep = 0;
+									this.gravityYAccelerationStep = 0;
 								}
 							}
 						}

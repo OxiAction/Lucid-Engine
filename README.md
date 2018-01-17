@@ -13,12 +13,14 @@ The engine supports top-down (RPG style) games, as well as side-scroll (platform
 Of course this engine supports both: Mobile devices and desktop computers.
 
 ## Open tasks & nice to have:
-* dynamic loading of JavaScript files on demand (require-style)
+* side-scrolling mode has some minor bugs
 * basic editor and its forms
 * animation manager
 * map related events triggering
-* more advanced physics for the entities (like bouncing)
+* more AI modules and options
+* more advanced physics for the entities (like bouncing, weight)
 * sounds / music
+* dynamic loading of JavaScript files on demand (require-style)
 * user management and dynamic spawning of user-entities
 * resolving all the TODO sections in the code
 * a nice demo game
