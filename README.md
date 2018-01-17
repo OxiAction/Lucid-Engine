@@ -22,7 +22,7 @@ Of course this engine supports both: Mobile devices and desktop computers.
 * user management and dynamic spawning of user-entities
 * resolving all the TODO sections in the code
 * a nice demo game
-* extended JSDoc
+* extended [[JSDoc]](http://usejsdoc.org/)
 
 ## Code Details & Coding Conventions
 The best way to work on this project is, by using the famous [[Sublime Text]](https://www.sublimetext.com/) editor. 
