@@ -30,7 +30,7 @@ The best way to work on this project is, by using the famous [[Sublime Text]](ht
 * getter and setters are **only** used for complex data types (e.g. Objects like Camera, Map etc.) but **not** for primitive data types (e.g. string, number) **unless** there is some good reason for it (e.g. you need to manipulate something when setting / getting)
 * for notifications / messaging we use the [[Publish–subscribe pattern]](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) and the corresponding Lucid.Event class.
 * use the official [[JSDoc]](http://usejsdoc.org/) documentation guidelines
-* install [[DoxyDoxygen]](https://github.com/20Tauri/DoxyDoxygen), which makes documentation in Sublime Text 3 easy and continuous
+* install [[DoxyDoxygen]](https://github.com/20Tauri/DoxyDoxygen), which makes documentation in [[Sublime Text]](https://www.sublimetext.com/) easy and continuous
 * use the following Sublime Text 3 snippet, to create your own Engine plugins:
 ```xml
 <snippet>
