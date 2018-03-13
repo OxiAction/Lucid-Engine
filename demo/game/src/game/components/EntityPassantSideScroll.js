@@ -104,11 +104,12 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 	processHandleKeyUpDown: function(code, move) {
 		switch (code) {
 			case Lucid.Input.KEYS["LEFT_ARROW"]:
+				this.assetY = 48;
 				this.setMoveDirection(Lucid.BaseEntity.DIR.LEFT, move);
-
 				break;
 
 			case Lucid.Input.KEYS["RIGHT_ARROW"]:
+				this.assetY = 96;
 				this.setMoveDirection(Lucid.BaseEntity.DIR.RIGHT, move);
 				break;
 
@@ -154,16 +155,6 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 	renderUpdate: function(delta) {
 		if (!this.getActive()) {
 			return;
-		}
-		
-		switch (this.dir) {
-			case Lucid.BaseEntity.DIR.RIGHT:
-				this.assetY = 96;
-			break;
-
-			case Lucid.BaseEntity.DIR.LEFT:
-				this.assetY = 48;
-			break;
 		}
 		
 		this._super(delta);
