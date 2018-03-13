@@ -25,6 +25,7 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 
 		this.checkSetMap();
 		this.checkSetCamera();
+		this.checkSetEngine();
 
 		return true;
 	},
@@ -65,6 +66,17 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 			for (var row = startRow; row <= endRow; ++row) {
 
 				var tileNumber = this.data[row][column];
+
+				if (Lucid.Debug.getMapCollidingTiles()) {
+					var layerCollision = this.engine.getLayerCollision();
+					var layerCollisionData = layerCollision.getData();
+
+					if (layerCollisionData[row][column]) {
+						this.canvasContext.fillStyle = "red";
+						this.canvasContext.fillRect(column * tileSize - this.camera.x, row * tileSize - this.camera.y, tileSize, tileSize);
+						continue;
+					}
+				}
 
 				// zero => empty tile
 				if (tileNumber !== 0) {

@@ -96,13 +96,15 @@ Lucid.Math = function() {
 		 *                       (the new x-position for box1), y (the new
 		 *                       y-position for box1), collisionX (true if there
 		 *                       was x-axis collision), collisionY (true if
-		 *                       there was y-axis collision)
+		 *                       there was y-axis collision), originFromDir (the
+		 *                       original direction, box1 is coming from)
 		 */
 		getCollisionDataBoxVsBox: function(box1, box2) {
 			var x = box1.x;
 			var y = box1.y;
 			var collisionX = false;
 			var collisionY = false;
+			var originFromDir = null;
 
 			// is box1 overlapping box2?
 			if (box1.x < box2.x + box2.width &&
@@ -114,22 +116,26 @@ Lucid.Math = function() {
 				if (box1.lastX + box1.width <= box2.x) {
 					x = box2.x - box1.width;
 					collisionX = true;
+					originFromDir = "left";
 				}
 				// box1 comes from the right side
 				else if (box1.lastX >= box2.x + box2.width) {
 					x = box2.x + box2.width;
 					collisionX = true;
+					originFromDir = "right";
 				}
 
 				// box1 comes from the up side
 				if (box1.lastY + box1.height <= box2.y) {
 					y = box2.y - box1.height;
 					collisionY = true;
+					originFromDir = "up";
 				}
 				// box1 comes from the down side
 				else if (box1.lastY >= box2.y + box2.height) {
 					y = box2.y + box2.height;
 					collisionY = true;
+					originFromDir = "down";
 				}
 			}
 
@@ -137,7 +143,8 @@ Lucid.Math = function() {
 				x: x,
 				y: y,
 				collisionX: collisionX,
-				collisionY: collisionY
+				collisionY: collisionY,
+				originFromDir: originFromDir
 			};
 		},
 

@@ -11,6 +11,9 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 
 	gravityChangeTimeout: null,
 
+	orgGravityYStep: null,
+	allowJump: true,
+
 	init: function(config) {
 		this.componentName = "EntityPassantSideScroll";
 		this.width = 32;
@@ -34,6 +37,9 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 
 		this.camera.setFollowTarget(this, true);
 
+		// save original gravity
+		this.orgGravityYStep = this.gravityYStep;
+
 		return true;
 	},
 
@@ -47,6 +53,19 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 			if (layerEntities) {
 				layerEntities.removeEntity(item.getID());
 			}
+		}
+
+		// touching some surface above -> deny further jumping and reset jump
+		// state
+		if (collisionData.originFromDir == "down") {
+			this.allowJump = false;
+			window.clearTimeout(this.gravityChangeTimeout);
+			this.gravityYStep = this.orgGravityYStep;
+			this.setMoveDirection(Lucid.BaseEntity.DIR.UP, false);
+		}
+		// touching ground -> allow jump again
+		else if (collisionData.originFromDir == "up") {
+			this.allowJump = true;
 		}
 	},
 
@@ -96,18 +115,14 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 			case Lucid.Input.KEYS["UP_ARROW"]:
 				if (!move) {
 					this.setMoveDirection(Lucid.BaseEntity.DIR.UP, move);
-				} else {
-					if (this.gravityYAccelerationStep <= 1) {
+				} else if (this.gravityYAccelerationStep <= 1 && this.allowJump) {
+					this.gravityYStep = -0.1;
 
-						var tmpGravity = this.gravityYStep;
-						this.gravityYStep = -0.1;
-
-						this.gravityChangeTimeout = window.setTimeout(function() {
-							this.gravityYStep = tmpGravity;
-						}.bind(this), 300);
-						
-						this.setMoveDirection(Lucid.BaseEntity.DIR.UP, move);
-					}
+					this.gravityChangeTimeout = window.setTimeout(function() {
+						this.gravityYStep = this.orgGravityYStep;
+					}.bind(this), 300);
+					
+					this.setMoveDirection(Lucid.BaseEntity.DIR.UP, move);
 				}
 				break;
 

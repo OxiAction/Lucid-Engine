@@ -26,10 +26,11 @@ function Game() {
 
 	// set-up debugging related stuff
 	Lucid.Debug.setEngineFPS(true);
-	Lucid.Debug.setMapTileSizeGrid(false);
+	Lucid.Debug.setMapTileSizeGrid(true);
 	Lucid.Debug.setEntityHitBox(false);
-	Lucid.Debug.setAISightRadius(false);
-	Lucid.Debug.setAILineOfSight(false);
+	Lucid.Debug.setAISightRadius(true);
+	Lucid.Debug.setAILineOfSight(true);
+	Lucid.Debug.setMapCollidingTiles(false);
 
 	// init engine
 	var engine = new Lucid.Engine();
@@ -101,5 +102,5 @@ function Game() {
 	});
 
 	// for testing purpose...
-	// engine.loadMap("map2");
+	engine.loadMap("map2");
 }
