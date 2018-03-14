@@ -76,10 +76,10 @@ Lucid.Loader = function() {
 			Lucid.Utils.log("Loader @ loadNext: attempting to load item - id: " + item.id + " filePath: " + item.filePath);
 
 			// the success function
-			function success(data) {
+			function success(request) {
 					Lucid.Utils.log("Loader @ loadNext: success loading item - id: " + item.id);
 
-					item.setData(data);
+					item.setData(request);
 					item.setLoaded(true);
 
 					loaded[item.id] = item;
@@ -89,7 +89,7 @@ Lucid.Loader = function() {
 			}
 
 			// the error function
-			function error(data) {
+			function error(request) {
 					Lucid.Utils.log("Loader @ loadNext: error loading item - id: " + item.id);
 					Lucid.Event.trigger(item.eventErrorName, item);
 					this.loadNext();
@@ -102,7 +102,6 @@ Lucid.Loader = function() {
 					image.onerror = error.bind(this);
 					image.src = item.filePath;
 			} else {
-					// $.loadFile(item.filePath, item.dataType, success.bind(this), error.bind(this));
 					Lucid.Utils.loadFile(item.filePath, item.dataType, success.bind(this), error.bind(this));
 			}
 		},
@@ -116,7 +115,7 @@ Lucid.Loader = function() {
 		 */
 		get: function(id) {
 			if (id in loaded) {
-					return loaded[id];
+				return loaded[id];
 			}
 
 			return null;

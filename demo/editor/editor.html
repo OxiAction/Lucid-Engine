@@ -28,7 +28,6 @@
 	<script src="src/vendor/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="src/vendor/jquery-ui.min.js" type="text/javascript"></script>
 	<script src="src/vendor/easystar-0.4.1.js" type="text/javascript"></script>
-	<script src="src/vendor/easystar-0.4.1.js" type="text/javascript"></script>
 
 	<!-- Engine -->
 	<script src="../../src/engine/misc/Debug.js" type="text/javascript"></script>
@@ -60,22 +59,22 @@
 	<script src="../../src/engine/components/layers/LayerEvents.js" type="text/javascript"></script>
 	<script src="../../src/engine/components/layers/data/BaseEntity.js" type="text/javascript"></script>
 
-	<!-- Game -->
-	<script src="src/game/Game.js" type="text/javascript"></script>
-	<script src="src/game/components/LayerMenu.js" type="text/javascript"></script>
-	<script src="src/game/components/LayerUI.js" type="text/javascript"></script>
-	<script src="src/game/components/EntityFighter.js" type="text/javascript"></script>
-	<script src="src/game/components/EntityPassant.js" type="text/javascript"></script>
-	<script src="src/game/components/EntityPotion.js" type="text/javascript"></script>
-
 	<!-- Editor -->
 	<script src="src/editor/Editor.js" type="text/javascript"></script>
+
+	<!-- Game -->
+	<script src="../game/src/game/components/LayerMenu.js" type="text/javascript"></script>
+	<script src="../game/src/game/components/LayerUI.js" type="text/javascript"></script>
+	<script src="../game/src/game/components/EntityFighter.js" type="text/javascript"></script>
+	<script src="../game/src/game/components/EntityPassant.js" type="text/javascript"></script>
+	<script src="../game/src/game/components/EntityPassantSideScroll.js" type="text/javascript"></script>
+	<script src="../game/src/game/components/EntityPotion.js" type="text/javascript"></script>
 
 <!-- <<< JAVASCRIPT -->
 </head>
 
 <body>
-	<div id="topbar">TOPBAR</div>
+	<div id="topbar">Lucid Editor</div>
 	<div id="content">
 		<div id="engine-container">
 			<canvas id="engine-canvas">Sorry - your Broswer does NOT support the game. Please update your Browser.</canvas>
@@ -87,17 +86,9 @@
 				<label for="select-map">Select a map:</label>
 				<select name="select-map" id="select-map">
 					<option value="" selected="selected">...</option>
-					<option value="Map1">Map 1</option>
-					<option value="Map2">Map 2</option>
 				</select>
 			</fieldset>
 		</form>
-		CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>
-		CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>
-		CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>
-		CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>
-		CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>
-		CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT<br/><br/>CONTENT
 	</div>
 	<div id="bottombar">v 0.1 alpha</div>
 </body>

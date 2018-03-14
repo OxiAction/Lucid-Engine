@@ -1,10 +1,8 @@
 ![Lucid Logo](/assets/lucid_logo_small.jpg?raw=true "Lucid Logo")
 
 ## Preview
-This is a preview of the Lucid Engine running a simple test game:
+This is a preview of the Lucid Engine running a simple demo:
 [[A simple test game]](https://htmlpreview.github.io/?https://github.com/OxiAction/Lucid-Engine/master/demo/game/game.html)
-
-Important: This may **not** be an up-to-date build (its a seperate **public** repo - which is required for rendering the preview).
 
 ## What is Lucid Engine?
 A 2D game engine, written in JavaScript.<br />

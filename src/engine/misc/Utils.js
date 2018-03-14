@@ -105,21 +105,19 @@ Lucid.Utils = function() {
 			request.open("GET", url + "?" + Date.now(), true);
 
 			request.onload = function() {
-				var responseText = request.responseText;
-
 				if (request.status >= 200 && request.status < 400) {
 					// success!
 					if (dataType == "script") {
 						var script = document.createElement("script");
 						script.type = "text/javascript";
-						script.text = responseText;
+						script.text = request.responseText;
 						document.body.appendChild(script);
 					}
 
-					success(responseText);
+					success(request);
 				} else {
 					// We reached our target server, but it returned an error
-					error(responseText);
+					error(request);
 				}
 			};
 

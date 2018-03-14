@@ -35,17 +35,21 @@ Lucid.LoaderItem = Lucid.BaseComponent.extend({
 	/**
 	 * Sets the data.
 	 *
-	 * @param      {Object}  value   The value which then will proceeded -
-	 *                               depending on dataType.
+	 * @param      {Object}          data     The data which then will proceeded -
+	 *                                        depending on dataType.
+	 * @param      {XMLHttpRequest}  request  The XMLHttpRequest Object.
 	 */
-	setData: function(value) {
+	setData: function(request) {
+		var data = null;
 		if (this.dataType == Lucid.Loader.TYPE.XML) {
-				value = $(value);
+				data = request.responseXML;
 		} else if (this.dataType == Lucid.Loader.TYPE.IMAGE) {
-				value = value.target;
+			data = request.target;
+		} else {
+			data = request;
 		}
 
-		this.data = value;
+		this.data = data;
 	},
 
 	/**
