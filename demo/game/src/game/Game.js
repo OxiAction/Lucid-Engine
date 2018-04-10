@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
    // setup
-	Lucid.Utils.setDebug(0);
+	Lucid.Utils.setDebug(1);
 
 	// check support
 	if (!Lucid.Utils.engineSupported()) {
@@ -31,6 +31,26 @@ function Game() {
 	Lucid.Debug.setAISightRadius(true);
 	Lucid.Debug.setAILineOfSight(true);
 	Lucid.Debug.setMapCollidingTiles(false);
+
+	/*
+	Lucid.Pathfinding.setGrid([
+						[0, 0, 0, 0, 0, 0],
+						[0, 0, 0, 0, 0, 0],
+						[0, 0, 0, 0, 0, 0],
+						[0, 0, 0, 0, 0, 0],
+						[0, 0, 0, 0, 0, 0],
+						[0, 0, 0, 0, 0, 0],
+						[1, 0, 0, 0, 0, 0]
+					]);
+
+	Lucid.Pathfinding.findPath(0, 0, 5, 6, function(resultPath) {
+		console.log("resultPath: ");
+		console.log(resultPath);
+	});
+
+	Lucid.Pathfinding.calculate();
+	return;
+	*/
 
 	// init engine
 	var engine = new Lucid.Engine();
@@ -102,5 +122,5 @@ function Game() {
 	});
 
 	// for testing purpose...
-	// engine.loadMap("map2");
+	engine.loadMap("map3");
 }

@@ -1,0 +1,87 @@
+/*JSON[*/
+Lucid.data.maps.map3 = {
+	config: {
+		id: "map3",
+		name: "Map 3",
+		cols: 12,
+		rows: 6,
+		tileSize: 64,
+		assetFilePath: "assets/map1_tiles.png",
+		gravityX: 0,
+		gravityY: 0,
+
+		// layers
+		layers: [
+			{
+				config: {
+					z: 10,
+					id: "layer-background",
+					render: 1,
+					type: Lucid.BaseLayer.TYPE.TILESET,
+					data: [
+						[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+						[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+						[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+						[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+						[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+						[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+					]
+				}
+			},
+			{
+				config: {
+					z: 11,
+					id: "layer-entities",
+					render: 1,
+					type: Lucid.BaseLayer.TYPE.ENTITIES,
+					data: [
+						{
+							id: "passant1",
+							componentName: "EntityPassant",
+							x: 670,
+							y: 250,
+							colliding: 1,
+							render: 1,
+							snapToGrid: 1,
+							team: 1,
+							type: Lucid.BaseEntity.TYPE.UNIT
+						}
+					]
+				}
+			},
+			{
+				config: {
+					z: 13,
+					id: "layer-foreground",
+					render: 1,
+					type: Lucid.BaseLayer.TYPE.TILESET,
+					data: [
+						[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+						[6, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 6],
+						[6, 0, 0, 0, 0, 6, 0, 0, 6, 0, 0, 6],
+						[6, 0, 0, 6, 0, 6, 0, 0, 0, 6, 0, 6],
+						[6, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 6],
+						[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
+					]
+				}
+			},
+			{
+				config: {
+					z: 14,
+					id: "layer-collision",
+					render: 1,
+					type: Lucid.BaseLayer.TYPE.COLLISION,
+					data: [
+						[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+						[1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+						[1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+						[1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1],
+						[1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+						[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+					]
+				}
+			}
+		]
+	}
+};
+/*]JSON*/
