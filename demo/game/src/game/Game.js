@@ -32,6 +32,8 @@ function Game() {
 	Lucid.Debug.setAILineOfSight(true);
 	Lucid.Debug.setMapCollidingTiles(false);
 
+	Lucid.Pathfinding.setUseDiagonals(true);
+
 	/*
 	Lucid.Pathfinding.setGrid([
 						[0, 0, 0, 0, 0, 0],
