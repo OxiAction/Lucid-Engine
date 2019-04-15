@@ -29,7 +29,9 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	healthMax: 100, // maximum health
 	assetFilePath: null, // full path to an asset
 	name: "Unknown", // name
-	speed: 1, // movement speed of the entity
+	mass: 80, // mass in kg
+	force: 1, // collision force - higher force values may move lower force values
+	speed: 10, // movement speed of the entity
 	vulnerable: true, // if set to false entity is immortal (cant loose any health / die)
 	render: true, // determines if the content is rendered
 	colliding: true, // does it collide with collisionData?
@@ -80,8 +82,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	gravityYAccelerationStep: 0, // the current step y
 
 	accelerationUpStep: 0.1, // for speed-up
-	accelerationDownStep: 0.2, // for breaking
-	accelerationMax: 1, // maximum for acceleration - this shouldnt be higher than 1!
+	accelerationDownStep: 0.1, // for breaking
+	accelerationMax: 1.5, // maximum for acceleration - this shouldnt be higher than 1!
 	accelerationX: 0, // current acceleration on x-axis
 	accelerationY: 0, // current acceleration on y-axis
 
@@ -352,10 +354,10 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 
 		if (!movementX && this.accelerationX != 0) {
 			if (this.accelerationX < 0) {
-				this.accelerationX = Math.min(0, this.accelerationX + this.accelerationDownStep);
-			} else {
-				this.accelerationX = Math.max(0, this.accelerationX - this.accelerationDownStep);
-			}
+				this.accelerationX = Math.max(-this.accelerationMax, Math.min(0, this.accelerationX + this.accelerationDownStep));
+			} else if (this.accelerationX > 0) {
+				this.accelerationX = Math.min(this.accelerationMax, Math.max(0, this.accelerationX - this.accelerationDownStep));
+			}	
 		}
 
 		var movementY = false;
@@ -373,9 +375,9 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 
 		if (!movementY && this.accelerationY != 0) {
 			if (this.accelerationY < 0) {
-				this.accelerationY = Math.min(0, this.accelerationY + this.accelerationDownStep);
+				this.accelerationY = Math.min(0, Math.max(-this.accelerationMax, this.accelerationY + this.accelerationUpStep));
 			} else {
-				this.accelerationY = Math.max(0, this.accelerationY - this.accelerationDownStep);
+				this.accelerationY = Math.max(0, Math.min(this.accelerationMax, this.accelerationY - this.accelerationUpStep));
 			}
 		}
 
@@ -405,6 +407,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 
 			var collisionX = false;
 			var collisionY = false;
+			var originFromDir = null;
 
 			newX = lastX;
 			newY = lastY;
@@ -438,8 +441,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 
 							// dont collide against self AND only collide against entities with
 							// the colliding property true
-							if (entity != this && entity.colliding) {
-
+							if (entity != this && entity.colliding && entity != null) {
 								// gather collision data...
 								var collisionData = Lucid.Math.getCollisionDataBoxVsBox({
 									x: newX,
@@ -455,15 +457,24 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 								newY = collisionData.y;
 								collisionX = collisionData.collisionX;
 								collisionY = collisionData.collisionY;
+								originFromDir = collisionData.originFromDir;
 
 								// trigger collision event
-								if (collisionX || collisionY) {
+								if (originFromDir) {
 									Lucid.Event.trigger(Lucid.BaseEntity.EVENT.COLLISION, this, entity, collisionData);
 
 									if (collisionX) {
 										this.gravityXAccelerationStep = 0;
+
+										if (this.force >= entity.force) {
+											entity.accelerationX = (this.mass * this.accelerationX + entity.mass * entity.accelerationX) / (this.mass + entity.mass);
+										}
 									} else {
 										this.gravityYAccelerationStep = 0;
+
+										if (this.force >= entity.force) {
+											entity.accelerationY = (this.mass * this.accelerationY + entity.mass * entity.accelerationY) / (this.mass + entity.mass);
+										}
 									}
 								}
 							}
@@ -566,8 +577,10 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 								Lucid.Event.trigger(Lucid.BaseEntity.EVENT.COLLISION, this, collidingGridEntry, collisionData);
 
 								if (collisionX) {
+									this.accelerationX = 0;
 									this.gravityXAccelerationStep = 0;
 								} else {
+									this.accelerationY = 0;
 									this.gravityYAccelerationStep = 0;
 								}
 							}

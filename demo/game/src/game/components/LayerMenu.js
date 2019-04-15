@@ -41,6 +41,12 @@ var LayerMenu = Lucid.BaseLayer.extend({
 			label: "MAP 2",
 			active: true,
 			go: "map#map2"
+		},
+
+		map3: {
+			label: "MAP 3",
+			active: true,
+			go: "map#map3"
 		}
 	},
 

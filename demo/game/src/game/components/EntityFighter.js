@@ -43,7 +43,7 @@ var EntityFighter = Lucid.BaseEntity.extend({
 		this.aiModuleFollow = new Lucid.AIModuleFollow();
 		ai.addModule(this.aiModuleFollow);
 
-		// this.setAI(ai);
+		this.setAI(ai);
 
 		return true;
 	},

@@ -124,5 +124,5 @@ function Game() {
 	});
 
 	// for testing purpose...
-	engine.loadMap("map3");
+	engine.loadMap("map1");
 }

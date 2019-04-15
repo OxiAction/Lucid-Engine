@@ -29,16 +29,6 @@ Lucid.Pathfinding = function() {
 	return {
 		// See for various grid heuristics:
 		// http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html#S7
-		// L_\inf norm (diagonal distance)
-		// linf_norm: function(x1, y1, x2, y2) {
-		//   return Math.max(Math.abs(x1 - x2), Math.abs(y1 - y2));
-		// },
-
-		// // L_1 norm (manhattan distance)
-		// l1_norm: function(x1, y1, x2, y2) {
-		//   return Math.abs(x1 - x2) + Math.abs(y1 - y2);
-		// },
-
 		getDistanceManhatten(x1, y1, x2, y2) {
 			return Math.abs(x1 - x2) + Math.abs(y1 - y2);
 		},

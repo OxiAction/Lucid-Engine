@@ -55,6 +55,28 @@ Lucid.data.maps.map2 = {
 							type: Lucid.BaseEntity.TYPE.UNIT
 						},
 						{
+							id: "fighter1",
+							componentName: "EntityFighter",
+							x: 200,
+							y: 200,
+							colliding: 1,
+							render: 1,
+							snapToGrid: 1,
+							team: 2,
+							type: Lucid.BaseEntity.TYPE.UNIT
+						},
+						{
+							id: "fighter2",
+							componentName: "EntityFighter",
+							x: 1000,
+							y: 200,
+							colliding: 1,
+							render: 1,
+							snapToGrid: 1,
+							team: 2,
+							type: Lucid.BaseEntity.TYPE.UNIT
+						},
+						{
 							id: "potion1",
 							componentName: "EntityPotion",
 							x: 470,
