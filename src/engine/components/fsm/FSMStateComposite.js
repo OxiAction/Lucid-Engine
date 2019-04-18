@@ -23,7 +23,7 @@ Lucid.FSMStateComposite = Lucid.FSMState.extend({
 	 * TODO description
 	 */
 	update: function() {
-		if (this.getActiveState() == null) {
+		if (!this.getActiveState()) {
 			return false;
 		}
 
@@ -32,25 +32,31 @@ Lucid.FSMStateComposite = Lucid.FSMState.extend({
 		// fetch transitions from this active (child) state
 		transitions = this.getActiveState().getTransitions();
 		
-		if (typeof transitions !== 'undefined' && transitions.length > 0) {
+		// sanity check
+		if (transitions.length > 0) {
 
 			for (i = 0; i < transitions.length; ++i) {
 				var transition = transitions[i];
 				
 				if (transition && this.getFSM().eventName == transition.eventName) {
-					// get new toState from transition ...
+					// get fromState and new toState from transition
+					fromState = transition.getFromState();
 					toState = transition.getToState();
 
-					// ... and set it as currently active state
-					this.setActiveState(toState);
+					// leave fromState (possible recursion)
+					fromState.leave();
 
+					// debug
 					Lucid.Utils.log("FSMStateComposite @ update transition details:\neventName -> " + this.getFSM().eventName + "\ndeactivate -> " + transition.getFromState().componentName + "\nactivate -> " + transition.getToState().componentName);
 
-					// set the toState active state to the default state (if available)
+					// set toState as currently active state
+					this.setActiveState(toState);
+
+					// set toState active state to its default state (if available)
 					if (toState.getDefaultState() != null) {
 						toState.setActiveState(toState.getDefaultState());
 					}
-
+					
 					// execute / update the new toState (possible recursion)
 					toState.execute();
 					toState.update();
@@ -65,13 +71,6 @@ Lucid.FSMStateComposite = Lucid.FSMState.extend({
 		
 		this.getActiveState().execute();
 		this.getActiveState().update();
-	},
-
-	/**
-	 * Execute the composite state.
-	 */
-	execute: function() {
-		// ...
 	},
 
 	/**

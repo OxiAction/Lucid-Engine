@@ -15,12 +15,5 @@ Lucid.FSMStateAtomic = Lucid.FSMState.extend({
 		this._super(config);
 
 		return true;
-	},
-
-	/**
-	 * Execute the atomic state.
-	 */
-	execute: function() {
-		// ...
 	}
 });

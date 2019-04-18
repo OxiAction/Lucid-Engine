@@ -18,18 +18,21 @@ var AIFSMFighter = Lucid.FSM.extend({
 			return false;
 		}
 
-		// states
+	// root (AI)
+
 		this.root = new Lucid.FSMStateComposite({
 			componentName: "AI",
 			fsm: this
 		});
 
-		var movement = new Lucid.FSMStateComposite({
+	// movement setup
+
+		var movement = new AIFSMStateMovement({
 			componentName: "Movement",
-			fsm: this
+			fsm: this,
+			ai: this.ai
 		});
 
-		// movement setup
 		var idle = new AIFSMStateIdle({
 			componentName: "Idle",
 			fsm: this,
@@ -54,11 +57,52 @@ var AIFSMFighter = Lucid.FSM.extend({
 
 		movement.addChildState(idle);
 		movement.addChildState(approach);
+
 		// default
 		movement.setDefaultState(idle);
 
 		this.root.addChildState(movement);
+
+	// combat setup
+
+		var combat = new AIFSMStateCombat({
+			componentName: "Combat",
+			fsm: this,
+			ai: this.ai
+		});
+
+		var attack = new AIFSMStateAttack({
+			componentName: "Attack",
+			fsm: this,
+			ai: this.ai
+		});
+
+		combat.addChildState(attack);
+
 		// default
+		combat.setDefaultState(attack);
+
+		this.root.addChildState(combat);
+
+	// transition(s) between movement and combat
+
+		movement.addTransition(new Lucid.FSMTransition({
+			toState: combat,
+			eventName: AIFSMFighter.EVENTS.ENEMY_IS_IN_RANGE
+		}));
+
+		combat.addTransition(new Lucid.FSMTransition({
+			toState: movement,
+			eventName: AIFSMFighter.EVENTS.ENEMY_NOT_IN_RANGE
+		}));
+		// or
+		combat.addTransition(new Lucid.FSMTransition({
+			toState: movement,
+			eventName: AIFSMFighter.EVENTS.ENEMY_DEAD
+		}));
+
+	// start
+
 		this.root.setDefaultState(movement);
 		this.root.setActiveState(movement);
 
@@ -103,4 +147,6 @@ AIFSMFighter.EVENTS = {
 	ENEMY_IS_IN_LINE_OF_SIGHT: "enemyIsInLineOfSight",
 	ENEMY_NOT_IN_LINE_OF_SIGHT: "enemyNotInLineOfSight",
 	ENEMY_DEAD: "enemyDead",
+	ENEMY_IS_IN_RANGE: "enemyIsInRange",
+	ENEMY_NOT_IN_RANGE: "enemyNotInRange"
 };

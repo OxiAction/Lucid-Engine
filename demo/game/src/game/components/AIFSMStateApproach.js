@@ -56,8 +56,6 @@ var AIFSMStateApproach = Lucid.FSMStateAtomic.extend({
 		}
 
 		if (!foundEntityOfAnotherTeam) {
-			this.stopFollow(originEntity);
-
 			// change state of fsm
 			this.fsm.eventName = AIFSMFighter.EVENTS.ENEMY_NOT_IN_LINE_OF_SIGHT;
 		}
@@ -83,5 +81,11 @@ var AIFSMStateApproach = Lucid.FSMStateAtomic.extend({
 		if (tmpPath) {
 			// TODO Lucid.Event.trigger(..., originEntity);
 		}
+	},
+
+	leave: function() {
+		this._super();
+
+		this.stopFollow(this.ai.getOriginEntity());
 	}
 });

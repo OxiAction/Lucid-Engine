@@ -41,6 +41,19 @@ Lucid.FSMState = Lucid.BaseComponent.extend({
 	 * See FSMStateComposite's update method.
 	 */
 	update: function() {
+		// ...
+	},
+
+	/**
+	 * This method is getting called, if this state is left.
+	 * This also notifies recursively other (underlying) active states!
+	 */
+	leave: function() {
+		Lucid.Utils.log("FSMState @ leave: " + this.componentName);
+
+		if (this.getActiveState()) {
+			this.getActiveState().leave();
+		}
 	},
 
 	/**

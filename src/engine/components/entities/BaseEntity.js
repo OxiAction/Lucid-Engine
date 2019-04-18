@@ -19,6 +19,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	sightRadius: 300, // sight radius in pixels
 	assetFilePath: null, // full path to an asset
 	name: "Unknown", // name
+	minimumAttackRange: 100, // the minimum distance between the attacker and the victim to trigger an attack
 	mass: 80, // mass in kg
 	force: 1, // collision force - higher force values may move lower force values
 	speed: 10, // movement speed of the entity
