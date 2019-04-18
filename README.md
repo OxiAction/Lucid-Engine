@@ -1,7 +1,8 @@
 ![Lucid Logo](/assets/lucid_logo_small.jpg?raw=true "Lucid Logo")
 
 ## Preview
-Unfortunately, the Live Preview does not work anymore since GitHub has explicitly disabled JavaScript hotlinking by introducing **X-Content-Type-Options: nosniff**. Currently working on a solution to provide a Live Preview (again).
+This is a preview of the Lucid Engine running a simple demo:
+[[A simple test game]](https://oxiaction.github.io/Lucid-Engine/demo/game/game.html)
 
 ## What is Lucid Engine?
 A 2D game engine, written in JavaScript.<br />
