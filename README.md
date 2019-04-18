@@ -2,7 +2,7 @@
 
 ## Preview
 This is a preview of the Lucid Engine running a simple demo:
-[[A simple test game]](https://oxiaction.github.io/Lucid-Engine/demo/game/game.html)
+[[Click Me :)]](https://oxiaction.github.io/Lucid-Engine/demo/game/game.html)
 
 ## What is Lucid Engine?
 A 2D game engine, written in JavaScript.<br />
