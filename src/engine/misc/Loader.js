@@ -9,7 +9,7 @@ var Lucid = Lucid || {};
  * @return     {Object}  Returns object with public methods.
  */
 Lucid.Loader = function() {
-	// private variables
+	// local variables
 	var instance = null;
 	var loaded = {};
 	var loadingQueue = [];

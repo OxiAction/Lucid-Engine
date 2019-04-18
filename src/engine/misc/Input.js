@@ -8,7 +8,7 @@ var Lucid = Lucid || {};
  * @return     {Object}  Public methods.
  */
 Lucid.Input = function() {
-	// private variables
+	// local variables
 	var target = null;
 	var pressed = {};
 	var position = {

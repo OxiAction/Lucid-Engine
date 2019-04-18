@@ -27,21 +27,15 @@ var EntityFighter = Lucid.BaseEntity.extend({
 
 		Lucid.Event.bind(Lucid.BaseEntity.EVENT.COLLISION + this.componentNamespace, this.handleCollision.bind(this));
 
-		Lucid.Event.bind(Lucid.AIModuleAttack.EVENT.START_ATTACK + this.componentNamespace, this.handleStartAttack.bind(this));
-		Lucid.Event.bind(Lucid.AIModuleAttack.EVENT.STOP_ATTACK + this.componentNamespace, this.handleStopAttack.bind(this));
-
-		Lucid.Event.bind(Lucid.AIModuleFollow.EVENT.START_FOLLOW + this.componentNamespace, this.handleStartFollow.bind(this));
-		Lucid.Event.bind(Lucid.AIModuleFollow.EVENT.STOP_FOLLOW + this.componentNamespace, this.handleStopFollow.bind(this));
-		
 		var ai = new Lucid.AI({
 			originEntity: this
 		});
 
-		this.aiModuleAttack = new Lucid.AIModuleAttack();
-		ai.addModule(this.aiModuleAttack);
+		var fsm = new AIFSMFighter({
+			ai: ai
+		});
 
-		this.aiModuleFollow = new Lucid.AIModuleFollow();
-		ai.addModule(this.aiModuleFollow);
+		ai.setFSM(fsm);
 
 		this.setAI(ai);
 
@@ -56,49 +50,9 @@ var EntityFighter = Lucid.BaseEntity.extend({
 		if (item.componentName == "EntityPotion") {
 			var layerEntities = this.engine.getLayerEntities();
 			if (layerEntities) {
-				layerEntities.removeEntity(item.getID());
+				layerEntities.removeEntity(item.id);
 			}
 		}
-	},
-
-	handleStartAttack: function(eventName, originEntity, targetEntity) {
-		if (originEntity != this) {
-			return;
-		}
-
-		Lucid.Utils.log("EntityFighter @ handleStartAttack");
-
-		this.aiModuleFollow.setActive(false);
-
-		if (originEntity.relativeCenterX < targetEntity.relativeCenterX) {
-			originEntity.dir = Lucid.BaseEntity.DIR.RIGHT;
-		}
-	},
-
-	handleStopAttack: function(eventName, originEntity) {
-		if (originEntity != this) {
-			return;
-		}
-
-		Lucid.Utils.log("EntityFighter @ handleStopAttack");
-
-		this.aiModuleFollow.setActive(true);
-	},
-
-	handleStartFollow: function(eventName, originEntity, targetEntity, path) {
-		if (originEntity != this) {
-			return;
-		}
-
-		Lucid.Utils.log("EntityFighter @ handleStartFollow");
-	},
-
-	handleStopFollow: function(eventName, originEntity) {
-		if (originEntity != this) {
-			return;
-		}
-		
-		Lucid.Utils.log("EntityFighter @ handleStopFollow");
 	},
 
 	updateAnim: function() {
@@ -127,19 +81,19 @@ var EntityFighter = Lucid.BaseEntity.extend({
 	renderDraw: function(interpolationPercentage) {
 		switch (this.dir) {
 			case Lucid.BaseEntity.DIR.RIGHT:
-				this.assetY = 96;
+			this.assetY = 96;
 			break;
 
 			case Lucid.BaseEntity.DIR.LEFT:
-				this.assetY = 48;
+			this.assetY = 48;
 			break;
 
 			case Lucid.BaseEntity.DIR.UP:
-				this.assetY = 144;
+			this.assetY = 144;
 			break;
 
 			default:
-				this.assetY = 0;
+			this.assetY = 0;
 		}
 
 		this._super(interpolationPercentage);

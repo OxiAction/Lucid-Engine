@@ -20,7 +20,6 @@
 <!-- JAVASCRIPT >>> -->
 
 	<!-- Vendor -->
-	<script src="src/vendor/easystar-0.4.1.js" type="text/javascript"></script>
 
 	<!-- Engine -->
 	<script src="../../src/engine/misc/Debug.js" type="text/javascript"></script>
@@ -33,16 +32,21 @@
 	<script src="../../src/engine/misc/Pathfinding.js" type="text/javascript"></script>
 
 	<script src="../../src/engine/components/BaseComponent.js" type="text/javascript"></script>
-	
-	<script src="../../src/engine/Engine.js" type="text/javascript"></script>
-	<script src="../../src/engine/components/LoaderItem.js" type="text/javascript"></script>
 	<script src="../../src/engine/components/Camera.js" type="text/javascript"></script>
+	<script src="../../src/engine/components/LoaderItem.js" type="text/javascript"></script>
 	<script src="../../src/engine/components/Map.js" type="text/javascript"></script>
 	
+	<script src="../../src/engine/Engine.js" type="text/javascript"></script>
+
 	<script src="../../src/engine/components/ai/AI.js" type="text/javascript"></script>
-	<script src="../../src/engine/components/ai/modules/BaseAIModule.js" type="text/javascript"></script>
-	<script src="../../src/engine/components/ai/modules/AIModuleAttack.js" type="text/javascript"></script>
-	<script src="../../src/engine/components/ai/modules/AIModuleFollow.js" type="text/javascript"></script>
+
+	<script src="../../src/engine/components/entities/BaseEntity.js" type="text/javascript"></script>
+
+	<script src="../../src/engine/components/fsm/FSM.js" type="text/javascript"></script>
+	<script src="../../src/engine/components/fsm/FSMState.js" type="text/javascript"></script>
+	<script src="../../src/engine/components/fsm/FSMStateAtomic.js" type="text/javascript"></script>
+	<script src="../../src/engine/components/fsm/FSMStateComposite.js" type="text/javascript"></script>
+	<script src="../../src/engine/components/fsm/FSMTransition.js" type="text/javascript"></script>
 
 	<script src="../../src/engine/components/layers/BaseLayer.js" type="text/javascript"></script>
 	<script src="../../src/engine/components/layers/LayerTileSet.js" type="text/javascript"></script>
@@ -50,7 +54,6 @@
 	<script src="../../src/engine/components/layers/LayerEntities.js" type="text/javascript"></script>
 	<script src="../../src/engine/components/layers/LayerUI.js" type="text/javascript"></script>
 	<script src="../../src/engine/components/layers/LayerEvents.js" type="text/javascript"></script>
-	<script src="../../src/engine/components/layers/data/BaseEntity.js" type="text/javascript"></script>
 
 	<!-- Game -->
 	<script src="src/game/Game.js" type="text/javascript"></script>
@@ -60,6 +63,9 @@
 	<script src="src/game/components/EntityPassant.js" type="text/javascript"></script>
 	<script src="src/game/components/EntityPassantSideScroll.js" type="text/javascript"></script>
 	<script src="src/game/components/EntityPotion.js" type="text/javascript"></script>
+	<script src="src/game/components/AIFSMFighter.js" type="text/javascript"></script>
+	<script src="src/game/components/AIFSMStateApproach.js" type="text/javascript"></script>
+	<script src="src/game/components/AIFSMStateIdle.js" type="text/javascript"></script>
 
 <!-- <<< JAVASCRIPT -->
 </head>

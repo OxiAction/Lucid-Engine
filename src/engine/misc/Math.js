@@ -8,7 +8,7 @@ var Lucid = Lucid || {};
  * @return     {Object}  Returns public methods.
  */
 Lucid.Math = function() {
-	// private variables
+	// local variables
 	// ...
 
 /**

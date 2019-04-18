@@ -215,9 +215,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 		this.loaded = false;
 		this.isBuild = false;
 
-		this._super();
-
-		return true;
+		return this._super();
 	}
 });
 

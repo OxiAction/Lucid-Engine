@@ -27,25 +27,5 @@ Lucid.LayerCollision = Lucid.LayerTileSet.extend({
 		this.checkSetCamera();
 
 		return true;
-	},
-
-	/**
-	 * Resize method. Usually called when the screen / browser dimensions have
-	 * changed.
-	 *
-	 * @param      {Object}  config  The configuration which must contain the
-	 *                               properties wWidth and wHeight.
-	 */
-	resize: function(config) {
-		this._super(config);
-	},
-
-	/**
-	 * Destroys the Layer and all its corresponding objects.
-	 *
-	 * @return     {Boolean}  Returns true on success.
-	 */
-	destroy: function() {
-		return this._super();
 	}
 });

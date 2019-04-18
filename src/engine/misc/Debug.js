@@ -8,7 +8,7 @@ var Lucid = Lucid || {};
  * @return     {Object}  Public methods.
  */
 Lucid.Debug = function() {
-	// private variables
+	// local variables
 	var enabled = false;
 	var layerDebug = null;
 

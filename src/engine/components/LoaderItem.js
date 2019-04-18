@@ -3,16 +3,16 @@
  */
 Lucid.LoaderItem = Lucid.BaseComponent.extend({
 	// config variables and their default values
-	id: null, // id - required
-	filePath: null, // filePath - required
+	id: null, // [required] unique identifier
+	filePath: null, // [required] filePath
+	eventSuccessName: null, // [required] event name which will be triggered on success
+	eventErrorName: null, // [required] event name which will be triggered on error
 	dataType: Lucid.Loader.TYPE.DEFAULT, // data type - use Lucid.Loader.TYPE.XXX
-	eventSuccessName: null, // event name which will be triggered on success - required
-	eventErrorName: null, // event name which will be triggered on error - required
 	extraData: null, // custom extra data which you can pass through
 
 	// local variables
 	loaded: false,
-	data: null,
+	data: null, // the actual content of the loaded item - see setData
 
 	/**
 		* Automatically called when instantiated.

@@ -3,9 +3,9 @@
  */
 Lucid.BaseLayer = Lucid.BaseComponent.extend({
 	// config variables and their default values
-	z: 0, // z-index!
-	id: null, // unique id
-	type: null, // type based on Lucid.BaseLayer.TYPE.XXX
+	id: null, // [required] unique id
+	type: null, // [required] type based on Lucid.BaseLayer.TYPE.XXX
+	z: 0, // z-index
 	image: null, // image data
 	data: null, // grid data
 	effects: null, // effects
@@ -32,12 +32,12 @@ Lucid.BaseLayer = Lucid.BaseComponent.extend({
 		this._super(config);
 
 		if (!this.id) {
-			Lucid.Utils.error("Layer @ init: id is null!");
+			Lucid.Utils.error("BaseLayer @ init: id is null!");
 			return false;
 		}
 
 		if (!this.type) {
-			Lucid.Utils.error("Layer @ init: type is null! Use Lucid.BaseLayer.TYPE.XXX as a type.");
+			Lucid.Utils.error("BaseLayer @ init: type is null! Use Lucid.BaseLayer.TYPE.XXX as a type.");
 			return false;
 		}
 
@@ -108,20 +108,18 @@ Lucid.BaseLayer = Lucid.BaseComponent.extend({
 	},
 
 	/**
-	 * Destroys the Layer and all its corresponding objects.
+	 * Destroys the BaseLayer and all its corresponding objects.
 	 *
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	destroy: function() {
-		Lucid.Utils.log("Layer @ destory: destroying Layer with id: " + this.id);
-
 		this.image = null;
 		this.map = null;
 		this.camera = null;
 		this.canvas = null;
 		this.canvasContext = null;
 
-		return true;
+		return this._super();
 	},
 
 /**

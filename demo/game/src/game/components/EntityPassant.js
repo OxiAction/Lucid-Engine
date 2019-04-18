@@ -45,7 +45,7 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		if (item.componentName == "EntityPotion") {
 			var layerEntities = this.engine.getLayerEntities();
 			if (layerEntities) {
-				layerEntities.removeEntity(item.getID());
+				layerEntities.removeEntity(item.id);
 			}
 		}
 	},

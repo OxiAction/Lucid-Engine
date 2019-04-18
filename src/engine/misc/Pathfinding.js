@@ -8,13 +8,6 @@ var Lucid = Lucid || {};
  * @return     {Object}  Returns public methods.
  */
 Lucid.Pathfinding = function() {
-	// initialize and config EasyStar.js
-	// @deprecated
-	// var easystar = new EasyStar.js();
-	// easystar.enableDiagonals();			// this should be fine and makes animation a bit smoother
-	// easystar.disableCornerCutting(); 	// we dont want to bug through objects!
-	// easystar.setAcceptableTiles([0]); 	// use zero values in the array as valid (walkable) tiles
-
 	var grid = null;
 	var gridWidth = 0;
 	var gridHeight = 0;

@@ -21,7 +21,7 @@ var Lucid = Lucid || {};
  * @return     {Object}  Public methods.
  */
 Lucid.Event = function() {
-	// private variables
+	// local variables
 	var events = {};
 
 /**

@@ -53,7 +53,7 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 		var entity;
 		for (var i = 0; i < this.entities.length; ++i) {
 			entity = this.entities[i];
-			if (entity.getID() == data.id) {
+			if (entity.id == data.id) {
 				Lucid.Utils.log("LayerEntities @ addEntity: entity with id " + data.id + " already exists!");
 				return null;
 			}
@@ -80,7 +80,7 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 	removeEntity: function(id) {
 		for (var i = 0; i < this.entities.length; ++i) {
 			var entity = this.entities[i];
-			if (entity.getID() == id) {
+			if (entity.id == id) {
 				this.entities.splice(i, 1);
 				entity.destroy();
 				entity = null;
@@ -203,14 +203,5 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 		}
 
 		this._super(config);
-	},
-
-	/**
-	 * Destroys the Layer and all its corresponding objects.
-	 *
-	 * @return     {Boolean}  Returns true on success.
-	 */
-	destroy: function() {
-		return this._super();
 	}
 });

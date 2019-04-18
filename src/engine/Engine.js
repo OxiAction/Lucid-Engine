@@ -484,7 +484,7 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 
 		Lucid.data.engine = null;
 
-		return true;
+		return this._super();
 	},
 
 	/**
@@ -545,7 +545,7 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 		Lucid.Event.bind(Lucid.Engine.EVENT.LOADED_MAP_FILE_SUCCESS + this.componentNamespace, function(eventName, loaderItem) {
 			this.cleanupMapLoading();
 
-			var mapFileName = loaderItem.getID();
+			var mapFileName = loaderItem.id;
 
 			// lets check if the currently loaded Map file is still the one required!
 			if (this.currentMapFileName && mapFileName != this.currentMapFileName) {

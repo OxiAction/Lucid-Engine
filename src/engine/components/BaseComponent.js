@@ -6,24 +6,15 @@ var Lucid = Lucid || {};
  */
 Lucid.BaseComponent = Class.extend({
 	// config variables and their default values
-	// @type       {String}
-	id: null,
-	// @type       {String}
-	type: null,
-	// @type       {Boolean}
-	active: true,
-	// @type       {Map}
-	map: null,
-	// @type       {Camera}
-	camera: null,
-	// @type       {Engine}
-	engine: null,
+	componentName: null, // [required] a name for this component
+	id: null, // identifier
+	active: true, // determines if this component is active or not
+	map: null, // reference to the current map - use checkSetMap()
+	camera: null, // reference to the current camera - use checkSetCamera()
+	engine: null, // reference to the current engine - use checkSetEngine()
 
 	// local variables
-	// component name
-	componentName: null,
-	// namespace - e.g. required event publishing
-	componentNamespace: null,
+	componentNamespace: null, // namespace - e.g. required for publish / subscribe pattern (events)
 
 	/**
 	 * Automatically called when instantiated.
@@ -38,11 +29,11 @@ Lucid.BaseComponent = Class.extend({
 		if (!this.componentName) {
 			Lucid.Utils.error("BaseComponent @ init: error - you have not defined a componentName!");
 			return false;
+		} else {
+			this.setComponentName(this.componentName);
 		}
 
 		Lucid.Utils.log("BaseComponent @ init: " + this.componentName);
-
-		this.componentNamespace = "." + this.componentName;
 
 		return true;
 	},
@@ -108,37 +99,22 @@ Lucid.BaseComponent = Class.extend({
 	},
 
 	/**
-	 * Destroys the component. You should remove/clear all dependencies,
-	 * intervals etc. from this object so it can be garbage collected.
+	 * Destroys the BaseComponent and all its corresponding objects.
+	 *
+	 * @return     {Boolean}  Returns true on success.
 	 */
 	destroy: function() {
 		this.map = null;
 		this.camera = null;
 		this.engine = null;
-	},
 
-	/**
-	 * Sets the type.
-	 *
-	 * @param      {String}  value   The value.
-	 */
-	setType: function(value) {
-		this.type = value;
-	},
-
-	/**
-	 * Gets the type.
-	 *
-	 * @return     {String}  The type.
-	 */
-	getType: function() {
-		return this.type;
+		return true;
 	},
 
 	/**
 	 * Sets the active state.
 	 *
-	 * @param      {Boolean}  active  The value.
+	 * @param      {Boolean}  active  The value
 	 */
 	setActive: function(active) {
 		this.active = active;
@@ -154,12 +130,12 @@ Lucid.BaseComponent = Class.extend({
 	},
 
 	/**
-	 * Gets the id.
+	 * Sets the map.
 	 *
-	 * @return     {String}  The id.
+	 * @param      {Map}  map	The map
 	 */
-	getID: function() {
-		return this.id;
+	setMap: function(map) {
+		this.map = map;
 	},
 
 	/**
@@ -172,12 +148,12 @@ Lucid.BaseComponent = Class.extend({
 	},
 
 	/**
-	 * Sets the map.
+	 * Sets the camera.
 	 *
-	 * @param      {Map}  map     The map
+	 * @param      {Camera}  camera  The camera
 	 */
-	setMap: function(map) {
-		this.map = map;
+	setCamera: function(camera) {
+		this.camera = camera;
 	},
 
 	/**
@@ -190,12 +166,12 @@ Lucid.BaseComponent = Class.extend({
 	},
 
 	/**
-	 * Sets the camera.
+	 * Sets the engine.
 	 *
-	 * @param      {Camera}  camera  The camera
+	 * @param      {Engine}  engine  The engine
 	 */
-	setCamera: function(camera) {
-		this.camera = camera;
+	setEngine: function(engine) {
+		this.engine = engine;
 	},
 
 	/**
@@ -208,11 +184,12 @@ Lucid.BaseComponent = Class.extend({
 	},
 
 	/**
-	 * Sets the engine.
+	 * Sets the component name.
 	 *
-	 * @param      {Engine}  engine  The engine
+	 * @param      {String}  componentName  The component name
 	 */
-	setEngine: function(engine) {
-		this.engine = engine;
+	setComponentName: function(componentName) {
+		this.componentName = componentName;
+		this.componentNamespace = "." + componentName;
 	}
 });

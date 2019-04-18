@@ -34,26 +34,6 @@ function Game() {
 
 	Lucid.Pathfinding.setUseDiagonals(true);
 
-	/*
-	Lucid.Pathfinding.setGrid([
-						[0, 0, 0, 0, 0, 0],
-						[0, 0, 0, 0, 0, 0],
-						[0, 0, 0, 0, 0, 0],
-						[0, 0, 0, 0, 0, 0],
-						[0, 0, 0, 0, 0, 0],
-						[0, 0, 0, 0, 0, 0],
-						[1, 0, 0, 0, 0, 0]
-					]);
-
-	Lucid.Pathfinding.findPath(0, 0, 5, 6, function(resultPath) {
-		console.log("resultPath: ");
-		console.log(resultPath);
-	});
-
-	Lucid.Pathfinding.calculate();
-	return;
-	*/
-
 	// init engine
 	var engine = new Lucid.Engine();
 	engine.start();
@@ -123,6 +103,6 @@ function Game() {
 		}
 	});
 
-	// for testing purpose...
+	// load a map
 	engine.loadMap("map1");
 }

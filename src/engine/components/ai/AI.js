@@ -3,14 +3,11 @@
  */
 Lucid.AI = Lucid.BaseComponent.extend({
 	// config variables and their default values
-	behavior: null,
 	originEntity: null, // the entity, this AI is attached to
 
-	modules: [],
-	entitiesData: [],
-
 	// local variables
-	// ...
+	fsm: null, // the FSM to use
+	entitiesData: [],
 
 	/**
 	 * Automatically called when instantiated.
@@ -30,19 +27,22 @@ Lucid.AI = Lucid.BaseComponent.extend({
 		return true;
 	},
 
-	addModule: function(module) {
-		module.setAI(this);
-		this.modules.push(module);
+	/**
+	 * Sets the fsm.
+	 *
+	 * @param      {FSM}  fsm     The fsm
+	 */
+	setFSM: function(fsm) {
+		this.fsm = fsm;
 	},
 
-	removeModule: function(module) {
-		module.destroy();
-		this.modules.erase(module);
-		module = null;
-	},
-
-	getModules: function() {
-		return this.modules;
+	/**
+	 * Gets the fsm.
+	 *
+	 * @return     {FSM}  The fsm.
+	 */
+	getFSM: function() {
+		return this.fsm;
 	},
 
 	/**
@@ -63,27 +63,23 @@ Lucid.AI = Lucid.BaseComponent.extend({
 		return this.originEntity;
 	},
 
-	getEntitiesInLineOfSight: function() {
-		return this.entitiesInLineOfSight;
-	},
-
+	/**
+	 * Gets the entities data.
+	 *
+	 * @return     {Array}  The entities data.
+	 */
 	getEntitiesData: function() {
 		return this.entitiesData;
 	},
 
 	/**
-	 * Change behavior by setting a new AI.BEHAVIOR.TYPE.XXX (some TYPES require
-	 * additional data)
+	 * The renderUpdate() function should simulate anything that is affected by
+	 * time. It can be called zero or more times per frame depending on the
+	 * frame rate.
 	 *
-	 * @param      {String}  type    The new AI.BEHAVIOR.TYPE.XXX.
-	 * @param      {Object}  data    The data. See comments about
-	 *                               AI.BEHAVIOR.XXX constants for further data
-	 *                               Object explanations.
+	 * @param      {Number}  delta   The amount of time in milliseconds to
+	 *                               simulate in the update.
 	 */
-	changeBehavior: function(type, data) {
-		
-	},
-
 	renderUpdate: function(delta) {
 		var originEntity = this.getOriginEntity();
 		var layerEntities = this.engine.getLayerEntities();
@@ -133,15 +129,8 @@ Lucid.AI = Lucid.BaseComponent.extend({
 			return Lucid.Math.getDistanceBetweenTwoEntities(entityData1.entity, originEntity) - Lucid.Math.getDistanceBetweenTwoEntities(entityData2.entity, originEntity);
 		});
 
-
-		for (i = 0; i < this.modules.length; ++i) {
-			this.modules[i].renderUpdate(delta);
-		}
-	},
-
-	renderDraw: function(interpolationPercentage) {
-		for (var i = 0; i < this.modules.length; ++i) {
-			this.modules[i].renderDraw(interpolationPercentage);
+		if (this.fsm) {
+			this.fsm.renderUpdate(delta);
 		}
 	},
 
@@ -240,16 +229,15 @@ Lucid.AI = Lucid.BaseComponent.extend({
 		return null;
 	},
 
+	/**
+	 * Destroys the AI and all its corresponding objects.
+	 *
+	 * @return     {Boolean}  Returns true on success.
+	 */
 	destroy: function() {
-		var modules = this.getModules();
-		for (var i = 0; i < modules.length; ++i) {
-			var module = modules[i];
-			module.destroy();
-			module = null;
-		}
-		modules = null;
+		this.fsm = null;
 		this.entitiesData = null;
 
-		this._super();
+		return this._super();
 	}
 });
