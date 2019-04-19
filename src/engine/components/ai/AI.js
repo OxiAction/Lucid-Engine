@@ -101,7 +101,6 @@ Lucid.AI = Lucid.BaseComponent.extend({
 		for (var i = 0; i < entities.length; ++i) {
 			var targetEntity = entities[i];
 
-
 			if (originEntity != targetEntity) {
 				targetEntityRelativeCenterX = targetEntity.relativeCenterX;
 				targetEntityRelativeCenterY = targetEntity.relativeCenterY;

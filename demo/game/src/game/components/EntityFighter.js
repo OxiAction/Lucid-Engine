@@ -12,6 +12,13 @@ var EntityFighter = Lucid.BaseEntity.extend({
 	aiModuleAttack: null,
 	aiModuleFollow: null,
 
+	showInformation: true, // render informations
+
+	healthPointsMaximum: 100,
+	healthPointsCurrent: 60,
+	manaPointsMaximum: 50,
+	manaPointsCurrent: 40,
+
 	init: function(config) {
 		this.componentName = "EntityFighter";
 		this.width = 32;
@@ -21,6 +28,10 @@ var EntityFighter = Lucid.BaseEntity.extend({
 		this.assetFilePath = "assets/entity_fighter.png";
 		
 		this._super(config);
+
+		// randomize values :D
+		this.healthPointsCurrent = Math.random() * (this.healthPointsMaximum - 5) + 5;
+		this.manaPointsCurrent = Math.random() * (this.manaPointsMaximum - 5) + 5;
 		
 		this.animInterval = setInterval(this.updateAnim.bind(this), 500);
 		this.updateAnim();

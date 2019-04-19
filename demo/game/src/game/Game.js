@@ -26,11 +26,11 @@ function Game() {
 
 	// set-up debugging related stuff
 	Lucid.Debug.setEngineFPS(true);
-	Lucid.Debug.setMapTileSizeGrid(true);
-	Lucid.Debug.setEntityHitBox(false);
-	Lucid.Debug.setAISightRadius(true);
-	Lucid.Debug.setAILineOfSight(true);
-	Lucid.Debug.setMapCollidingTiles(false);
+	// Lucid.Debug.setMapTileSizeGrid(true);
+	// Lucid.Debug.setEntityHitBox(true);
+	// Lucid.Debug.setAISightRadius(true);
+	// Lucid.Debug.setAILineOfSight(true);
+	// Lucid.Debug.setMapCollidingTiles(true);
 
 	Lucid.Pathfinding.setUseDiagonals(true);
 
@@ -48,11 +48,20 @@ function Game() {
 	// setup input manager
 	Lucid.Input.init(engine.getCanvas());
 
+	// custom layer for the entities  information
+	var layerEntitiesInformation = new LayerEntitiesInformation({
+		id: "layer-entities-information",
+		type: Lucid.BaseLayer.TYPE.UI,
+		z: 20,
+		active: true
+	});
+	engine.addLayer(layerEntitiesInformation);
+
 	// custom layer for the ui
 	var layerUI = new LayerUI({
 		id: "layer-ui",
 		type: Lucid.BaseLayer.TYPE.UI,
-		z: 20,
+		z: 25,
 		active: false
 	});
 	engine.addLayer(layerUI);

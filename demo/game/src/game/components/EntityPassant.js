@@ -16,6 +16,7 @@ var EntityPassant = Lucid.BaseEntity.extend({
 		this.force = 1.5;
 		this.speed = 10;
 		this.assetFilePath = "assets/entity_passant.png";
+		this.isPlayer = true;
 		
 		this._super(config);
 		
