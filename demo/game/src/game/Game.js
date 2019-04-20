@@ -1,3 +1,8 @@
+"use strict";
+
+// namespace
+var Game = Game || {};
+
 document.addEventListener("DOMContentLoaded", function() {
    // setup
 	Lucid.Utils.setDebug(1);
@@ -49,7 +54,7 @@ function Game() {
 	Lucid.Input.init(engine.getCanvas());
 
 	// custom layer for the entities  information
-	var layerEntitiesInformation = new LayerEntitiesInformation({
+	var layerEntitiesInformation = new Game.LayerEntitiesInformation({
 		id: "layer-entities-information",
 		type: Lucid.BaseLayer.TYPE.UI,
 		z: 20,
@@ -58,7 +63,7 @@ function Game() {
 	engine.addLayer(layerEntitiesInformation);
 
 	// custom layer for the ui
-	var layerUI = new LayerUI({
+	var layerUI = new Game.LayerUI({
 		id: "layer-ui",
 		type: Lucid.BaseLayer.TYPE.UI,
 		z: 25,
@@ -67,7 +72,7 @@ function Game() {
 	engine.addLayer(layerUI);
 
 	// custom layer for the menu
-	var layerMenu = new LayerMenu({
+	var layerMenu = new Game.LayerMenu({
 		id: "layer-menu",
 		type: Lucid.BaseLayer.TYPE.UI,
 		z: 30
@@ -75,7 +80,7 @@ function Game() {
 	engine.addLayer(layerMenu);
 
 	// LAYER UI: menu button key down event
-	Lucid.Event.bind(LayerUI.EVENT.MENU_BUTTON_KEY_DOWN + namespace, function(eventName) {
+	Lucid.Event.bind(Game.LayerUI.EVENT.MENU_BUTTON_KEY_DOWN + namespace, function(eventName) {
 		engine.getMap().setActive(false);
 		layerMenu.setActive(true);
 		layerUI.setActive(false);
@@ -104,7 +109,7 @@ function Game() {
 	});
 
 	// LAYER MENU: custom event for the "back to game" button in the menu
-	Lucid.Event.bind(LayerMenu.EVENT.CUSTOM_EVENT + namespace, function(eventName, customEventName) {
+	Lucid.Event.bind(Game.LayerMenu.EVENT.CUSTOM_EVENT + namespace, function(eventName, customEventName) {
 		if (customEventName == "closeMenu") {
 			layerUI.setActive(true);
 			layerMenu.setActive(false);

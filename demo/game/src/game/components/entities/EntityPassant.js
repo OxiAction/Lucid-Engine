@@ -1,26 +1,31 @@
+// namespace
+var Game = Game || {};
+
 /**
-* Game custom EntityPassantSideScroll - extends BaseEntity.
+* Game custom EntityPassant - extends BaseEntity.
 */
-var EntityPassantSideScroll = Lucid.BaseEntity.extend({
+Game.EntityPassant = Lucid.BaseEntity.extend({
 	// config variables and their default values
 	// ...
 
 	// local variables
 	animInterval: null,
 	animCounter: 0,
-
-	gravityChangeTimeout: null,
-
-	orgGravityYStep: null,
-	allowJump: true,
+	showInformation: true, // render informations
+	healthPointsMaximum: 100,
+	healthPointsCurrent: 60,
+	manaPointsMaximum: 50,
+	manaPointsCurrent: 40,
+	audioPunch: null,
 
 	init: function(config) {
-		this.componentName = "EntityPassantSideScroll";
+		this.componentName = "EntityPassant";
 		this.width = 32;
 		this.height = 48;
-		this.speed = 20;
+		this.force = 1.5;
+		this.speed = 10;
+		this.minimumAttackRange = 60;
 		this.assetFilePath = "assets/entity_passant.png";
-		this.assetY = 96;
 		
 		this._super(config);
 		
@@ -35,10 +40,17 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 		Lucid.Event.bind(Lucid.Input.EVENTS.KEY_DOWN + this.componentNamespace, this.handleKeyDown.bind(this));
 		Lucid.Event.bind(Lucid.Input.EVENTS.KEY_UP + this.componentNamespace, this.handleKeyUp.bind(this));
 
+		this.setPathByClick(true);
+
 		this.camera.setFollowTarget(this, true);
 
-		// save original gravity
-		this.orgGravityYStep = this.gravityYStep;
+		this.audioPunch = document.createElement("audio");
+		if (this.audioPunch.canPlayType("audio/mpeg")) {
+			this.audioPunch.setAttribute("src", "assets/punch.mp3");
+		}
+		if (this.audioPunch.canPlayType("audio/ogg")) {
+			this.audioPunch.setAttribute("src", "assets/punch.ogg");
+		}
 
 		return true;
 	},
@@ -48,24 +60,11 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 			return;
 		}
 
-		if (item.componentName == "EntityPotion") {
+		if (item.componentName == "Game.EntityPotion") {
 			var layerEntities = this.engine.getLayerEntities();
 			if (layerEntities) {
 				layerEntities.removeEntity(item.id);
 			}
-		}
-
-		// touching some surface above -> deny further jumping and reset jump
-		// state
-		if (collisionData.originFromDir == "down") {
-			this.allowJump = false;
-			window.clearTimeout(this.gravityChangeTimeout);
-			this.gravityYStep = this.orgGravityYStep;
-			this.setMoveDirection(Lucid.BaseEntity.DIR.UP, false);
-		}
-		// touching ground -> allow jump again
-		else if (collisionData.originFromDir == "up") {
-			this.allowJump = true;
 		}
 	},
 
@@ -74,7 +73,7 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 			return;
 		}
 
-		Lucid.Utils.log("EntityPassantSideScroll @ handleStartPath");
+		Lucid.Utils.log("EntityPassant @ handleStartPath");
 	},
 
 	handleStopPath: function(eventName, originEntity) {
@@ -82,7 +81,7 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 			return;
 		}
 
-		Lucid.Utils.log("EntityPassantSideScroll @ handleStopPath");
+		Lucid.Utils.log("EntityPassant @ handleStopPath");
 	},
 
 	handleReachedEndPath: function(eventName, originEntity) {
@@ -90,7 +89,7 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 			return;
 		}
 		
-		Lucid.Utils.log("EntityPassantSideScroll @ handleReachedEndPath");
+		Lucid.Utils.log("EntityPassant @ handleReachedEndPath");
 	},
 
 	handleKeyDown: function(eventName, code) {
@@ -104,31 +103,25 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 	processHandleKeyUpDown: function(code, move) {
 		switch (code) {
 			case Lucid.Input.KEYS["LEFT_ARROW"]:
-				this.assetY = 48;
 				this.setMoveDirection(Lucid.BaseEntity.DIR.LEFT, move);
 				break;
 
 			case Lucid.Input.KEYS["RIGHT_ARROW"]:
-				this.assetY = 96;
 				this.setMoveDirection(Lucid.BaseEntity.DIR.RIGHT, move);
 				break;
 
 			case Lucid.Input.KEYS["UP_ARROW"]:
-				if (!move) {
-					this.setMoveDirection(Lucid.BaseEntity.DIR.UP, move);
-				} else if (this.gravityYAccelerationStep <= 1 && this.allowJump) {
-					this.gravityYStep = -0.1;
-
-					this.gravityChangeTimeout = window.setTimeout(function() {
-						this.gravityYStep = this.orgGravityYStep;
-					}.bind(this), 300);
-					
-					this.setMoveDirection(Lucid.BaseEntity.DIR.UP, move);
-				}
+				this.setMoveDirection(Lucid.BaseEntity.DIR.UP, move);
 				break;
 
 			case Lucid.Input.KEYS["DOWN_ARROW"]:
 				this.setMoveDirection(Lucid.BaseEntity.DIR.DOWN, move);
+				break;
+
+			case Lucid.Input.KEYS["SPACE"]:
+				if (move) {
+					this.attack();
+				}
 				break;
 		}
 	},
@@ -152,9 +145,68 @@ var EntityPassantSideScroll = Lucid.BaseEntity.extend({
 		this.animCounter++;
 	},
 
+	attack: function() {
+		var layerEntities = this.engine.getLayerEntities();
+		var entities = layerEntities.getEntities();
+
+		var ai = new Lucid.AI({
+			originEntity: this
+		});
+		ai.renderUpdate(0);
+
+		var entitiesData = ai.getEntitiesData();
+		var enemyInRange = false;
+
+		for (var i = 0; i < entitiesData.length; ++i) {
+			var entityData = entitiesData[i];
+
+			var targetEntity = entityData.entity;
+			var collisionData = entityData.collisionData;
+
+			// no collisionData means targetEntity is in line of sight!
+			if (!collisionData) {
+
+				// check type & team
+				if (targetEntity.type == Lucid.BaseEntity.TYPE.UNIT && targetEntity.team != this.team) {
+
+					// get distance between targetEntity and originEntity and check if its > minimumRange
+					if (Lucid.Math.getDistanceBetweenTwoEntities(targetEntity, this) <= this.minimumAttackRange) {
+						if (targetEntity.healthPointsCurrent) {
+							targetEntity.healthPointsCurrent = Math.max(0, targetEntity.healthPointsCurrent - 10);
+							enemyInRange = true;
+						}
+					}
+				}
+			}
+		}
+
+		if (enemyInRange) {
+			this.audioPunch.pause();
+			this.audioPunch.currentTime = 0;
+			this.audioPunch.play();
+		}
+	},
+
 	renderUpdate: function(delta) {
 		if (!this.getActive()) {
 			return;
+		}
+		
+		switch (this.dir) {
+			case Lucid.BaseEntity.DIR.RIGHT:
+				this.assetY = 96;
+			break;
+
+			case Lucid.BaseEntity.DIR.LEFT:
+				this.assetY = 48;
+			break;
+
+			case Lucid.BaseEntity.DIR.UP:
+				this.assetY = 144;
+			break;
+
+			default:
+				this.assetY = 0;
 		}
 		
 		this._super(delta);

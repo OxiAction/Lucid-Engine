@@ -1,5 +1,5 @@
 /**
- * TODO description
+ * TODO description.
  */
 Lucid.FSMState = Lucid.BaseComponent.extend({
 	// config variables and their default values
@@ -38,7 +38,7 @@ Lucid.FSMState = Lucid.BaseComponent.extend({
 	},
 
 	/**
-	 * See FSMStateComposite's update method.
+	 * TODO description.
 	 */
 	update: function() {
 		// ...
@@ -139,6 +139,10 @@ Lucid.FSMState = Lucid.BaseComponent.extend({
 	setDefaultState: function(defaultState) {
 		Lucid.Utils.log("FSMState @ setDefaultState: " + this.componentName + " to: " + defaultState.componentName);
 		this.defaultState = defaultState;
+
+		if (!this.getActiveState()) {
+			this.setActiveState(defaultState);
+		}
 	},
 
 	/**

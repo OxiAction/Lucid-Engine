@@ -247,7 +247,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 *                               simulate in the update.
 	 */
 	renderUpdate: function(delta) {
-		if (!this.getActive()) {
+		if (!this.getActive() || !this.map) {
 			return;
 		}
 

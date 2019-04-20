@@ -239,6 +239,30 @@ Lucid.Utils = function() {
 		},
 
 		/**
+		 * Get global function by string. Supports namespaces.
+		 * Example:
+		 * var fn = stringToFunction("My.Name.Space.Foo");
+		 * var foo = new fn(...args);
+		 *
+		 * @param      {String}  string  The string
+		 * @return     {Object}  the function or null (on error).
+		 */
+		stringToFunction: function(string) {
+			var names = string.split(".");
+
+			var fn = (window || this);
+			for (var i = 0, length = names.length; i < length; ++i) {
+				fn = fn[names[i]];
+			}
+
+			if (typeof fn !== "function") {
+				return null;
+			}
+
+			return fn;
+		},
+
+		/**
 		 * Determines if plain object.
 		 *
 		 * @param      {Object}   object  The object

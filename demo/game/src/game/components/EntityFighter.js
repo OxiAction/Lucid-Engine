@@ -42,7 +42,7 @@ var EntityFighter = Lucid.BaseEntity.extend({
 			originEntity: this
 		});
 
-		var fsm = new AIFSMFighter({
+		var fsm = new Game.AI.Fighter.FSM({
 			ai: ai
 		});
 

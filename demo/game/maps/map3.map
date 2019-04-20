@@ -37,7 +37,7 @@ Lucid.data.maps.map3 = {
 					data: [
 						{
 							id: "passant1",
-							componentName: "EntityPassant",
+							componentName: "Game.EntityPassant",
 							x: 670,
 							y: 250,
 							colliding: 1,

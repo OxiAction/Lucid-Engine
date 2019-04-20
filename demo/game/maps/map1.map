@@ -56,7 +56,7 @@ Lucid.data.maps.map1 = {
 					data: [
 						{
 							id: "passant1",
-							componentName: "EntityPassant",
+							componentName: "Game.EntityPassant",
 							x: 500,
 							y: 200,
 							colliding: 1,
@@ -67,7 +67,7 @@ Lucid.data.maps.map1 = {
 						},
 						{
 							id: "fighter1",
-							componentName: "EntityFighter",
+							componentName: "Game.EntityFighter",
 							x: 500,
 							y: 400,
 							colliding: 1,
@@ -78,7 +78,7 @@ Lucid.data.maps.map1 = {
 						},
 						{
 							id: "fighter2",
-							componentName: "EntityFighter",
+							componentName: "Game.EntityFighter",
 							x: 600,
 							y: 400,
 							colliding: 1,
@@ -89,7 +89,7 @@ Lucid.data.maps.map1 = {
 						},
 						{
 							id: "fighter3",
-							componentName: "EntityFighter",
+							componentName: "Game.EntityFighter",
 							x: 300,
 							y: 400,
 							colliding: 1,
@@ -100,7 +100,7 @@ Lucid.data.maps.map1 = {
 						},
 						{
 							id: "fighter4",
-							componentName: "EntityFighter",
+							componentName: "Game.EntityFighter",
 							x: 400,
 							y: 400,
 							colliding: 1,
@@ -111,7 +111,7 @@ Lucid.data.maps.map1 = {
 						},
 						{
 							id: "potion1",
-							componentName: "EntityPotion",
+							componentName: "Game.EntityPotion",
 							x: 470,
 							y: 570,
 							colliding: 1,

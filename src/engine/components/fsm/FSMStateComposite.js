@@ -1,5 +1,5 @@
 /**
- * TODO description
+ * TODO description.
  */
 Lucid.FSMStateComposite = Lucid.FSMState.extend({
 	// local variables
@@ -20,18 +20,18 @@ Lucid.FSMStateComposite = Lucid.FSMState.extend({
 	},
 
 	/**
-	 * TODO description
+	 * TODO description.
 	 */
 	update: function() {
 		if (!this.getActiveState()) {
 			return false;
 		}
 
-		// CASE 1: transition required
+		// CASE 1: transition required for this active state
 
-		// fetch transitions from this active (child) state
+		// fetch transitions from this active state
 		transitions = this.getActiveState().getTransitions();
-		
+
 		// sanity check
 		if (transitions.length > 0) {
 
@@ -51,7 +51,7 @@ Lucid.FSMStateComposite = Lucid.FSMState.extend({
 
 					// set toState as currently active state
 					this.setActiveState(toState);
-
+					
 					// set toState active state to its default state (if available)
 					if (toState.getDefaultState() != null) {
 						toState.setActiveState(toState.getDefaultState());
@@ -67,10 +67,15 @@ Lucid.FSMStateComposite = Lucid.FSMState.extend({
 			}
 		}
 
-		// CASE 2: there was no transition - just execute / update this active state
+		// CASE 2: there was no transition - just execute this active state.
+		// NOTE: if this active state changed the eventName, we dont want to update
+		// it (the active state), as its childs could possibly change the eventName again!
 		
+		var tmpEventName = this.getFSM().eventName;
 		this.getActiveState().execute();
-		this.getActiveState().update();
+		if (this.getFSM().eventName == tmpEventName) {
+			this.getActiveState().update();
+		}
 	},
 
 	/**

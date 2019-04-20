@@ -1,5 +1,5 @@
 /**
- * TODO description
+ * TODO description.
  */
 Lucid.FSMTransition = Lucid.BaseComponent.extend({
 	// config variables and their default values

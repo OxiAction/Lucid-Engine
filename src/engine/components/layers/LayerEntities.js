@@ -41,15 +41,24 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 	 * @return     {Object}  Returns the created Entity on success or null.
 	 */
 	addEntity: function(data) {
-		// check if componentName property is given AND also check if theres a class defined with this componentName
+		var fn; // entity function
+
+		// check if componentName property is given
 		if (!("componentName" in data)) {
-			Lucid.Utils.error("LayerEntities @ addEntity: trying to instanciate a new entity but componentName property is missing in data[" + i + "]!");
+			Lucid.Utils.error("LayerEntities @ addEntity: trying to instanciate a new entity, but componentName property is missing in data!");
 			return null;
-		} else if (!window[data.componentName]) {
-			Lucid.Utils.error("LayerEntities @ addEntity: trying to instanciate a new entity but window[" + data.componentName + "] is not defined!");
+		}
+		
+		// try to get function in window object
+		fn = Lucid.Utils.stringToFunction(data.componentName);
+
+		// error
+		if (!fn) {
+			Lucid.Utils.error("LayerEntities @ addEntity: trying to instanciate a new entity with " + data.componentName + ", but function couldnt be found in window object!");
 			return null;
 		}
 
+		// check if entity is unique
 		var entity;
 		for (var i = 0; i < this.entities.length; ++i) {
 			entity = this.entities[i];
@@ -61,12 +70,11 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 
 		// inject
 		data.parentLayer = this;
-
 		// instanciate entity! Apply the data object as config parameter
-		entity = new window[data.componentName](data);
+		entity = new fn(data);
 		// start loading its assets
 		entity.load();
-		// add to our entities render list
+		// add to entities render list
 		this.entities.push(entity);
 
 		return entity;

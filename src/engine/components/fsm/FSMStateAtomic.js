@@ -1,5 +1,5 @@
 /**
- * TODO description
+ * TODO description.
  */
 Lucid.FSMStateAtomic = Lucid.FSMState.extend({
 

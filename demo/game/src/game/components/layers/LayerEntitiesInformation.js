@@ -1,7 +1,10 @@
+// namespace
+var Game = Game || {};
+
 /**
 * Game custom entities information Layer - extends Layer.
 */
-var LayerEntitiesInformation = Lucid.BaseLayer.extend({
+Game.LayerEntitiesInformation = Lucid.BaseLayer.extend({
 	// config variables and their default values
 	// ...
 
