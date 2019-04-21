@@ -7,7 +7,7 @@ Controls:
 * access menu in top right corner to switch maps
 
 AI behaviour:
-* first priority: Heal (when below 80% life)
+* first priority: Heal (when below 30% life)
 * second priority: Chase (when in line-of-sight) and Attack (when in attack-range) enemy
 
 [[Game Demo]](https://oxiaction.github.io/Lucid-Engine/demo/game/game.html)

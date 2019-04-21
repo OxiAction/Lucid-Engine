@@ -136,8 +136,8 @@ Game.AI.Fighter.FSM.Root.Core = Lucid.FSMStateComposite.extend({
 	execute: function() {
 		var originEntity = this.fsm.ai.getOriginEntity();
 
-		// lower than 80 percent health?
-		if (originEntity.healthPointsCurrent / originEntity.healthPointsMaximum < 0.8) {
+		// lower than xx percent health?
+		if (originEntity.healthPointsCurrent / originEntity.healthPointsMaximum < 0.3) {
 			this.fsm.eventName = Game.AI.Fighter.FSM.EVENTS.DEFENSE_ALERT;
 		}
 	}
@@ -339,7 +339,7 @@ Game.AI.Fighter.FSM.Root.Defense = Lucid.FSMStateComposite.extend({
 		var originEntity = this.fsm.ai.getOriginEntity();
 
 		// higher (or equal) than 80 percent health?
-		if (originEntity.healthPointsCurrent / originEntity.healthPointsMaximum >= 0.8) {
+		if (originEntity.healthPointsCurrent / originEntity.healthPointsMaximum >= 0.3) {
 			this.fsm.eventName = Game.AI.Fighter.FSM.EVENTS.NOT_DEFENSE_ALERT;
 		}
 	}
