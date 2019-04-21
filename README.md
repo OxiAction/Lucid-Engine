@@ -1,8 +1,16 @@
 ![Lucid Logo](/assets/lucid_logo_small.jpg?raw=true "Lucid Logo")
 
-## Preview
-This is a preview of the Lucid Engine running a simple demo:
-[[Click Me :)]](https://oxiaction.github.io/Lucid-Engine/demo/game/game.html)
+## Preview (Game Demo)
+Controls:
+* use arrow keys or point-and-click (only available in top-down maps)
+* use space to attack
+* access menu in top right corner to switch maps
+
+AI behaviour:
+* first priority: Heal (when bellow 80% life)
+* second priority: Chase (when in line-of-sight) and Attack (when in attack-range) enemy
+
+[[Game Demo]](https://oxiaction.github.io/Lucid-Engine/demo/game/game.html)
 
 ## What is Lucid Engine?
 A 2D game engine, written in JavaScript.<br />
@@ -10,12 +18,12 @@ The aim of this project is, to deliver you with all the (core) tools you need, t
 The engine supports top-down (RPG style) games, as well as side-scroll (platformer) game types.<br />
 Supports both, mobile devices and desktop computers.
 
-## Open tasks & nice to have:
+## Open tasks & nice to have
 * basic editor and its forms
 * animation manager
 * map related events triggering
 * more advanced physics for the entities
-* sounds / music
+* sounds / music manager
 * dynamic loading of JavaScript files on demand (require-style)
 * user management and dynamic spawning of user-entities
 * resolving all the TODO sections in the code

@@ -12,8 +12,8 @@ Game.EntityPassant = Lucid.BaseEntity.extend({
 	animInterval: null,
 	animCounter: 0,
 	showInformation: true, // render informations
-	healthPointsMaximum: 100,
-	healthPointsCurrent: 60,
+	healthPointsMaximum: 500,
+	healthPointsCurrent: 400,
 	manaPointsMaximum: 50,
 	manaPointsCurrent: 40,
 	audioPunch: null,
@@ -64,6 +64,7 @@ Game.EntityPassant = Lucid.BaseEntity.extend({
 			var layerEntities = this.engine.getLayerEntities();
 			if (layerEntities) {
 				layerEntities.removeEntity(item.id);
+				this.healthPointsCurrent = Math.min(this.healthPointsMaximum, this.healthPointsCurrent + 100);
 			}
 		}
 	},
@@ -190,6 +191,13 @@ Game.EntityPassant = Lucid.BaseEntity.extend({
 	renderUpdate: function(delta) {
 		if (!this.getActive()) {
 			return;
+		}
+
+		if (this.healthPointsCurrent <= 0) {
+			var layerEntities = this.engine.getLayerEntities();
+			if (layerEntities) {
+				layerEntities.removeEntity(this.id);
+			}
 		}
 		
 		switch (this.dir) {

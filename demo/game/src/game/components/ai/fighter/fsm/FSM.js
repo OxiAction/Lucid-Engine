@@ -164,7 +164,7 @@ Game.AI.Fighter.FSM.Root.Core.Movement = Lucid.FSMStateComposite.extend({
 				if (targetEntity.type == Lucid.BaseEntity.TYPE.UNIT && targetEntity.team != originEntity.team) {
 
 					// get distance between targetEntity and originEntity and check if its <= minimumRange
-					if (Lucid.Math.getDistanceBetweenTwoEntities(targetEntity, originEntity) <= targetEntity.minimumAttackRange) {
+					if (Lucid.Math.getDistanceBetweenTwoEntities(targetEntity, originEntity) <= originEntity.minimumAttackRange) {
 						this.fsm.eventName = Game.AI.Fighter.FSM.EVENTS.ENEMY_IN_RANGE;
 						break;
 					}
@@ -303,7 +303,33 @@ Game.AI.Fighter.FSM.Root.Core.Combat = Lucid.FSMStateComposite.extend({
 /**
 * TODO description & implementation.
 */
-Game.AI.Fighter.FSM.Root.Core.Combat.Attack = Lucid.FSMStateAtomic.extend({});
+Game.AI.Fighter.FSM.Root.Core.Combat.Attack = Lucid.FSMStateAtomic.extend({
+	execute: function() {
+		var originEntity = this.fsm.ai.getOriginEntity();
+		var entitiesData = this.fsm.ai.getEntitiesData();
+
+		for (var i = 0; i < entitiesData.length; ++i) {
+			var entityData = entitiesData[i];
+
+			var targetEntity = entityData.entity;
+			var collisionData = entityData.collisionData;
+
+			// no collisionData means targetEntity is in line of sight!
+			if (!collisionData) {
+
+				// check type & team
+				if (targetEntity.type == Lucid.BaseEntity.TYPE.UNIT && targetEntity.team != originEntity.team) {
+
+					// get distance between targetEntity and originEntity and check if its <= minimumRange
+					if (Lucid.Math.getDistanceBetweenTwoEntities(targetEntity, originEntity) <= originEntity.minimumAttackRange) {
+						targetEntity.healthPointsCurrent = Math.max(0, targetEntity.healthPointsCurrent - 0.5);
+					}
+				}
+			}
+		}
+
+	}
+});
 
 /**
 * TODO description.

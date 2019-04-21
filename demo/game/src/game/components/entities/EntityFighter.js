@@ -23,6 +23,7 @@ Game.EntityFighter = Lucid.BaseEntity.extend({
 		this.width = 32;
 		this.height = 48;
 		this.speed = 5;
+		this.minimumAttackRange = 60;
 		this.sightRadius = 400;
 		this.assetFilePath = "assets/entity_fighter.png";
 		
