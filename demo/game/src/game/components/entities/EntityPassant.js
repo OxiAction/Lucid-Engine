@@ -173,7 +173,7 @@ Game.EntityPassant = Lucid.BaseEntity.extend({
 					// get distance between targetEntity and originEntity and check if its > minimumRange
 					if (Lucid.Math.getDistanceBetweenTwoEntities(targetEntity, this) <= this.minimumAttackRange) {
 						if (targetEntity.healthPointsCurrent) {
-							targetEntity.healthPointsCurrent = Math.max(0, targetEntity.healthPointsCurrent - 10);
+							targetEntity.healthPointsCurrent = Math.max(0, targetEntity.healthPointsCurrent - 5);
 							enemyInRange = true;
 						}
 					}
