@@ -169,7 +169,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 			// check if layer is valid
 			if (this.layers[i].config !== undefined && this.layers[i].config.id !== undefined) {
 				// inject current active status
-				// this.layers[i].config["active"] = this.getActive();
+				this.layers[i].config["active"] = this.getActive();
 
 				this.engine.createAddLayer(this.layers[i].config);
 			} else {
