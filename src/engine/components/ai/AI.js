@@ -72,7 +72,7 @@ Lucid.AI = Lucid.BaseComponent.extend({
 	/**
 	 * Gets the Entities data Object Array, with Entities of 
 	 * all kind (but excluding the originEntity), sorted by 
-	 * the distance to the originEntity, that are:
+	 * the distance to the originEntity, which are:
 	 * 
 	 * - inside the sight radius of the originEntity
 	 * 
@@ -94,7 +94,7 @@ Lucid.AI = Lucid.BaseComponent.extend({
 	/**
 	 * Gets the Entities Array, with Entity Objects (but 
 	 * excluding the originEntity), sorted by the distance 
-	 * to the originEntity, that are:
+	 * to the originEntity, which are:
 	 * 
 	 * - inside the sight radius of the originEntity
 	 * - in line-of-sight with the originEntity

@@ -3,7 +3,7 @@
 ## Preview (Game Demo)
 Controls:
 * use arrow keys or point-and-click (only available in top-down maps)
-* use space to attack
+* use space to attack (only available in top-down maps)
 * access menu in top right corner to switch maps
 
 AI behaviour:
