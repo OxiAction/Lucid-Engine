@@ -164,7 +164,7 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 		this.numUpdateSteps = 0;
 		while (this.frameDelta >= this.simulationTimestep) {
 			// update stuff - e.g. positions x/y etc...
-			this.renderUpdate(this.simulationTimestep / 100);
+			this.renderUpdate(this.simulationTimestep / 1000);
 			this.frameDelta -= this.simulationTimestep;
 
 			// sanity check: bail if we run the loop too many times. Triggers

@@ -23,7 +23,7 @@ Game.EntityPassant = Lucid.BaseEntity.extend({
 		this.width = 32;
 		this.height = 48;
 		this.force = 1.5;
-		this.speed = 10;
+		this.speed = 100;
 		this.minimumAttackRange = 60;
 		this.assetFilePath = "assets/entity_passant.png";
 		

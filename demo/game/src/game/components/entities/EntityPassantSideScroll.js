@@ -27,7 +27,7 @@ Game.EntityPassantSideScroll = Lucid.BaseEntity.extend({
 		this.componentName = "Game.EntityPassantSideScroll";
 		this.width = 32;
 		this.height = 48;
-		this.speed = 20;
+		this.speed = 200;
 		this.assetFilePath = "assets/entity_passant.png";
 		this.assetY = 96;
 		
