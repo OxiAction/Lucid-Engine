@@ -19,7 +19,7 @@ Lucid.LayerTileSet = Lucid.BaseLayer.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
-		this.componentName = "LayerTileSet";
+		this.checkSetComponentName("Lucid.LayerTileSet");
 		
 		this._super(config);
 

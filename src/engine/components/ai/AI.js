@@ -1,13 +1,19 @@
 /**
- * Engine default AI. This component also handles pathfinding.
+ * This AI Object can be attached to Entities and pre-calculates
+ * lots of usefull stuff, based on its attached originEntity 
+ * and all the other Entities - fetched from Lucid.LayerEntities.
+ * 
+ * See: getEntitiesDataInSightRadius()
+ * See: getHostileEntitiesInLineOfSight()
  */
 Lucid.AI = Lucid.BaseComponent.extend({
 	// config variables and their default values
 	originEntity: null, // the entity, this AI is attached to
 
 	// local variables
-	fsm: null, // the FSM to use
-	entitiesData: [],
+	fsm: null, // the fsm to use
+	entitiesDataInSightRadius: [], // see: getEntitiesDataInSightRadius()
+	hostileEntitiesInLineOfSight: [], // see: getHostileEntitiesInLineOfSight()
 
 	/**
 	 * Automatically called when instantiated.
@@ -16,7 +22,7 @@ Lucid.AI = Lucid.BaseComponent.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
-		this.componentName = "AI";
+		this.checkSetComponentName("Lucid.AI");
 		
 		this._super(config);
 
@@ -57,19 +63,49 @@ Lucid.AI = Lucid.BaseComponent.extend({
 	/**
 	 * Gets the origin entity.
 	 *
-	 * @return     {Object}  The origin entity..
+	 * @return     {Object}  The origin entity.
 	 */
 	getOriginEntity: function() {
 		return this.originEntity;
 	},
 
 	/**
-	 * Gets the entities data.
+	 * Gets the Entities data Object Array, with Entities of 
+	 * all kind (but excluding the originEntity), sorted by 
+	 * the distance to the originEntity, that are:
+	 * 
+	 * - inside the sight radius of the originEntity
+	 * 
+	 * Keys for each data Object:
+	 * 
+	 * - entity: 		The target Entity Object.
+	 * - collisionData: The collision data between the 
+	 * 					origin and the target Entity.
+	 * 					If this is null, there exists
+	 * 					line-of-sight between the 
+	 * 					origin and the target Entity.
 	 *
-	 * @return     {Array}  The entities data.
+	 * @return     {Array}  The Entities data Object Array.
 	 */
-	getEntitiesData: function() {
-		return this.entitiesData;
+	getEntitiesDataInSightRadius: function() {
+		return this.entitiesDataInSightRadius;
+	},
+
+	/**
+	 * Gets the Entities Array, with Entity Objects (but 
+	 * excluding the originEntity), sorted by the distance 
+	 * to the originEntity, that are:
+	 * 
+	 * - inside the sight radius of the originEntity
+	 * - in line-of-sight with the originEntity
+	 * - of type Lucid.BaseEntity.TYPE.UNIT
+	 * - hostile, which means they are not
+	 *   in the same team as the originEntity
+	 *
+	 * @return     {Array}  The Entities Array.
+	 */
+	getHostileEntitiesInLineOfSight: function() {
+		return this.hostileEntitiesInLineOfSight;
 	},
 
 	/**
@@ -89,6 +125,8 @@ Lucid.AI = Lucid.BaseComponent.extend({
 			return;
 		}
 
+		var i;
+
 		var entities = layerEntities.getEntities();
 
 		var originEntityRelativeCenterX = originEntity.relativeCenterX;
@@ -96,9 +134,9 @@ Lucid.AI = Lucid.BaseComponent.extend({
 		var targetEntityRelativeCenterX;
 		var targetEntityRelativeCenterY;
 
-		this.entitiesData = [];
+		var entitiesDataInSightRadius = [];
 
-		for (var i = 0; i < entities.length; ++i) {
+		for (i = 0; i < entities.length; ++i) {
 			var targetEntity = entities[i];
 
 			if (originEntity != targetEntity) {
@@ -115,7 +153,7 @@ Lucid.AI = Lucid.BaseComponent.extend({
 					});
 				
 				if (targetEntityInOriginEntitySightRadius) {
-					this.entitiesData.push({
+					entitiesDataInSightRadius.push({
 						entity: targetEntity,
 						collisionData: this.getCollisionDataEntityLineOfSight(originEntity, targetEntity, layerCollision.getData(), this.map, this.camera)
 					});
@@ -123,10 +161,30 @@ Lucid.AI = Lucid.BaseComponent.extend({
 			}
 		}
 
-		// sort entities by distance to origin - the first element will be the closest one!
-		this.entitiesData.sort(function(entityData1, entityData2) {
+		// sort entities by distance to originEntity - the first element will be the closest one!
+		entitiesDataInSightRadius.sort(function(entityData1, entityData2) {
 			return Lucid.Math.getDistanceBetweenTwoEntities(entityData1.entity, originEntity) - Lucid.Math.getDistanceBetweenTwoEntities(entityData2.entity, originEntity);
 		});
+
+		this.entitiesDataInSightRadius = entitiesDataInSightRadius;
+
+		var hostileEntitiesInLineOfSight = [];
+
+		for (i = 0; i < entitiesDataInSightRadius.length; ++i) {
+			var entityData = entitiesDataInSightRadius[i];
+			var targetEntity = entityData.entity;
+			var collisionData = entityData.collisionData;
+
+			// if there exists line-of-sight ...
+			if (!collisionData) {
+				// ... and its an enemy unit ...
+				if (targetEntity.type == Lucid.BaseEntity.TYPE.UNIT && targetEntity.team != originEntity.team) {
+					hostileEntitiesInLineOfSight.push(targetEntity);
+				}
+			}
+		}
+
+		this.hostileEntitiesInLineOfSight = hostileEntitiesInLineOfSight;
 
 		if (this.fsm) {
 			this.fsm.renderUpdate(delta);
@@ -235,7 +293,8 @@ Lucid.AI = Lucid.BaseComponent.extend({
 	 */
 	destroy: function() {
 		this.fsm = null;
-		this.entitiesData = null;
+		this.entitiesDataInSightRadius = null;
+		this.hostileEntitiesInLineOfSight = null;
 
 		return this._super();
 	}

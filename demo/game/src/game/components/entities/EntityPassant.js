@@ -19,7 +19,7 @@ Game.EntityPassant = Lucid.BaseEntity.extend({
 	audioPunch: null,
 
 	init: function(config) {
-		this.componentName = "EntityPassant";
+		this.componentName = "Game.EntityPassant";
 		this.width = 32;
 		this.height = 48;
 		this.force = 1.5;
@@ -74,7 +74,7 @@ Game.EntityPassant = Lucid.BaseEntity.extend({
 			return;
 		}
 
-		Lucid.Utils.log("EntityPassant @ handleStartPath");
+		Lucid.Utils.log(this.componentName + " @ handleStartPath");
 	},
 
 	handleStopPath: function(eventName, originEntity) {
@@ -82,7 +82,7 @@ Game.EntityPassant = Lucid.BaseEntity.extend({
 			return;
 		}
 
-		Lucid.Utils.log("EntityPassant @ handleStopPath");
+		Lucid.Utils.log(this.componentName + " @ handleStopPath");
 	},
 
 	handleReachedEndPath: function(eventName, originEntity) {
@@ -90,7 +90,7 @@ Game.EntityPassant = Lucid.BaseEntity.extend({
 			return;
 		}
 		
-		Lucid.Utils.log("EntityPassant @ handleReachedEndPath");
+		Lucid.Utils.log(this.componentName + " @ handleReachedEndPath");
 	},
 
 	handleKeyDown: function(eventName, code) {
@@ -155,33 +155,24 @@ Game.EntityPassant = Lucid.BaseEntity.extend({
 		});
 		ai.renderUpdate(0);
 
-		var entitiesData = ai.getEntitiesData();
-		var enemyInRange = false;
+		// try to get all hostile entities in line-of-sight ...
+		var hostileEntitiesInLineOfSight = ai.getHostileEntitiesInLineOfSight();
 
-		for (var i = 0; i < entitiesData.length; ++i) {
-			var entityData = entitiesData[i];
+		// ... if at least one is available ...
+		if (hostileEntitiesInLineOfSight[0]) {
 
-			var targetEntity = entityData.entity;
-			var collisionData = entityData.collisionData;
+			// ... iterate through them and apply damage
+			for (var i = 0; i < hostileEntitiesInLineOfSight.length; ++i) {
+				var targetEntity = hostileEntitiesInLineOfSight[i];
 
-			// no collisionData means targetEntity is in line of sight!
-			if (!collisionData) {
-
-				// check type & team
-				if (targetEntity.type == Lucid.BaseEntity.TYPE.UNIT && targetEntity.team != this.team) {
-
-					// get distance between targetEntity and originEntity and check if its > minimumRange
-					if (Lucid.Math.getDistanceBetweenTwoEntities(targetEntity, this) <= this.minimumAttackRange) {
-						if (targetEntity.healthPointsCurrent) {
-							targetEntity.healthPointsCurrent = Math.max(0, targetEntity.healthPointsCurrent - 5);
-							enemyInRange = true;
-						}
+				if (Lucid.Math.getDistanceBetweenTwoEntities(targetEntity, this) <= this.minimumAttackRange) {
+					if (targetEntity.healthPointsCurrent) {
+						targetEntity.healthPointsCurrent = Math.max(0, targetEntity.healthPointsCurrent - 5);
 					}
 				}
 			}
-		}
 
-		if (enemyInRange) {
+			// play sound
 			this.audioPunch.pause();
 			this.audioPunch.currentTime = 0;
 			this.audioPunch.play();

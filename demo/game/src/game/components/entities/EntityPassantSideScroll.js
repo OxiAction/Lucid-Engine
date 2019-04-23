@@ -11,6 +11,12 @@ Game.EntityPassantSideScroll = Lucid.BaseEntity.extend({
 	// local variables
 	animInterval: null,
 	animCounter: 0,
+	showInformation: true, // render informations
+	healthPointsMaximum: 500,
+	healthPointsCurrent: 400,
+	manaPointsMaximum: 50,
+	manaPointsCurrent: 40,
+	audioPunch: null,
 
 	gravityChangeTimeout: null,
 
@@ -18,7 +24,7 @@ Game.EntityPassantSideScroll = Lucid.BaseEntity.extend({
 	allowJump: true,
 
 	init: function(config) {
-		this.componentName = "EntityPassantSideScroll";
+		this.componentName = "Game.EntityPassantSideScroll";
 		this.width = 32;
 		this.height = 48;
 		this.speed = 20;
@@ -51,7 +57,7 @@ Game.EntityPassantSideScroll = Lucid.BaseEntity.extend({
 			return;
 		}
 
-		if (item.componentName == "EntityPotion") {
+		if (item.componentName == "Game.EntityPotion") {
 			var layerEntities = this.engine.getLayerEntities();
 			if (layerEntities) {
 				layerEntities.removeEntity(item.id);
@@ -77,7 +83,7 @@ Game.EntityPassantSideScroll = Lucid.BaseEntity.extend({
 			return;
 		}
 
-		Lucid.Utils.log("EntityPassantSideScroll @ handleStartPath");
+		Lucid.Utils.log(this.componentName + " @ handleStartPath");
 	},
 
 	handleStopPath: function(eventName, originEntity) {
@@ -85,7 +91,7 @@ Game.EntityPassantSideScroll = Lucid.BaseEntity.extend({
 			return;
 		}
 
-		Lucid.Utils.log("EntityPassantSideScroll @ handleStopPath");
+		Lucid.Utils.log(this.componentName + " @ handleStopPath");
 	},
 
 	handleReachedEndPath: function(eventName, originEntity) {
@@ -93,7 +99,7 @@ Game.EntityPassantSideScroll = Lucid.BaseEntity.extend({
 			return;
 		}
 		
-		Lucid.Utils.log("EntityPassantSideScroll @ handleReachedEndPath");
+		Lucid.Utils.log(this.componentName + " @ handleReachedEndPath");
 	},
 
 	handleKeyDown: function(eventName, code) {

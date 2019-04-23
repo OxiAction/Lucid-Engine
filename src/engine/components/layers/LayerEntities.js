@@ -19,7 +19,7 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
-		this.componentName = "LayerEntities";
+		this.checkSetComponentName("Lucid.LayerEntities");
 		
 		this._super(config);
 		
@@ -45,7 +45,7 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 
 		// check if componentName property is given
 		if (!("componentName" in data)) {
-			Lucid.Utils.error("LayerEntities @ addEntity: trying to instanciate a new entity, but componentName property is missing in data!");
+			Lucid.Utils.error(this.componentName + " @ addEntity: trying to instanciate a new entity, but componentName property is missing in data!");
 			return null;
 		}
 		
@@ -54,7 +54,7 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 
 		// error
 		if (!fn) {
-			Lucid.Utils.error("LayerEntities @ addEntity: trying to instanciate a new entity with " + data.componentName + ", but function couldnt be found in window object!");
+			Lucid.Utils.error(this.componentName + " @ addEntity: trying to instanciate a new entity with " + data.componentName + ", but function couldnt be found in window object!");
 			return null;
 		}
 
@@ -63,7 +63,7 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 		for (var i = 0; i < this.entities.length; ++i) {
 			entity = this.entities[i];
 			if (entity.id == data.id) {
-				Lucid.Utils.log("LayerEntities @ addEntity: entity with id " + data.id + " already exists!");
+				Lucid.Utils.log(this.componentName + " @ addEntity: entity with id " + data.id + " already exists!");
 				return null;
 			}
 		}
@@ -96,7 +96,7 @@ Lucid.LayerEntities = Lucid.BaseLayer.extend({
 			}
 		}
 
-		Lucid.Utils.log("LayerEntities @ removeEntity: entity with id " + id + " doesnt exist!");
+		Lucid.Utils.log(this.componentName + " @ removeEntity: entity with id " + id + " doesnt exist!");
 	},
 
 	/**

@@ -26,7 +26,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
-		this.componentName = "Map";
+		this.checkSetComponentName("Lucid.Map");
 		
 		this._super(config);
 
@@ -43,7 +43,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 	 * Start loading.
 	 */
 	load: function() {
-		Lucid.Utils.log("Map @ load: starting to load in Map with name: " + this.name);
+		Lucid.Utils.log(this.componentName + " @ load: starting to load in Map with name: " + this.name);
 		this.loadAsset();
 	},
 
@@ -51,7 +51,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 	 * General loading success.
 	 */
 	loadingSuccess: function() {
-		Lucid.Utils.log("Map @ loadingSuccess: loaded everything in Map with name: " + this.name);
+		Lucid.Utils.log(this.componentName + " @ loadingSuccess: loaded everything in Map with name: " + this.name);
 		this.loaded = true;
 		Lucid.Event.trigger(Lucid.Map.EVENT.LOADING_SUCCESS, this);
 	},
@@ -60,7 +60,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 	 * General loading error.
 	 */
 	loadingError: function() {
-		Lucid.Utils.log("Map @ loadingError: ERROR occurred while loading in Map with name: " + this.name);
+		Lucid.Utils.log(this.componentName + " @ loadingError: ERROR occurred while loading in Map with name: " + this.name);
 		this.loaded = false;
 		Lucid.Event.trigger(Lucid.Map.EVENT.LOADING_ERROR, this);
 	},
@@ -69,7 +69,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 	 * Loads the asset.
 	 */
 	loadAsset: function() {
-		Lucid.Utils.log("Map @ loadAsset: " + this.name + " - loading asset");
+		Lucid.Utils.log(this.componentName + " @ loadAsset: " + this.name + " - loading asset");
 
 		var loaderItem = new Lucid.LoaderItem({
 			id: this.assetFilePath,
@@ -131,27 +131,27 @@ Lucid.Map = Lucid.BaseComponent.extend({
 	 */
 	build: function() {
 		if (this.isBuild) {
-			Lucid.Utils.log("Map @ build: already build!");
+			Lucid.Utils.log(this.componentName + " @ build: already build!");
 			return false;
 		}
 
 		if (!this.asset) {
-			Lucid.Utils.log("Map @ build: asset is NOT loaded yet - call loadAsset() first");
+			Lucid.Utils.log(this.componentName + " @ build: asset is NOT loaded yet - call loadAsset() first");
 			return false;
 		}
 		
 		if (!this.layers || this.layers.length < 1) {
-			Lucid.Utils.error("Map @ build: " + this.name + " - layers are not defined!");
+			Lucid.Utils.error(this.componentName + " @ build: " + this.name + " - layers are not defined!");
 			return false;
 		}
 
-		Lucid.Utils.log("Map @ build: createAddLayers in Engine");
+		Lucid.Utils.log(this.componentName + " @ build: createAddLayers in Engine");
 		for (var i = 0; i < this.layers.length; ++i) {
 			// check if layer is valid
 			if (this.layers[i].config !== undefined && this.layers[i].config.id !== undefined) {
 				this.engine.createAddLayer(this.layers[i].config);
 			} else {
-				Lucid.Utils.log("Map @ build: tried to createAddLayer in Engine but Layer.config or Layer.id is not set! Index in layers Array: " + i);
+				Lucid.Utils.log(this.componentName + " @ build: tried to createAddLayer in Engine but Layer.config or Layer.id is not set! Index in layers Array: " + i);
 			}
 		}
 
@@ -206,7 +206,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 					// no need for layer.destroy here - because the Engine will take care of this!
 					this.engine.removeLayer(layer.config.id);
 				} else {
-					Lucid.Utils.error("Map @ destroy: map name: " + this.name + " - tried to remove Layer from Engine but Layer config or Layer id is undefined!");
+					Lucid.Utils.error(this.componentName + " @ destroy: map name: " + this.name + " - tried to remove Layer from Engine but Layer config or Layer id is undefined!");
 				}
 			}
 		}

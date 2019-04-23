@@ -29,7 +29,7 @@ Lucid.Loader = function() {
 		 */
 		add: function(item) {
 			if (!item.isValid()) {
-					Lucid.Utils.error("Loader @ add: can not add invalid item to Loader - id: " + item.id);
+					Lucid.Utils.error("Lucid.Loader @ add: can not add invalid item to Loader - id: " + item.id);
 					return false;
 			}
 
@@ -38,7 +38,7 @@ Lucid.Loader = function() {
 			// Possible solution: A variable "cache" which can be altered on demand.
 			// For now we just check if its already in the loading queue:
 			if (!loadingQueue.contains(item)) {
-					Lucid.Utils.log("Loader @ add: item added to Loader - id: " + item.id);
+					Lucid.Utils.log("Lucid.Loader @ add: item added to Loader - id: " + item.id);
 					loadingQueue.push(item);
 			}
 
@@ -55,7 +55,7 @@ Lucid.Loader = function() {
 		loadNext: function() {
 			// check if queue is empty
 			if (loadingQueue.length < 1) {
-					Lucid.Utils.log("Loader @ loadNext: finished loading. Queue is empty");
+					Lucid.Utils.log("Lucid.Loader @ loadNext: finished loading. Queue is empty");
 					loading = false;
 					// publish
 					Lucid.Event.trigger(Lucid.Loader.EVENT.READY);
@@ -73,11 +73,11 @@ Lucid.Loader = function() {
 			// get item
 			var item = loadingQueue.pop();
 
-			Lucid.Utils.log("Loader @ loadNext: attempting to load item - id: " + item.id + " filePath: " + item.filePath);
+			Lucid.Utils.log("Lucid.Loader @ loadNext: attempting to load item - id: " + item.id + " filePath: " + item.filePath);
 
 			// the success function
 			function success(request) {
-					Lucid.Utils.log("Loader @ loadNext: success loading item - id: " + item.id);
+					Lucid.Utils.log("Lucid.Loader @ loadNext: success loading item - id: " + item.id);
 
 					item.setData(request);
 					item.setLoaded(true);
@@ -90,7 +90,7 @@ Lucid.Loader = function() {
 
 			// the error function
 			function error(request) {
-					Lucid.Utils.log("Loader @ loadNext: error loading item - id: " + item.id);
+					Lucid.Utils.log("Lucid.Loader @ loadNext: error loading item - id: " + item.id);
 					Lucid.Event.trigger(item.eventErrorName, item);
 					this.loadNext();
 			}

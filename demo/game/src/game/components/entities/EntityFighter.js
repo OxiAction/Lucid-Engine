@@ -19,7 +19,7 @@ Game.EntityFighter = Lucid.BaseEntity.extend({
 	manaPointsCurrent: 40,
 
 	init: function(config) {
-		this.componentName = "EntityFighter";
+		this.componentName = "Game.EntityFighter";
 		this.width = 32;
 		this.height = 48;
 		this.speed = 5;
@@ -58,7 +58,7 @@ Game.EntityFighter = Lucid.BaseEntity.extend({
 			return;
 		}
 
-		if (item.componentName == "EntityPotion") {
+		if (item.componentName == "Game.EntityPotion") {
 			var layerEntities = this.engine.getLayerEntities();
 			if (layerEntities) {
 				layerEntities.removeEntity(item.id);

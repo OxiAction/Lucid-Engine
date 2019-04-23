@@ -29,15 +29,17 @@ Lucid.BaseLayer = Lucid.BaseComponent.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
+		this.checkSetComponentName("Lucid.BaseLayer");
+		
 		this._super(config);
 
 		if (!this.id) {
-			Lucid.Utils.error("BaseLayer @ init: id is null!");
+			Lucid.Utils.error(this.componentName + " @ init: id is null!");
 			return false;
 		}
 
 		if (!this.type) {
-			Lucid.Utils.error("BaseLayer @ init: type is null! Use Lucid.BaseLayer.TYPE.XXX as a type.");
+			Lucid.Utils.error(this.componentName + " @ init: type is null! Use Lucid.BaseLayer.TYPE.XXX as a type.");
 			return false;
 		}
 

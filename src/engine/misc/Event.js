@@ -92,24 +92,11 @@ Lucid.Event = function() {
 
 						// IF (at runtime) the events[orgPropertyName] gets null (for whatever reason)
 						// OR if we have run through all entries
-						// THEN stop!
+						// -> stop!
 						if (!events[orgPropertyName] || i >= events[orgPropertyName].length) {
 							break;
 						}
 					}
-
-					// DEPRECATED: This caused bugs and problems when changing the events array 
-					// on runtime while this is iterating through it!
-					// 
-					// call all the callback functions
-					// for(var i = 0; i < events[orgPropertyName].length; ++i){
-					// 	var callback = events[orgPropertyName][i];
-					// 	if (callback) {
-					// 		// pass through parameters - starting with the eventName and
-					// 		// followed by the custom arguments
-					// 		callback.apply(this, arguments);
-					// 	}
-					// }
 				}
 			}
 		}

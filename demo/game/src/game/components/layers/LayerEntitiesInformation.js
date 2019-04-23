@@ -21,7 +21,7 @@ Game.LayerEntitiesInformation = Lucid.BaseLayer.extend({
 	 * @return     {boolean}  Returns true on success.
 	 */
 	init: function(config) {
-		this.componentName = "LayerEntitiesInformation";
+		this.componentName = "Game.LayerEntitiesInformation";
 
 		this._super(config);
 

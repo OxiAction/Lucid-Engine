@@ -1,9 +1,11 @@
 /**
- * TODO description.
+ * A Transition is used to change from one State to another,
+ * based on the Transition eventName property and the current 
+ * FSM reference Object eventName property.
  */
 Lucid.FSMTransition = Lucid.BaseComponent.extend({
 	// config variables and their default values
-	toState: null, // [required] to state
+	toState: null, // [required] the state to transition to
 	eventName: null, // [required] event name which triggers this transition
 
 	// local variables
@@ -16,17 +18,17 @@ Lucid.FSMTransition = Lucid.BaseComponent.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
-		this.componentName = "FSMTransition";
+		this.checkSetComponentName("Lucid.FSMTransition");
 		
 		this._super(config);
 
 		if (!this.toState) {
-			Lucid.Utils.error("FSMState @ init: toState is null!");
+			Lucid.Utils.error(this.componentName + " @ init: toState is null!");
 			return false;
 		}
 
 		if (!this.eventName) {
-			Lucid.Utils.error("FSMState @ init: eventName is not defined!");
+			Lucid.Utils.error(this.componentName + " @ init: eventName is not defined!");
 			return false;
 		}
 
@@ -34,36 +36,36 @@ Lucid.FSMTransition = Lucid.BaseComponent.extend({
 	},
 
 	/**
-	 * Sets the from state.
+	 * Sets the from State.
 	 *
-	 * @param      {FSMState}  fromState  The from state
+	 * @param      {FSMState}  fromState  The from State
 	 */
 	setFromState: function(fromState) {
 		this.fromState = fromState;
 	},
 
 	/**
-	 * Gets the from state.
+	 * Gets the from State.
 	 *
-	 * @return     {FSMState}  The from state.
+	 * @return     {FSMState}  The from State.
 	 */
 	getFromState: function() {
 		return this.fromState;
 	},
 
 	/**
-	 * Sets to state.
+	 * Sets to State.
 	 *
-	 * @param      {FSMState}  toState  To state
+	 * @param      {FSMState}  toState  To State
 	 */
 	setToState: function(toState) {
 		this.toState = toState;
 	},
 
 	/**
-	 * Gets to state.
+	 * Gets to State.
 	 *
-	 * @return     {FSMState}  To state.
+	 * @return     {FSMState}  To State.
 	 */
 	getToState: function() {
 		return this.toState;

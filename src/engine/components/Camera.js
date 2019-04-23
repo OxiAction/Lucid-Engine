@@ -20,7 +20,7 @@ Lucid.Camera = Lucid.BaseComponent.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
-		this.componentName = "Camera";
+		this.checkSetComponentName("Lucid.Camera");
 		
 		this._super(config);
 
@@ -59,7 +59,7 @@ Lucid.Camera = Lucid.BaseComponent.extend({
 					this.y = Math.floor(this.followTarget.y - this.halfHeight + this.followTarget.halfHeight);
 				}
 			} else {
-				Lucid.Utils.error("Camera @ setFollowObject: the followTarget object doesnt have proper properties - x, y, halfWidth, halfHeight are required!");
+				Lucid.Utils.error(this.componentName + " @ setFollowObject: the followTarget object doesnt have proper properties - x, y, halfWidth, halfHeight are required!");
 			}
 		} else {
 			this.followTarget = null;

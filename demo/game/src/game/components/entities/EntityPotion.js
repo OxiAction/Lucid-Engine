@@ -12,7 +12,7 @@ Game.EntityPotion = Lucid.BaseEntity.extend({
 	// ...
 
 	init: function(config) {
-		this.componentName = "EntityPotion";
+		this.componentName = "Game.EntityPotion";
 		this.width = 16;
 		this.height = 17;
 		this.sightRadius = 400;

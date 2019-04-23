@@ -19,7 +19,7 @@ Lucid.LayerEvents = Lucid.BaseLayer.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
-		this.componentName = "LayerEvents";
+		this.checkSetComponentName("Lucid.LayerEvents");
 		
 		this._super(config);
 

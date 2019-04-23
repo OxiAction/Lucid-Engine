@@ -92,28 +92,28 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
+		this.checkSetComponentName("Lucid.Engine");
+		
+		this._super(config);
+
 		if (Lucid.data.engine != null) {
-			Lucid.Utils.error("Engine @ init: you can not instantiate the Engine more then once!");
+			Lucid.Utils.error(this.componentName + " @ init: you can not instantiate the Engine more then once!");
 			return false;
 		} else {
 			Lucid.data.engine = this;
 		}
 
-		this.componentName = "Engine";
-		
-		this._super(config);
-
 		// get wrapper / container from HTML
 		this.container = document.getElementById(this.containerID);
 		if (!this.container) {
-			Lucid.Utils.error("Engine @ init: could not find container with id: " + this.containerID);
+			Lucid.Utils.error(this.componentName + " @ init: could not find container with id: " + this.containerID);
 			return;
 		}
 
 		// get canvas from HTML
 		this.canvas = document.getElementById(this.canvasID);
 		if (!this.canvas) {
-			Lucid.Utils.error("Engine @ init: there is no DOM canvas with id: " + this.canvasID);
+			Lucid.Utils.error(this.componentName + " @ init: there is no DOM canvas with id: " + this.canvasID);
 			return false;
 		}
 
@@ -330,52 +330,6 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	 *                                fallen too far behind real time.
 	 */
 	renderEnd: function(fps, panic) {
-		/*
-		// cache variable
-		var canvasContext = this.canvasContext;
-
-		this.canvasContext.fillStyle = "red";
-		this.canvasContext.font = "normal 12px Arial, Helvetica Neue, Helvetica, sans-serif";
-
-		// draw a grid (depending on the map.tileSize)
-		if (Lucid.Debug.getMapTileSizeGrid() && this.map && this.camera) {
-			canvasContext.strokeStyle = "black";
-
-			var tileSize = this.map.tileSize;
-
-			canvasContext.beginPath();
-
-			var i;
-			var numColsScreen = Math.floor(this.camera.width / tileSize) + 2;
-			for (i = 0; i < numColsScreen; ++i) {
-				var posX = i * tileSize - this.camera.x % tileSize + 0.5; // + 0.5 fixes lines pixel snapping
-				canvasContext.moveTo(posX, 0);
-				canvasContext.lineTo(posX, this.camera.height);
-			}
-			var numRowsScreen = Math.floor(this.camera.height / tileSize) + 2;
-			for (i = 0; i < numRowsScreen; ++i) {
-				var posY = i * tileSize - this.camera.y % tileSize + 0.5;
-				canvasContext.moveTo(0, posY);
-				canvasContext.lineTo(this.camera.width, posY);
-			}
-
-			canvasContext.stroke();
-		}
-
-		var debugTextsYOffset = 20;
-
-		// draw frames per second as text
-		if (Lucid.Debug.getEngineFPS()) {
-			canvasContext.fillText("FPS: " + Math.round(fps), 10, debugTextsYOffset);
-			debugTextsYOffset += 15;
-		}
-
-		if (Lucid.Debug.getEnginePanic()) {
-			canvasContext.fillText("Panic: " + panic, 10, debugTextsYOffset);
-			debugTextsYOffset += 15;
-		}
-		*/
-
 		if (panic) {
 			// TODO: handle panic!
 			// For now: discard frameDelta
@@ -397,7 +351,7 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 		// this.setMaxAllowedFPS(50);
 
 		this.renderFrameID = window.requestAnimationFrame(function(timestamp) {
-			Lucid.Utils.log("Engine @ start: renderFrameID: " + this.renderFrameID);
+			Lucid.Utils.log(this.componentName + " @ start: renderFrameID: " + this.renderFrameID);
 			// Render the initial state before any updates occur.
 			this.renderFrame(1);
 
@@ -417,7 +371,7 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	 */
 	stop: function() {
 		this.started = false;
-		Lucid.Utils.log("Engine @ stop: renderFrameID: " + this.renderFrameID);
+		Lucid.Utils.log(this.componentName + " @ stop: renderFrameID: " + this.renderFrameID);
 		if (this.renderFrameID != null) {
 			window.cancelAnimationFrame(this.renderFrameID);
 			this.renderFrameID = null;
@@ -528,7 +482,7 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 
  		this.currentMapFileName = fileName;
 
- 		Lucid.Utils.log("Engine @ loadMap: load map with fileName: " + fileName);
+ 		Lucid.Utils.log(this.componentName + " @ loadMap: load map with fileName: " + fileName);
 
  		var filePath = this.folderPaths.maps + fileName + this.extensions.maps;
 
@@ -593,18 +547,18 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 		var loaderItem = Lucid.Loader.get(fileName);
 
 		if (!loaderItem) {
-			Lucid.Utils.error("Engine @ setBuildMapByFileName: cannot build Map - not loaded yet: " + fileName);
+			Lucid.Utils.error(this.componentName + " @ setBuildMapByFileName: cannot build Map - not loaded yet: " + fileName);
 			return null;
 		}
 
-		Lucid.Utils.log("Engine @ setMapByFileName: building Map: " + fileName);
+		Lucid.Utils.log(this.componentName + " @ setMapByFileName: building Map: " + fileName);
 
 		// fetch data from DOM
 		var mapData = window.Lucid.data.maps[fileName];
 
 		var mapConfig = mapData.config;
 		if (mapConfig === undefined) {
-			Lucid.Utils.error("Engine @ setMapByFileName: Map data doesnt have a config: " + fileName);
+			Lucid.Utils.error(this.componentName + " @ setMapByFileName: Map data doesnt have a config: " + fileName);
 			return null;
 		}
 
@@ -638,7 +592,7 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	 */
 	destroyMap: function() {
 		if (this.map == null) {
-			Lucid.Utils.log("Engine @ destroyMap: Engine.map is null - nothing to destroy");
+			Lucid.Utils.log(this.componentName + " @ destroyMap: Engine.map is null - nothing to destroy");
 			return false;
 		}
 
@@ -662,10 +616,10 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	 */
 	createAddLayer: function(config) {
 		if (config === undefined) {
-			Lucid.Utils.error("Engine @ createAddLayer: config is undefined!");
+			Lucid.Utils.error(this.componentName + " @ createAddLayer: config is undefined!");
 			return null;
 		} else if (config.id == null, config.type == null) {
-			Lucid.Utils.error("Engine @ createAddLayer: id or type is null - please asign an id and Layer.TYPE.XXX!");
+			Lucid.Utils.error(this.componentName + " @ createAddLayer: id or type is null - please asign an id and Layer.TYPE.XXX!");
 			return null;
 		}
 
@@ -689,7 +643,7 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	 * @return     {Layer}   Returns a new Layer instance.
 	 */
 	createLayer: function(config) {
-		Lucid.Utils.log("Engine @ createLayer: creating / instantiating a new Layer - config: " + config);
+		Lucid.Utils.log(this.componentName + " @ createLayer: creating / instantiating a new Layer - config: " + config);
 
 		switch (config.type) {
 			case Lucid.BaseLayer.TYPE.UI:
@@ -728,12 +682,12 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	addLayer: function(layer) {
-		Lucid.Utils.log("Engine @ addLayer: add layer id: " + layer.id + " type: " + layer.type);
+		Lucid.Utils.log(this.componentName + " @ addLayer: add layer id: " + layer.id + " type: " + layer.type);
 		
 		// check for LayerCollision
 		if (layer.type == Lucid.BaseLayer.TYPE.COLLISION) {
 			if (this.layerCollision != null) {
-				EngineUtils.error("Engine @ addLayer: you can only have one Layer with type Lucid.BaseLayer.TYPE.COLLISION!");
+				EngineUtils.error(this.componentName + " @ addLayer: you can only have one Layer with type Lucid.BaseLayer.TYPE.COLLISION!");
 				return false;
 			}
 			this.layerCollision = layer;
@@ -743,7 +697,7 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 		// check for LayerEntities
 		else if (layer.type == Lucid.BaseLayer.TYPE.ENTITIES) {
 			if (this.layerEntities != null) {
-				EngineUtils.error("Engine @ addLayer: you can only have one Layer with type Lucid.BaseLayer.TYPE.ENTITIES!");
+				EngineUtils.error(this.componentName + " @ addLayer: you can only have one Layer with type Lucid.BaseLayer.TYPE.ENTITIES!");
 				return false;
 			}
 			this.layerEntities = layer;

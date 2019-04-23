@@ -21,7 +21,7 @@ Lucid.LoaderItem = Lucid.BaseComponent.extend({
 		* @return     {Boolean}  Returns true on success.
 		*/
 	init: function(config) {
-		this.componentName = "LoaderItem";
+		this.checkSetComponentName("Lucid.LoaderItem");
 		
 		this._super(config);
 

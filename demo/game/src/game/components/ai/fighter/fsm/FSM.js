@@ -4,8 +4,14 @@ Game.AI = Game.AI || {};
 Game.AI.Fighter = Game.AI.Fighter || {};
 
 /**
-* Game custom AI Fighter FSM for entities.
-*/
+ * Definition of an Finite-State-Machine (FSM) Object, 
+ * used in an Lucid.AI Object. This Lucid.AI Object 
+ * can be attached to Entities and ultimately simulates 
+ * artificial intelligence, based on the concept of the FSM.
+ * 
+ * @see Lucid.AI
+ * @see Lucid.BaseEntity
+ */
 Game.AI.Fighter.FSM = Lucid.FSM.extend({
 	// config variables and their default values
 	ai: null, // [required] reference to the ai
@@ -19,7 +25,7 @@ Game.AI.Fighter.FSM = Lucid.FSM.extend({
 		this._super(config);
 
 		if (!this.ai) {
-			Lucid.Utils.error("Game.AI.Fighter.FSM @ init: ai is null!");
+			Lucid.Utils.error(this.componentName + " @ init: ai is null!");
 			return false;
 		}
 
@@ -27,29 +33,29 @@ Game.AI.Fighter.FSM = Lucid.FSM.extend({
 		// step 1 -> setup states:
 
 			// root
-			this.root = new Game.AI.Fighter.FSM.Root({ componentName: "Root", fsm: this });
+			this.root = new Game.AI.Fighter.FSM.Root({ componentName: this.componentName + ".Root", fsm: this });
 
 			// composite states (of root):
 				// a) core
-				var core = new Game.AI.Fighter.FSM.Root.Core({ componentName: "Core", fsm: this });
+				var core = new Game.AI.Fighter.FSM.Root.Core({ componentName: this.componentName + ".Core", fsm: this });
 
 				// composite states (of core):
 					// a.a) movement
-					var movement = new Game.AI.Fighter.FSM.Root.Core.Movement({ componentName: "Movement", fsm: this });
+					var movement = new Game.AI.Fighter.FSM.Root.Core.Movement({ componentName: this.componentName + ".Movement", fsm: this });
 
 					// atomic states (of movement)
-						var idle = new Game.AI.Fighter.FSM.Root.Core.Movement.Idle({ componentName: "Idle", fsm: this });
-						var approach = new Game.AI.Fighter.FSM.Root.Core.Movement.Approach({ componentName: "Approach", fsm: this });
+						var idle = new Game.AI.Fighter.FSM.Root.Core.Movement.Idle({ componentName: this.componentName + ".Idle", fsm: this });
+						var approach = new Game.AI.Fighter.FSM.Root.Core.Movement.Approach({ componentName: this.componentName + ".Approach", fsm: this });
 
 					movement.addChildState(idle);
 					movement.addChildState(approach);
 					movement.setDefaultState(idle);
 
 					// a.b) combat
-					var combat = new Game.AI.Fighter.FSM.Root.Core.Combat({ componentName: "Combat", fsm: this });
+					var combat = new Game.AI.Fighter.FSM.Root.Core.Combat({ componentName: this.componentName + ".Combat", fsm: this });
 
 					// atomic states (of combat)
-						var attack = new Game.AI.Fighter.FSM.Root.Core.Combat.Attack({ componentName: "Attack", fsm: this });
+						var attack = new Game.AI.Fighter.FSM.Root.Core.Combat.Attack({ componentName: this.componentName + ".Attack", fsm: this });
 
 					combat.addChildState(attack);
 					combat.setDefaultState(attack);
@@ -59,10 +65,10 @@ Game.AI.Fighter.FSM = Lucid.FSM.extend({
 				core.setDefaultState(movement);
 
 				// b) defense
-				var defense = new Game.AI.Fighter.FSM.Root.Defense({ componentName: "Defense", fsm: this });
+				var defense = new Game.AI.Fighter.FSM.Root.Defense({ componentName: this.componentName + ".Defense", fsm: this });
 
 				// atomic states (of defense)
-					var heal = new Game.AI.Fighter.FSM.Root.Defense.Heal({ componentName: "Heal", fsm: this });
+					var heal = new Game.AI.Fighter.FSM.Root.Defense.Heal({ componentName: this.componentName + ".Heal", fsm: this });
 
 				defense.addChildState(heal);
 				defense.setDefaultState(heal);
@@ -125,84 +131,72 @@ Game.AI.Fighter.FSM = Lucid.FSM.extend({
 });
 
 /**
-* TODO description.
-*/
+ * The root container State.
+ */
 Game.AI.Fighter.FSM.Root = Lucid.FSMStateComposite.extend({});
 
 /**
-* TODO description.
-*/
+ * In case originEntity healtPoints are lower than
+ * defined percent, change eventName to DEFENSE_ALERT.
+ */
 Game.AI.Fighter.FSM.Root.Core = Lucid.FSMStateComposite.extend({
 	execute: function() {
 		var originEntity = this.fsm.ai.getOriginEntity();
 
-		// lower than xx percent health?
+		// if lower than defined percent ...
 		if (originEntity.healthPointsCurrent / originEntity.healthPointsMaximum < 0.3) {
+			// ... change eventName to DEFENSE_ALERT
 			this.fsm.eventName = Game.AI.Fighter.FSM.EVENTS.DEFENSE_ALERT;
 		}
 	}
 });
 
 /**
-* TODO description.
-*/
+ * Check for hostile Entities in line-of-sight and 
+ * change eventName to ENEMY_IN_RANGE.
+ */
 Game.AI.Fighter.FSM.Root.Core.Movement = Lucid.FSMStateComposite.extend({
 	execute: function() {
 		var originEntity = this.fsm.ai.getOriginEntity();
-		var entitiesData = this.fsm.ai.getEntitiesData();
+		// // try to get the first (closest) hostile entity in line-of-sight ...
+		var closestHostileEntityInLineOfSight = this.fsm.ai.getHostileEntitiesInLineOfSight()[0];
 
-		for (var i = 0; i < entitiesData.length; ++i) {
-			var entityData = entitiesData[i];
-
-			var targetEntity = entityData.entity;
-			var collisionData = entityData.collisionData;
-
-			// no collisionData means targetEntity is in line of sight!
-			if (!collisionData) {
-
-				// check type & team
-				if (targetEntity.type == Lucid.BaseEntity.TYPE.UNIT && targetEntity.team != originEntity.team) {
-
-					// get distance between targetEntity and originEntity and check if its <= minimumRange
-					if (Lucid.Math.getDistanceBetweenTwoEntities(targetEntity, originEntity) <= originEntity.minimumAttackRange) {
-						this.fsm.eventName = Game.AI.Fighter.FSM.EVENTS.ENEMY_IN_RANGE;
-						break;
-					}
-				}
+		// ... if available ...
+		if (closestHostileEntityInLineOfSight) {
+			// ... check if its within the originEntity minimumAttackRange ...
+			if (Lucid.Math.getDistanceBetweenTwoEntities(closestHostileEntityInLineOfSight, originEntity) <= originEntity.minimumAttackRange) {
+				// ... change eventName to ENEMY_IN_RANGE
+				this.fsm.eventName = Game.AI.Fighter.FSM.EVENTS.ENEMY_IN_RANGE;
 			}
 		}
 	}
 });
 
 /**
-* TODO description.
-*/
+ * Change eventName to ENEMY_LINE_OF_SIGHT, in case 
+ * there exists a hostile Entity within line-of-sight.
+ */
 Game.AI.Fighter.FSM.Root.Core.Movement.Idle = Lucid.FSMStateAtomic.extend({
 	execute: function() {
 		var originEntity = this.fsm.ai.getOriginEntity();
-		var entitiesData = this.fsm.ai.getEntitiesData();
+		// try to get the first (closest) hostile entity in line-of-sight ...
+		var closestHostileEntityInLineOfSight = this.fsm.ai.getHostileEntitiesInLineOfSight()[0];
 
-		for (var i = 0; i < entitiesData.length; ++i) {
-			var entityData = entitiesData[i];
-
-			var targetEntity = entityData.entity;
-			var collisionData = entityData.collisionData;
-
-			// if there exists line-of-sight ...
-			if (!collisionData) {
-				// ... and its an enemy unit
-				if (targetEntity.type == Lucid.BaseEntity.TYPE.UNIT && targetEntity.team != originEntity.team) {
-					this.fsm.eventName = Game.AI.Fighter.FSM.EVENTS.ENEMY_LINE_OF_SIGHT;
-					break;
-				}
-			}
+		// ... if available ...
+		if (closestHostileEntityInLineOfSight) {
+			// ... change eventName to ENEMY_LINE_OF_SIGHT
+			this.fsm.eventName = Game.AI.Fighter.FSM.EVENTS.ENEMY_LINE_OF_SIGHT;
 		}
 	}
 });
 
 /**
-* TODO description.
-*/
+ * Check for a hostile Entity in line-of-sight and 
+ * approach it. If no valid hostile Entity was found, 
+ * change eventName to NOT_ENEMY_LINE_OF_SIGHT.
+ * 
+ * Clear path (stop movement) when this State is left.
+ */
 Game.AI.Fighter.FSM.Root.Core.Movement.Approach = Lucid.FSMStateAtomic.extend({
 	init: function(config) {
 		this._super(config);
@@ -215,39 +209,26 @@ Game.AI.Fighter.FSM.Root.Core.Movement.Approach = Lucid.FSMStateAtomic.extend({
 
 	execute: function() {
 		var originEntity = this.fsm.ai.getOriginEntity();
-		var entitiesData = this.fsm.ai.getEntitiesData();
+		// try to get the first (closest) hostile entity in line-of-sight ...
+		var closestHostileEntityInLineOfSight = this.fsm.ai.getHostileEntitiesInLineOfSight()[0];
+		
+		// ... if available ...
+		if (closestHostileEntityInLineOfSight) {
+			var originEntityGridIndices = Lucid.Math.getEntityToGridIndices(originEntity, this.map.tileSize);
+			var targetEntityGridIndices = Lucid.Math.getEntityToGridIndices(closestHostileEntityInLineOfSight, this.map.tileSize);
 
-		var foundEntityOfAnotherTeam = false;
-
-		for (var i = 0; i < entitiesData.length; ++i) {
-			var entityData = entitiesData[i];
-
-			var targetEntity = entityData.entity;
-			var collisionData = entityData.collisionData;
-
-			// if there exists line-of-sight ...
-			if (!collisionData) {
-				// ... and its an enemy unit
-				if (targetEntity.type == Lucid.BaseEntity.TYPE.UNIT && targetEntity.team != originEntity.team) {
-					foundEntityOfAnotherTeam = true;
-
-					var originEntityGridIndices = Lucid.Math.getEntityToGridIndices(originEntity, this.map.tileSize);
-					var targetEntityGridIndices = Lucid.Math.getEntityToGridIndices(targetEntity, this.map.tileSize);
-
-					Lucid.Pathfinding.findPath(originEntityGridIndices[0], originEntityGridIndices[1], targetEntityGridIndices[0], targetEntityGridIndices[1], function(path) {
-						if (path) {
-							originEntity.setPath(path);
-						}
-					}.bind(this));
-
-					Lucid.Pathfinding.calculate();
-					break;
+			// ... approach it
+			Lucid.Pathfinding.findPath(originEntityGridIndices[0], originEntityGridIndices[1], targetEntityGridIndices[0], targetEntityGridIndices[1], function(path) {
+				if (path) {
+					this.fsm.ai.getOriginEntity().setPath(path);
 				}
-			}
-		}
+			}.bind(this));
 
-		if (!foundEntityOfAnotherTeam) {
-			// change state of fsm
+			Lucid.Pathfinding.calculate();
+		} 
+		// ... if not available ...
+		else {
+			// ... change eventName to NOT_ENEMY_LINE_OF_SIGHT
 			this.fsm.eventName = Game.AI.Fighter.FSM.EVENTS.NOT_ENEMY_LINE_OF_SIGHT;
 		}
 	},
@@ -255,90 +236,69 @@ Game.AI.Fighter.FSM.Root.Core.Movement.Approach = Lucid.FSMStateAtomic.extend({
 	leave: function() {
 		this._super();
 
-		// reset path
+		// stop movement
 		this.fsm.ai.getOriginEntity().setPath(null);
 	}
 });
 
 /**
-* TODO description.
-*/
+ * Change eventName to NOT_ENEMY_IN_RANGE, in case 
+ * there is no hostile Entity within the originEntity 
+ * minimumAttackRange.
+ */
 Game.AI.Fighter.FSM.Root.Core.Combat = Lucid.FSMStateComposite.extend({
-	init: function(config) {
-		this._super(config);
-
-		// check / set map reference
-		this.checkSetMap();
-
-		return true;
-	},
-
 	execute: function() {
 		var originEntity = this.fsm.ai.getOriginEntity();
-		var entitiesData = this.fsm.ai.getEntitiesData();
 
-		for (var i = 0; i < entitiesData.length; ++i) {
-			var entityData = entitiesData[i];
+		// try to get the first (closest) hostile entity in line-of-sight ...
+		var closestHostileEntityInLineOfSight = this.fsm.ai.getHostileEntitiesInLineOfSight()[0];
 
-			var targetEntity = entityData.entity;
-			var collisionData = entityData.collisionData;
-
-			// no collisionData means targetEntity is in line of sight!
-			if (!collisionData) {
-
-				// check type & team
-				if (targetEntity.type == Lucid.BaseEntity.TYPE.UNIT && targetEntity.team != originEntity.team) {
-
-					// get distance between targetEntity and originEntity and check if its > minimumRange
-					if (Lucid.Math.getDistanceBetweenTwoEntities(targetEntity, originEntity) > targetEntity.minimumAttackRange) {
-						this.fsm.eventName = Game.AI.Fighter.FSM.EVENTS.NOT_ENEMY_IN_RANGE;
-						break;
-					}
-				}
+		// ... if available ...
+		if (closestHostileEntityInLineOfSight) {
+			// ... check if its outside of the originEntity minimumAttackRange ...
+			if (Lucid.Math.getDistanceBetweenTwoEntities(closestHostileEntityInLineOfSight, originEntity) > originEntity.minimumAttackRange) {
+				// ... change eventName to NOT_ENEMY_IN_RANGE
+				this.fsm.eventName = Game.AI.Fighter.FSM.EVENTS.NOT_ENEMY_IN_RANGE;
 			}
 		}
 	}
 });
 
 /**
-* TODO description & implementation.
-*/
+ * Apply damage to the first hostile Entity, within 
+ * originEntity minimumAttackRange.
+ * 
+ * Note: 	In case we want to deal Area-of-Effect (AoE) 
+ * 			damage, we could also iterate through the 
+ * 			hostile Entities Array and apply the damage 
+ * 			for each Entity within range.
+ */
 Game.AI.Fighter.FSM.Root.Core.Combat.Attack = Lucid.FSMStateAtomic.extend({
 	execute: function() {
 		var originEntity = this.fsm.ai.getOriginEntity();
-		var entitiesData = this.fsm.ai.getEntitiesData();
 
-		for (var i = 0; i < entitiesData.length; ++i) {
-			var entityData = entitiesData[i];
+		// try to get the first (closest) hostile entity in line-of-sight ...
+		var closestHostileEntityInLineOfSight = this.fsm.ai.getHostileEntitiesInLineOfSight()[0];
 
-			var targetEntity = entityData.entity;
-			var collisionData = entityData.collisionData;
-
-			// no collisionData means targetEntity is in line of sight!
-			if (!collisionData) {
-
-				// check type & team
-				if (targetEntity.type == Lucid.BaseEntity.TYPE.UNIT && targetEntity.team != originEntity.team) {
-
-					// get distance between targetEntity and originEntity and check if its <= minimumRange
-					if (Lucid.Math.getDistanceBetweenTwoEntities(targetEntity, originEntity) <= originEntity.minimumAttackRange) {
-						targetEntity.healthPointsCurrent = Math.max(0, targetEntity.healthPointsCurrent - 0.5);
-					}
-				}
+		// ... if available ...
+		if (closestHostileEntityInLineOfSight) {
+			// ... check if its within of the originEntity minimumAttackRange
+			if (Lucid.Math.getDistanceBetweenTwoEntities(closestHostileEntityInLineOfSight, originEntity) <= originEntity.minimumAttackRange) {
+				closestHostileEntityInLineOfSight.healthPointsCurrent = Math.max(0, closestHostileEntityInLineOfSight.healthPointsCurrent - 0.5);
 			}
 		}
-
 	}
 });
 
 /**
-* TODO description.
-*/
+ * Check if originEntity has enough healthPoints and
+ * change eventName to NOT_DEFENSE_ALERT.
+ */
 Game.AI.Fighter.FSM.Root.Defense = Lucid.FSMStateComposite.extend({
 	execute: function() {
 		var originEntity = this.fsm.ai.getOriginEntity();
 
-		// higher (or equal) than 80 percent health?
+		// higher (or equal) than defined percent health?
 		if (originEntity.healthPointsCurrent / originEntity.healthPointsMaximum >= 0.3) {
 			this.fsm.eventName = Game.AI.Fighter.FSM.EVENTS.NOT_DEFENSE_ALERT;
 		}
@@ -346,18 +306,18 @@ Game.AI.Fighter.FSM.Root.Defense = Lucid.FSMStateComposite.extend({
 });
 
 /**
-* TODO description.
-*/
+ * Recover healthPoints of originEntity.
+ */
 Game.AI.Fighter.FSM.Root.Defense.Heal = Lucid.FSMStateAtomic.extend({
 	execute: function() {
 		var originEntity = this.fsm.ai.getOriginEntity();
 
-		// heal :)
+		// recover healthPoints
 		originEntity.healthPointsCurrent += 0.1;
 	}
 });
 
-// event constants
+// FSM eventName constants
 Game.AI.Fighter.FSM.EVENTS = {
 		ENEMY_LINE_OF_SIGHT: "enemyLineOfSight",
 	NOT_ENEMY_LINE_OF_SIGHT: "notEnemyLineOfSight",

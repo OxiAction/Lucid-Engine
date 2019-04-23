@@ -19,7 +19,7 @@ Lucid.LayerCollision = Lucid.LayerTileSet.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
-		this.componentName = "LayerCollision";
+		this.checkSetComponentName("Lucid.LayerCollision");
 		
 		this._super(config);
 

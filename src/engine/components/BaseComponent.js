@@ -27,20 +27,20 @@ Lucid.BaseComponent = Class.extend({
 		Lucid.Utils.extend(this, this, config);
 
 		if (!this.componentName) {
-			Lucid.Utils.error("BaseComponent @ init: error - you have not defined a componentName!");
+			Lucid.Utils.error("Lucid.BaseComponent @ init: error - you have not defined a componentName!");
 			return false;
 		} else {
 			this.setComponentName(this.componentName);
 		}
 
-		Lucid.Utils.log("BaseComponent @ init: " + this.componentName);
+		Lucid.Utils.log(this.componentName + " @ init");
 
 		return true;
 	},
 
 	/**
 	 * Checks if this.map is defined. If not, tries to set this.map to
-	 * Lucid.data.engine.getCamera(). On fail -> error.
+	 * Lucid.data.engine.getMap(). On fail -> error.
 	 *
 	 * @return     {Boolean}  Returns true on success.
 	 */
@@ -48,7 +48,7 @@ Lucid.BaseComponent = Class.extend({
 		if (!this.map) {
 			var map = Lucid.data.engine.getMap();
 			if (!map) {
-				Lucid.Utils.error("BaseComponent @ init: this.map AND Lucid.data.engine.getMap() is null!");
+				Lucid.Utils.error(this.componentName + " @ init: this.map AND Lucid.data.engine.getMap() is null!");
 				return false;
 			} else {
 				this.setMap(map);
@@ -68,7 +68,7 @@ Lucid.BaseComponent = Class.extend({
 		if (!this.camera) {
 			var camera = Lucid.data.engine.getCamera();
 			if (!camera) {
-				Lucid.Utils.error("BaseComponent @ init: this.camera AND Lucid.data.engine.getCamera() is null!");
+				Lucid.Utils.error(this.componentName + " @ init: this.camera AND Lucid.data.engine.getCamera() is null!");
 				return false;
 			} else {
 				this.setCamera(camera);
@@ -88,7 +88,7 @@ Lucid.BaseComponent = Class.extend({
 		if (!this.engine) {
 			var engine = Lucid.data.engine;
 			if (!engine) {
-				Lucid.Utils.error("BaseComponent @ init: this.engine AND Lucid.data.engine is null!");
+				Lucid.Utils.error(this.componentName + " @ init: this.engine AND Lucid.data.engine is null!");
 				return false;
 			} else {
 				this.setEngine(engine);
@@ -191,5 +191,16 @@ Lucid.BaseComponent = Class.extend({
 	setComponentName: function(componentName) {
 		this.componentName = componentName;
 		this.componentNamespace = "." + componentName;
+	},
+
+	/**
+	 * Sets the component name only if not set yet.
+	 *
+	 * @param      {String}  componentName  The component name.
+	 */
+	checkSetComponentName: function(componentName) {
+		if (!this.componentName) {
+			this.setComponentName(componentName);
+		}
 	}
 });

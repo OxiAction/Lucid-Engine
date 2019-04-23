@@ -87,7 +87,7 @@ Game.LayerMenu = Lucid.BaseLayer.extend({
 	 * @return     {boolean}  Returns true on success.
 	 */
 	init: function(config) {
-		this.componentName = "LayerMenu";
+		this.componentName = "Game.LayerMenu";
 
 		this._super(config);
 

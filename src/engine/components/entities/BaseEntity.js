@@ -87,6 +87,8 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
+		this.checkSetComponentName("Lucid.BaseEntity");
+
 		this._super(config);
 
 		this.checkSetMap();
@@ -127,7 +129,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 * Start loading.
 	 */
 	load: function() {
-		Lucid.Utils.log("BaseEntity @ load: starting to load in BaseEntity with name: " + this.name);
+		Lucid.Utils.log(this.componentName + " @ load: starting to load in BaseEntity with name: " + this.name);
 		this.loadAsset();
 	},
 
@@ -135,7 +137,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 * General loading success.
 	 */
 	loadingSuccess: function() {
-		Lucid.Utils.log("BaseEntity @ loadingSuccess: loaded everything in BaseEntity with name: " + this.name);
+		Lucid.Utils.log(this.componentName + " @ loadingSuccess: loaded everything in BaseEntity with name: " + this.name);
 		this.loaded = true;
 		Lucid.Event.trigger(Lucid.BaseEntity.EVENT.LOADING_SUCCESS, this);
 	},
@@ -144,7 +146,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 * General loading error.
 	 */
 	loadingError: function() {
-		Lucid.Utils.log("BaseEntity @ loadingError: ERROR occurred while loading in BaseEntity with name: " + this.name);
+		Lucid.Utils.log(this.componentName + " @ loadingError: ERROR occurred while loading in BaseEntity with name: " + this.name);
 		this.loaded = false;
 		Lucid.Event.trigger(Lucid.BaseEntity.EVENT.LOADING_ERROR, this);
 	},
@@ -153,7 +155,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	 * Loads the asset.
 	 */
 	loadAsset: function() {
-		Lucid.Utils.log("BaseEntity @ loadAsset: " + this.name + " - loading asset");
+		Lucid.Utils.log(this.componentName + " @ loadAsset: " + this.name + " - loading asset");
 
 		var loaderItem = new Lucid.LoaderItem({
 			id: this.assetFilePath,
@@ -837,15 +839,15 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 					
 					// check if both "vectors" are valid
 					if (entityGridIndices && clickedGridIndices) {
-						Lucid.Utils.log("BaseEntity @ setPathByClick: clicked on tile @ " + clickedGridIndices[0] + "/" + clickedGridIndices[1]);
+						Lucid.Utils.log(this.componentName + " @ setPathByClick: clicked on tile @ " + clickedGridIndices[0] + "/" + clickedGridIndices[1]);
 
 						// set new path indices
 						// params: startX, startY, endX, endY, callback
 						Lucid.Pathfinding.findPath(entityGridIndices[0], entityGridIndices[1], clickedGridIndices[0], clickedGridIndices[1], function(path) {
 							if (!path) {
-								Lucid.Utils.log("BaseEntity @ setPathByClick: path was not found");
+								Lucid.Utils.log(this.componentName + " @ setPathByClick: path was not found");
 							} else if (path.length) {
-								Lucid.Utils.log("BaseEntity @ setPathByClick: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
+								Lucid.Utils.log(this.componentName + " @ setPathByClick: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
 							} 
 							// case: entityGridIndices are the same as clickedGridIndices
 							// this means there is no path.
@@ -855,7 +857,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 									y: entityGridIndices[1]
 								});
 
-								Lucid.Utils.log("BaseEntity @ setPathByClick: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
+								Lucid.Utils.log(this.componentName + " @ setPathByClick: path was found - last point is @ " + path[path.length - 1].x + "/" + path[path.length - 1].y);
 							}
 							
 							// set path (if not null)

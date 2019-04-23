@@ -1,9 +1,12 @@
 /**
- * TODO description.
+ * A Composite State is a container State, which means it does
+ * contain one or multiple child States.
+ * 
+ * By default, the first active State is the specified default State.
  */
 Lucid.FSMStateComposite = Lucid.FSMState.extend({
 	// local variables
-	childStates: [], // array with (children) FSMStates
+	childStates: [], // array with child states
 
 	/**
 	 * Automatically called when instantiated.
@@ -12,7 +15,7 @@ Lucid.FSMStateComposite = Lucid.FSMState.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
-		this.componentName = "FSMStateComposite";
+		this.checkSetComponentName("Lucid.FSMStateComposite");
 		
 		this._super(config);
 
@@ -20,7 +23,9 @@ Lucid.FSMStateComposite = Lucid.FSMState.extend({
 	},
 
 	/**
-	 * TODO description.
+	 *  Checks the currently active State Transitions and (if necessary)
+	 *  changes to a new active State. This happens, by comparing the Transitions 
+	 *  eventName property with the FSM reference Object eventName property.
 	 */
 	update: function() {
 		if (!this.getActiveState()) {
@@ -47,13 +52,13 @@ Lucid.FSMStateComposite = Lucid.FSMState.extend({
 					fromState.leave();
 
 					// debug
-					Lucid.Utils.log("FSMStateComposite @ update transition details:\neventName -> " + this.getFSM().eventName + "\ndeactivate -> " + transition.getFromState().componentName + "\nactivate -> " + transition.getToState().componentName);
+					Lucid.Utils.log(this.componentName + " @ update transition details:\neventName -> " + this.getFSM().eventName + "\ndeactivate -> " + transition.getFromState().componentName + "\nactivate -> " + transition.getToState().componentName);
 
 					// set toState as currently active state
 					this.setActiveState(toState);
 					
 					// set toState active state to its default state (if available)
-					if (toState.getDefaultState() != null) {
+					if (toState.getDefaultState()) {
 						toState.setActiveState(toState.getDefaultState());
 					}
 					

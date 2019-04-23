@@ -19,7 +19,7 @@ Lucid.LayerUI = Lucid.BaseLayer.extend({
 	 * @return     {Boolean}  Returns true on success.
 	 */
 	init: function(config) {
-		this.componentName = "LayerUI";
+		this.checkSetComponentName("Lucid.LayerUI");
 		
 		this._super(config);
 
