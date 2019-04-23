@@ -99,6 +99,7 @@ function Game() {
 
 	// LAYER UI: menu button key down event
 	Lucid.Event.bind(Game.LayerUI.EVENT.MENU_BUTTON_KEY_DOWN + namespace, function(eventName) {
+		camera.setActive(false);
 		engine.getMap().setActive(false);
 		layerMenu.setActive(true);
 		layerUI.setActive(false);
@@ -116,13 +117,9 @@ function Game() {
 
 	// MAP: wait for the map to load its assets
 	Lucid.Event.bind(Lucid.Map.EVENT.LOADING_SUCCESS + namespace, function(eventName, map) {
-		// build the map!
 		map.build();
-
-		// show LayerUI
 		layerUI.setActive(true);
-
-		// change menu for LayerMenu
+		camera.setActive(true);
 		layerMenu.setCurrentMenuConfig(layerMenu.menuConfigIngame);
 	});
 
@@ -132,6 +129,7 @@ function Game() {
 			layerUI.setActive(true);
 			layerMenu.setActive(false);
 			engine.getMap().setActive(true);
+			camera.setActive(true);
 		}
 	});
 
