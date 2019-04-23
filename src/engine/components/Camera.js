@@ -25,6 +25,7 @@ Lucid.Camera = Lucid.BaseComponent.extend({
 	y: 0,
 	width: 0,
 	height: 0,
+	speed: 5,
 
 	// local variables
 	followTarget: null,
@@ -55,8 +56,8 @@ Lucid.Camera = Lucid.BaseComponent.extend({
 	 */
 	renderUpdate: function(delta) {
 		if (this.followTarget) {
-			this.x += Math.floor((this.followTarget.x - this.x - this.halfWidth + this.followTarget.halfWidth) * delta);
-			this.y += Math.floor((this.followTarget.y - this.y - this.halfHeight + this.followTarget.halfHeight) * delta);
+			this.x += Math.floor((this.followTarget.x - this.x - this.halfWidth + this.followTarget.halfWidth) * delta * this.speed);
+			this.y += Math.floor((this.followTarget.y - this.y - this.halfHeight + this.followTarget.halfHeight) * delta * this.speed);
 		}
 	},
 
