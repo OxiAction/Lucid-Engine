@@ -82,3 +82,7 @@ In case you run the demo files on a local or online webserver, it doesnt matter 
 
 * [[jQuery]](https://jquery.com/) version 3.2.1+ (Editor only)
 * [[jQueryUI]](https://jqueryui.com/) version 1.12.1+ (Editor only)
+
+### License
+
+* [[AGPL]](https://www.gnu.org/licenses/agpl-3.0.html)

@@ -1,4 +1,22 @@
 /**
+ * Lucid Engine
+ * Copyright (C) 2019 Michael Schreiber
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/**
  * Basically, every Object on-screen which has (potential) movement
  * characteristics, should inherit from the BaseEntity class.
  *
@@ -22,7 +40,7 @@ Lucid.BaseEntity = Lucid.BaseComponent.extend({
 	minimumAttackRange: 100, // the minimum distance between the attacker and the victim to trigger an attack
 	mass: 80, // mass in kg
 	force: 1, // collision force - higher force values may move lower force values
-	speed: 10, // movement speed of the entity
+	speed: 100, // movement speed of the entity
 	render: true, // determines if the content is rendered
 	colliding: true, // does it collide with collisionData?
 	skipFirstPathSegment: true, // splices first path segment -> smoother animations
