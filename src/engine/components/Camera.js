@@ -55,6 +55,10 @@ Lucid.Camera = Lucid.BaseComponent.extend({
 	 *                               simulate in the update.
 	 */
 	renderUpdate: function(delta) {
+		if (!this.getActive()) {
+			return;
+		}
+
 		if (this.followTarget) {
 			this.x += Math.floor((this.followTarget.x - this.x - this.halfWidth + this.followTarget.halfWidth) * delta * this.speed);
 			this.y += Math.floor((this.followTarget.y - this.y - this.halfHeight + this.followTarget.halfHeight) * delta * this.speed);

@@ -49,6 +49,7 @@ Lucid.Map = Lucid.BaseComponent.extend({
 		this._super(config);
 
 		this.checkSetEngine();
+		this.checkSetCamera();
 
 		// events for loading the asset
 		Lucid.Event.bind(Lucid.Map.EVENT.LOADED_ASSET_FILE_SUCCESS + this.componentNamespace, this.assetLoadingSuccess.bind(this));
@@ -167,6 +168,9 @@ Lucid.Map = Lucid.BaseComponent.extend({
 		for (var i = 0; i < this.layers.length; ++i) {
 			// check if layer is valid
 			if (this.layers[i].config !== undefined && this.layers[i].config.id !== undefined) {
+				// inject current active status
+				this.layers[i].config["active"] = this.getActive();
+
 				this.engine.createAddLayer(this.layers[i].config);
 			} else {
 				Lucid.Utils.log(this.componentName + " @ build: tried to createAddLayer in Engine but Layer.config or Layer.id is not set! Index in layers Array: " + i);
@@ -192,16 +196,14 @@ Lucid.Map = Lucid.BaseComponent.extend({
 				if (this.layers[i].config !== undefined && this.layers[i].config.id !== undefined) {
 					var layer = this.engine.getLayer(this.layers[i].config.id);
 
-					// "play"
-					if (active) {
-						layer.setActive(true);
-					}
-					// "pause"
-					else {
-						layer.setActive(false);
-					}
+					layer.setActive(active);
 				}
 			}
+		}
+
+		// set camera active state
+		if (this.camera) {
+			this.camera.setActive(active)
 		}
 
 		this._super(active);
