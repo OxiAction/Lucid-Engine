@@ -33,11 +33,23 @@ Lucid.Pathfinding = function() {
 	var useDiagonals = false;
 	var diagonalCost = Math.SQRT2; // 1.41....
 	var straightCost = 1.0;
+
+	var debugResultNodes = null; // debugging
+	var debugInpsectedNodes = []; // debugging
+
 /**
  * Public methods
  */
 
 	return {
+		getDebugResultNodes() {
+			return debugResultNodes;
+		},
+
+		getDebugInspectedNodes() {
+			return debugInpsectedNodes;
+		},
+		
 		// See for various grid heuristics:
 		// http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html#S7
 		getDistanceManhatten(x1, y1, x2, y2) {
@@ -105,6 +117,7 @@ Lucid.Pathfinding = function() {
 			});
 
 			var nodes = [];
+			debugInpsectedNodes = [];
 
 			// grid not null?
 			if (grid != null) {
@@ -125,7 +138,6 @@ Lucid.Pathfinding = function() {
 				startNode.f = 0;
 
 				var endNode = nodes[path.getEndY()][path.getEndX()];
-
 				nodesToVisit.push(startNode);
 				startNode.opened = true;
 
@@ -134,8 +146,20 @@ Lucid.Pathfinding = function() {
 					var current = nodesToVisit.pop();
 					current.closed = true;
 
+					// store inspected nodes - for debugging
+					debugInpsectedNodes.push(current);
+
 					if (current.x == path.getEndX() && current.y == path.getEndY()) {
+						// get result nodes
 						var result = this.backtrace(current);
+
+						// store result nodes - for debugging,
+						// by creating a copy of the result
+						debugResultNodes = [];
+						for (var i = 0; i < result.length; ++i) {
+							debugResultNodes.push(result[i]);
+						}
+
 						path.triggerCallback(result);
 						break;
 					}

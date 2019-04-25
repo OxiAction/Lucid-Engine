@@ -17,7 +17,7 @@
  */
 
 /**
- * A Transition is used to change from one State to another,
+ * A Transition is used, to change from one State to another,
  * based on the Transition eventName property and the current 
  * FSM reference Object eventName property.
  */

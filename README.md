@@ -1,6 +1,9 @@
 ![Lucid Logo](/assets/lucid_logo_small.jpg?raw=true "Lucid Logo")
 
 ## Preview (Game Demo)
+General:
+* switching to map3 enabled pathfinding and grid debug mode
+
 Controls:
 * use arrow keys or point-and-click (only available in top-down maps)
 * use space to attack (only available in top-down maps)
@@ -19,6 +22,7 @@ The engine supports top-down (RPG style) games, as well as side-scroll (platform
 Supports both, mobile devices and desktop computers.
 
 ## Open tasks & nice to have
+* WebGL renderer
 * basic editor and its forms
 * animation manager
 * map related events triggering
@@ -27,11 +31,10 @@ Supports both, mobile devices and desktop computers.
 * dynamic loading of JavaScript files on demand (require-style)
 * user management and dynamic spawning of user-entities
 * resolving all the TODO sections in the code
-* a nice demo game
 * extended [[JSDoc]](http://usejsdoc.org/)
 
 ## Code Details & Coding Conventions
-The best way to work on this project is, by using the famous [[Sublime Text]](https://www.sublimetext.com/) editor. 
+The best way to work on this project is, by using the [[Sublime Text]](https://www.sublimetext.com/) editor. 
 
 * getter and setters are **only** used for complex data types (e.g. Objects like Camera, Map etc.) but **not** for primitive data types (e.g. String, Number) **unless** there is some good reason for it (e.g. you need to manipulate something when setting / getting)
 * for notifications / messaging we use the [[Publish–subscribe pattern]](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) and the corresponding Lucid.Event class.

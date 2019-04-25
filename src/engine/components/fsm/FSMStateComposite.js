@@ -107,8 +107,8 @@ Lucid.FSMStateComposite = Lucid.FSMState.extend({
 	 * @param      {FSMState}  state   The state
 	 */
 	addChildState: function(state) {
-		this.childStates.push(state);
 		state.setParentState(this);
+		this.childStates.push(state);
 	},
 
 	/**

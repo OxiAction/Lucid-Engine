@@ -66,7 +66,7 @@ Lucid.BaseComponent = Class.extend({
 		if (!this.map) {
 			var map = Lucid.data.engine.getMap();
 			if (!map) {
-				Lucid.Utils.error(this.componentName + " @ init: this.map AND Lucid.data.engine.getMap() is null!");
+				Lucid.Utils.error(this.componentName + " @ checkSetMap: this.map AND Lucid.data.engine.getMap() is null!");
 				return false;
 			} else {
 				this.setMap(map);
@@ -86,7 +86,7 @@ Lucid.BaseComponent = Class.extend({
 		if (!this.camera) {
 			var camera = Lucid.data.engine.getCamera();
 			if (!camera) {
-				Lucid.Utils.error(this.componentName + " @ init: this.camera AND Lucid.data.engine.getCamera() is null!");
+				Lucid.Utils.error(this.componentName + " @ checkSetCamera: this.camera AND Lucid.data.engine.getCamera() is null!");
 				return false;
 			} else {
 				this.setCamera(camera);
@@ -106,7 +106,7 @@ Lucid.BaseComponent = Class.extend({
 		if (!this.engine) {
 			var engine = Lucid.data.engine;
 			if (!engine) {
-				Lucid.Utils.error(this.componentName + " @ init: this.engine AND Lucid.data.engine is null!");
+				Lucid.Utils.error(this.componentName + " @ checkSetEngine: this.engine AND Lucid.data.engine is null!");
 				return false;
 			} else {
 				this.setEngine(engine);

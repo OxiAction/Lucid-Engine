@@ -49,6 +49,7 @@ function Game() {
 
 	// set-up debugging related stuff
 	Lucid.Debug.setEngineFPS(true);
+	// Lucid.Debug.setPathfinding(true);
 	// Lucid.Debug.setMapTileSizeGrid(true);
 	// Lucid.Debug.setEntityHitBox(true);
 	// Lucid.Debug.setAISightRadius(true);
@@ -93,7 +94,7 @@ function Game() {
 	var layerMenu = new Game.LayerMenu({
 		id: "layer-menu",
 		type: Lucid.BaseLayer.TYPE.UI,
-		z: 30
+		z: 100 // debug layer z-index is 99
 	});
 	engine.addLayer(layerMenu);
 
@@ -105,8 +106,26 @@ function Game() {
 		layerUI.setActive(false);
 	});
 
+	// stores grid debug settings
+	var tmpMapTileSizeGridSetting = null;
+
 	// MAP FILE: on loading succes hide menu
 	Lucid.Event.bind(Lucid.Engine.EVENT.START_LOADING_MAP_FILE + namespace, function(eventName, fileName, filePath) {
+		// show pathfinding results for map3 only
+		if (fileName == "map3") {
+			Lucid.Debug.setPathfinding(true);
+			// store grid debug setting
+			tmpMapTileSizeGridSetting = Lucid.Debug.getMapTileSizeGrid();
+			Lucid.Debug.setMapTileSizeGrid(true);
+		} else {
+			// restore previous grid debug setting
+			if (tmpMapTileSizeGridSetting !== null) {
+				Lucid.Debug.setMapTileSizeGrid(tmpMapTileSizeGridSetting);
+			}
+
+			Lucid.Debug.setPathfinding(false);
+		}
+
 		layerMenu.setActive(false);
 	});
 
@@ -128,6 +147,8 @@ function Game() {
 		if (customEventName == "closeMenu") {
 			layerUI.setActive(true);
 			layerMenu.setActive(false);
+			// set the "ingame" menu
+			layerMenu.setCurrentMenuConfig(layerMenu.menuConfigIngame);
 			engine.getMap().setActive(true);
 			camera.setActive(true);
 		}

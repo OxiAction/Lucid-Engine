@@ -213,31 +213,98 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 			var layerDebugCanvasContext = layerDebug.getCanvasContext();
 
 			layerDebugCanvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
 			layerDebugCanvasContext.font = "normal 12px Arial, Helvetica Neue, Helvetica, sans-serif";
 
-			// draw a grid (depending on the map.tileSize)
-			if (Lucid.Debug.getMapTileSizeGrid() && this.map && this.camera) {
-				layerDebugCanvasContext.beginPath();
-				layerDebugCanvasContext.strokeStyle = "black";
+			if (this.map && this.camera) {
+				// draw a grid (depending on the map.tileSize)
+				if (Lucid.Debug.getMapTileSizeGrid()) {
+					var tileSize = this.map.tileSize;
+					var i;
+					var numColsScreen = Math.floor(this.camera.width / tileSize) + 2;
+					var numRowsScreen = Math.floor(this.camera.height / tileSize) + 2;
+					var posX;
+					var posY;
 
-				var tileSize = this.map.tileSize;
+					layerDebugCanvasContext.beginPath();
+					layerDebugCanvasContext.strokeStyle = "black";
 
-				var i;
-				var numColsScreen = Math.floor(this.camera.width / tileSize) + 2;
-				for (i = 0; i < numColsScreen; ++i) {
-					var posX = i * tileSize - this.camera.x % tileSize + 0.5; // + 0.5 fixes lines pixel snapping
-					layerDebugCanvasContext.moveTo(posX, 0);
-					layerDebugCanvasContext.lineTo(posX, this.camera.height);
+					for (i = 0; i < numColsScreen; ++i) {
+						posX = i * tileSize - this.camera.x % tileSize + 0.5; // + 0.5 fixes lines pixel snapping
+						layerDebugCanvasContext.moveTo(posX, 0);
+						layerDebugCanvasContext.lineTo(posX, this.camera.height);
+					}
+					
+					for (i = 0; i < numRowsScreen; ++i) {
+						posY = i * tileSize - this.camera.y % tileSize + 0.5;
+						layerDebugCanvasContext.moveTo(0, posY);
+						layerDebugCanvasContext.lineTo(this.camera.width, posY);
+					}
+
+					layerDebugCanvasContext.stroke();
 				}
-				var numRowsScreen = Math.floor(this.camera.height / tileSize) + 2;
-				for (i = 0; i < numRowsScreen; ++i) {
-					var posY = i * tileSize - this.camera.y % tileSize + 0.5;
-					layerDebugCanvasContext.moveTo(0, posY);
-					layerDebugCanvasContext.lineTo(this.camera.width, posY);
-				}
 
-				layerDebugCanvasContext.stroke();
+				// draw pathfinding results
+				if (Lucid.Debug.getPathfinding()) {
+					var debugInspectedNodes = Lucid.Pathfinding.getDebugInspectedNodes();
+					var debugResultNodes = Lucid.Pathfinding.getDebugResultNodes();
+
+					if (debugInspectedNodes.length > 0) {
+						var tileSize = this.map.tileSize;
+						var posX;
+						var posY;
+						var nr = 0;
+
+						for (var i = 0; i < debugInspectedNodes.length; ++i) {
+							var inspectedNode = debugInspectedNodes[i];
+
+							posX = inspectedNode.x * tileSize - this.camera.x + 0.5; // + 0.5 fixes lines pixel snapping
+							posY = inspectedNode.y * tileSize - this.camera.y + 0.5; // + 0.5 fixes lines pixel snapping
+							layerDebugCanvasContext.globalAlpha = 0.7;
+							layerDebugCanvasContext.fillStyle = "#ffffff";
+							layerDebugCanvasContext.fillRect(posX, posY, tileSize, tileSize);
+							layerDebugCanvasContext.globalAlpha = 1;
+
+							// start node
+							if (i == 0) {
+								layerDebugCanvasContext.fillStyle = "red";
+								layerDebugCanvasContext.strokeStyle = "red";
+							} 
+							// end node
+							else if (i == debugInspectedNodes.length - 1) {
+								layerDebugCanvasContext.fillStyle = "green";
+								layerDebugCanvasContext.strokeStyle = "green";
+							} 
+							// normal node
+							else {
+								layerDebugCanvasContext.fillStyle = "black";
+								layerDebugCanvasContext.strokeStyle = "black";
+							}
+
+							layerDebugCanvasContext.strokeRect(posX, posY, tileSize, tileSize);
+							
+							posX += 10;
+
+							// g, f, h score
+							layerDebugCanvasContext.fillText("g: " + (Math.floor(inspectedNode.g * 100) / 100), posX, posY + 15);
+							layerDebugCanvasContext.fillText("f: " + (Math.floor(inspectedNode.f * 100) / 100), posX, posY + 29);
+							layerDebugCanvasContext.fillText("h: " + (Math.floor(inspectedNode.h * 100) / 100), posX, posY + 43);
+
+							// check if there exists a result node, for the current inspected node
+							if (debugResultNodes && debugResultNodes.length > 0) {
+								for (var j = 0; j < debugResultNodes.length; ++j) {
+									var resultNode = debugResultNodes[j];
+
+									if (resultNode.x == inspectedNode.x && resultNode.y == inspectedNode.y) {
+										++nr;
+										// the number of the result nodes
+										layerDebugCanvasContext.fillText("#: " + nr, posX, posY + 57);
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 
 			var debugTextsYOffset = 20;

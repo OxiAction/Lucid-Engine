@@ -37,6 +37,7 @@ Lucid.Debug = function() {
 	var entityHitBox = false;
 	var aiSightRadius = false;
 	var aiLineOfSight = false;
+	var pathfinding = false;
 
 	function enableDebug() {
 		if (!enabled && Lucid.data && Lucid.data.engine) {
@@ -160,6 +161,19 @@ Lucid.Debug = function() {
 
 		getAILineOfSight: function() {
 			return aiLineOfSight;
+		},
+
+		// pathfinding
+
+		setPathfinding: function(value) {
+			if (value) {
+				enableDebug();
+			}
+			pathfinding = value;
+		},
+
+		getPathfinding: function() {
+			return pathfinding;
 		}
 	};
 }();

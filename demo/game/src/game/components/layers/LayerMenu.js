@@ -28,12 +28,19 @@ Game.LayerMenu = Lucid.BaseLayer.extend({
 
 	// local variables
 	menuConfigMain: {
+		back: {
+			label: "BACK TO GAME",
+			active: true,
+			go: "event#closeMenu"
+		},
+
 		start: {
 			label: "START",
 			active: true,
 			go: "menu#menuConfigSelectMap"
 		},
 
+		/*
 		options: {
 			label: "OPTIONS",
 			active: true
@@ -43,6 +50,7 @@ Game.LayerMenu = Lucid.BaseLayer.extend({
 			label: "CREDITS",
 			active: true
 		}
+		*/
 	},
 
 	menuConfigSelectMap: {
@@ -78,6 +86,7 @@ Game.LayerMenu = Lucid.BaseLayer.extend({
 			go: "event#closeMenu"
 		},
 
+		/*
 		save: {
 			label: "SAVE GAME",
 			active: true
@@ -87,8 +96,9 @@ Game.LayerMenu = Lucid.BaseLayer.extend({
 			label: "LOAD GAME",
 			active: true
 		},
+		*/
 
-		quit: {
+		main: {
 			label: "MAIN MENU",
 			active: true,
 			go: "menu#menuConfigMain"
@@ -111,6 +121,8 @@ Game.LayerMenu = Lucid.BaseLayer.extend({
 
 		this.checkSetCamera();
 		this.checkSetEngine();
+
+		this.showHideBackToGameButton();
 
 		this.setCurrentMenuConfig(this.menuConfigMain);
 
@@ -135,7 +147,7 @@ Game.LayerMenu = Lucid.BaseLayer.extend({
 	 *                               simulate in the update.
 	 */
 	renderUpdate: function(delta) {
-
+		
 	},
 
 	/**
@@ -239,6 +251,13 @@ Game.LayerMenu = Lucid.BaseLayer.extend({
 		this.currentMenuConfig = currentMenuConfig;
 	},
 
+	showHideBackToGameButton: function() {
+		if (Lucid.data.engine) {
+			var map = Lucid.data.engine.getMap();
+			this.menuConfigMain.back.active = map ? true : false;
+		}
+	},
+
 	/**
 	 * Sets the active state.
 	 *
@@ -246,6 +265,8 @@ Game.LayerMenu = Lucid.BaseLayer.extend({
 	 */
 	setActive: function(active) {
 		this._super(active);
+
+		this.showHideBackToGameButton();
 	},
 });
 

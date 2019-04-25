@@ -21,7 +21,7 @@
  * Lucid.FSM and define the States structure inside 
  * the init() function.
  * 
- * In addition, pass your extending FSM as a reference
+ * In addition, pass your extended FSM as a reference
  * to each State, using the "fsm" config property.
  */
 Lucid.FSM = Lucid.BaseComponent.extend({
