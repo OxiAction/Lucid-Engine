@@ -35,7 +35,7 @@ Lucid.Pathfinding = function() {
 	var straightCost = 1.0;
 
 	var debugResultNodes = null; // debugging
-	var debugInpsectedNodes = []; // debugging
+	var debugInpsectedNodes = null; // debugging
 
 /**
  * Public methods
@@ -46,8 +46,16 @@ Lucid.Pathfinding = function() {
 			return debugResultNodes;
 		},
 
+		setDebugResultNodes(nodes) {
+			debugResultNodes = nodes;
+		},
+
 		getDebugInspectedNodes() {
 			return debugInpsectedNodes;
+		},
+
+		setDebugInspectedNodes(nodes) {
+			debugInpsectedNodes = nodes;
 		},
 		
 		// See for various grid heuristics:

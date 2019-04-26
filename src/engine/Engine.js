@@ -248,7 +248,7 @@ Lucid.Engine = Lucid.BaseComponent.extend({
 					var debugInspectedNodes = Lucid.Pathfinding.getDebugInspectedNodes();
 					var debugResultNodes = Lucid.Pathfinding.getDebugResultNodes();
 
-					if (debugInspectedNodes.length > 0) {
+					if (debugInspectedNodes && debugInspectedNodes.length > 0) {
 						var tileSize = this.map.tileSize;
 						var posX;
 						var posY;

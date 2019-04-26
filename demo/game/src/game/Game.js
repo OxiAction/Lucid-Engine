@@ -113,6 +113,10 @@ function Game() {
 	Lucid.Event.bind(Lucid.Engine.EVENT.START_LOADING_MAP_FILE + namespace, function(eventName, fileName, filePath) {
 		// show pathfinding results for map3 only
 		if (fileName == "map3") {
+			// reset
+			Lucid.Pathfinding.setDebugResultNodes(null);
+			Lucid.Pathfinding.setDebugInspectedNodes(null);
+
 			Lucid.Debug.setPathfinding(true);
 			// store grid debug setting
 			tmpMapTileSizeGridSetting = Lucid.Debug.getMapTileSizeGrid();

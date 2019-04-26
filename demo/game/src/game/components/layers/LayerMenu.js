@@ -38,19 +38,7 @@ Game.LayerMenu = Lucid.BaseLayer.extend({
 			label: "START",
 			active: true,
 			go: "menu#menuConfigSelectMap"
-		},
-
-		/*
-		options: {
-			label: "OPTIONS",
-			active: true
-		},
-
-		credits: {
-			label: "CREDITS",
-			active: true
 		}
-		*/
 	},
 
 	menuConfigSelectMap: {
@@ -85,18 +73,6 @@ Game.LayerMenu = Lucid.BaseLayer.extend({
 			active: true,
 			go: "event#closeMenu"
 		},
-
-		/*
-		save: {
-			label: "SAVE GAME",
-			active: true
-		},
-
-		load: {
-			label: "LOAD GAME",
-			active: true
-		},
-		*/
 
 		main: {
 			label: "MAIN MENU",
