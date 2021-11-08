@@ -16,7 +16,7 @@ AI behaviour:
 [[Game Demo]](https://oxiaction.github.io/Lucid-Engine/demo/game/game.html)
 
 ## What is Lucid Engine?
-A 2D game engine, written in JavaScript.<br />
+A 2D game engine - created with JavaScript.<br />
 The goal of this project is, to provide all the (core) tools for creating a simple 2D game.<br />
 The engine supports top-down (RPG style) games, as well as side-scroll (platformer) game types.<br />
 Supports both, mobile devices and desktop computers.
