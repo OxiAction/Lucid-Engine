@@ -17,7 +17,7 @@ AI behaviour:
 
 ## What is Lucid Engine?
 A 2D game engine, written in JavaScript.<br />
-The aim of this project is, to deliver you with all the (core) tools you need, to create your own 2D game.<br />
+The goal of this project is, to provide all the (core) tools for creating a simple 2D game.<br />
 The engine supports top-down (RPG style) games, as well as side-scroll (platformer) game types.<br />
 Supports both, mobile devices and desktop computers.
 
